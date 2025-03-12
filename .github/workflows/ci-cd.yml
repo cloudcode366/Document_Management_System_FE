@@ -77,7 +77,7 @@ jobs:
             docker rm dmsfe || true
             
             # Chạy container mới
-            docker run -d --name dmsfe -p 80:80 wiramin/dmsfe:latest
+            docker run -d --name dmsfe -p 8008:80 wiramin/dmsfe:latest
             
             # Xóa các image cũ của wiramin/dmsfe, trừ image đang dùng
             docker images wiramin/dmsfe --format '{{.ID}}' | grep -v "$NEW_IMAGE_ID" | sort -u | xargs -r docker rmi -f
