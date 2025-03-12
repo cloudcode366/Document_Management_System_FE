@@ -66,5 +66,5 @@ jobs:
             docker pull wiramin/dmsfe:latest
             docker stop dmsfe || true
             docker rm dmsfe || true
-            docker run -d --name dmsfe -p 80:80 wiramin/dmsfe:latest
+            docker run -d --name dmsfe -p 8008:80 wiramin/dmsfe:latest
           EOF
