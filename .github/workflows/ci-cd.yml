@@ -17,28 +17,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Đăng nhập vào Docker Hub
+      # 2. Kiểm tra DOCKER_USERNAME
+      - name: Check Docker Username
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+            echo "Error: DOCKER_USERNAME is not set in secrets!"
+            exit 1
+          else
+            echo "DOCKER_USERNAME is set to: ${{ secrets.DOCKER_USERNAME }}"
+          fi
+
+      # 3. Đăng nhập vào Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. Build và push Docker image
+      # 4. Build và push Docker image
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/react-app:${{ github.sha }} .
-          docker tag ${{ secrets.DOCKER_USERNAME }}/react-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/react-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/react-app:${{ github.sha }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+          IMAGE_NAME="wiramin/dmsfe"
+          TAGGED_IMAGE="$IMAGE_NAME:${{ github.run_number }}"
+          LATEST_IMAGE="$IMAGE_NAME:latest"
+          
+          echo "Building image: $TAGGED_IMAGE"
+          docker build -t "$TAGGED_IMAGE" .
+          docker tag "$TAGGED_IMAGE" "$LATEST_IMAGE"
+          docker push "$TAGGED_IMAGE"
+          docker push "$LATEST_IMAGE"
 
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' # Chỉ deploy khi push vào main
+    if: github.ref == 'refs/heads/main'
 
     steps:
-      # 1. Deploy lên server qua SSH với mật khẩu
+      # 1. Deploy lên server qua SSH
       - name: Deploy to Server
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
@@ -46,12 +61,10 @@ jobs:
           SSH_HOST: ${{ secrets.SERVER_HOST }}
           SSH_PORT: ${{ secrets.SERVER_PORT }}
         run: |
-          # Cài sshpass
           sudo apt-get update && sudo apt-get install -y sshpass
-          # Deploy qua SSH với các thông tin từ secrets
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USERNAME@$SSH_HOST << 'EOF'
-            docker pull ${{ secrets.DOCKER_USERNAME }}/react-app:latest
-            docker stop react-app || true
-            docker rm react-app || true
-            docker run -d --name react-app -p 80:80 ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+            docker pull wiramin/dmsfe:latest
+            docker stop dmsfe || true
+            docker rm dmsfe || true
+            docker run -d --name dmsfe -p 80:80 wiramin/dmsfe:latest
           EOF
