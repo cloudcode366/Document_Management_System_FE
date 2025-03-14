@@ -1,5 +1,5 @@
 const App = () => {
-  return <>Document Management System cicd hehe k eeee</>;
+  return <>Document Management System</>;
 };
 
 export default App;
