@@ -1,0 +1,137 @@
+$primary-color: #0575e6;
+$gradient-start: #0575e6;
+$gradient-middle: #02298a;
+$gradient-end: #021b79;
+
+:root {
+  --color-white: #ffffff;
+  --color-light: #f1f5f9;
+  --color-black: #121212;
+  --color-night: #001632;
+
+  --color-red: #f44336;
+  --color-blue: #1a73e8;
+  --color-gray: #80868b;
+  --color-grayish: #dadce0;
+
+  --shadow-normal: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+
+  .left {
+    width: 70vw;
+    background: linear-gradient(
+      180deg,
+      $gradient-start 0%,
+      $gradient-middle 85%,
+      $gradient-end 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -20vw;
+      left: -10vw;
+      width: 30vw; // 1/8 chiều rộng màn hình
+      height: 30vw; // 1/8 chiều cao màn hình
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+    }
+
+    &::after {
+      bottom: -15vw;
+      left: -15vw;
+      width: 30vw;
+      height: 30vw;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .content {
+      h1 {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+      p {
+        font-size: 1rem;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .right {
+    width: 40vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-light);
+
+    // Components
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 80rem;
+      min-height: 100vh;
+      padding: 0 2rem;
+      margin: 0 auto;
+    }
+
+    .text {
+      font-family: inherit;
+      line-height: inherit;
+      text-transform: unset;
+      text-rendering: optimizeLegibility;
+
+      &-large {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--color-black);
+      }
+
+      &-normal {
+        font-size: 1rem;
+        font-weight: 400;
+        color: var(--color-black);
+      }
+    }
+
+    .main {
+      .wrapper {
+        max-width: 25vw;
+        width: 100%;
+        margin: 2rem auto;
+        padding: 2rem 2.5rem;
+        border: none;
+        outline: none;
+        border-radius: 0.5rem;
+        color: var(--color-black);
+        background: var(--color-white);
+        box-shadow: var(--shadow-large);
+      }
+    }
+  }
+}
