@@ -20,7 +20,7 @@ const { Content, Footer, Sider } = Layout;
 
 const LayoutAdmin = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [activeMenu, setActiveMenu] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const currentKey = location.pathname;
@@ -241,7 +241,7 @@ const LayoutAdmin = () => {
               </Dropdown>
             </div>
           </div>
-          <Content style={{ padding: "15px" }}>
+          <Content>
             <Outlet />
           </Content>
         </Layout>
