@@ -1,0 +1,19 @@
+/* Chữ & icon màu trắng và đậm khi chưa chọn */
+.custom-menu .ant-menu-item a,
+.custom-menu .ant-menu-item .anticon,
+.custom-menu .ant-menu-item svg {
+  color: white !important;
+  font-weight: bold !important;
+}
+
+/* Khi chọn item, chữ & icon chuyển sang màu xanh */
+.custom-menu .ant-menu-item-selected a,
+.custom-menu .ant-menu-item-selected .anticon,
+.custom-menu .ant-menu-item-selected svg {
+  color: #037cdc !important;
+}
+
+/* Nền trắng khi chọn */
+.custom-menu .ant-menu-item-selected {
+  background-color: white !important;
+}
