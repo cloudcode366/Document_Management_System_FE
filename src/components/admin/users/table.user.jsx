@@ -1,22 +1,15 @@
-// import { deleteUserAPI, getUsersAPI } from "@/services/api";
 import { dateRangeValidate } from "@/services/helper";
 import {
   CloudUploadOutlined,
   DeleteTwoTone,
   EditTwoTone,
-  ExportOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
 import { ProTable, TableDropdown } from "@ant-design/pro-components";
 import { App, Avatar, Button, Popconfirm, Space, Tag } from "antd";
 import { useRef, useState } from "react";
-// import DetailUser from "./detail.user";
-// import CreateUser from "./create.user";
-// import ImportUser from "./data/import.user";
-// import { CSVLink } from "react-csv";
-// import UpdateUser from "./update.user";
 import dayjs from "dayjs";
-import { render } from "nprogress";
+import ImportUser from "./import.user";
 
 const data = [
   {
@@ -396,16 +389,29 @@ const TableUser = () => {
       title: "Họ và tên",
       dataIndex: "fullName",
       copyable: true,
+      fieldProps: {
+        placeholder: "Vui lòng nhập họ và tên",
+      },
     },
     {
-      title: "Username",
+      title: "Tên đăng nhập",
       dataIndex: "username",
       copyable: true,
+      fieldProps: {
+        placeholder: "Vui lòng nhập tên đăng nhập",
+      },
+      formItemProps: {
+        labelCol: { span: 8 }, // Điều chỉnh label rộng hơn để không bị đè
+        wrapperCol: { span: 18 }, // Đảm bảo input không chiếm hết không gian
+      },
     },
     {
       title: "Email",
       dataIndex: "email",
       copyable: true,
+      fieldProps: {
+        placeholder: "Vui lòng nhập email",
+      },
     },
     {
       title: "Vai trò",
@@ -423,7 +429,7 @@ const TableUser = () => {
         ];
       },
       fieldProps: {
-        placeholder: "Chọn vai trò",
+        placeholder: "Vui lòng chọn vai trò",
         showSearch: true,
       },
     },
@@ -443,7 +449,7 @@ const TableUser = () => {
         ];
       },
       fieldProps: {
-        placeholder: "Chọn phòng ban",
+        placeholder: "Vui lòng chọn phòng ban",
         showSearch: true,
       },
       render: (_, entity) => entity?.division?.name || "-",
@@ -452,6 +458,9 @@ const TableUser = () => {
       title: "Chức vụ",
       dataIndex: "position",
       copyable: true,
+      fieldProps: {
+        placeholder: "Vui lòng nhập chức vụ",
+      },
     },
     {
       title: "Ngày tạo",
@@ -603,7 +612,7 @@ const TableUser = () => {
               setOpenModalImport(true);
             }}
           >
-            Tạo người dùng theo CSV file
+            Tạo người dùng theo CSV hoặc XLSX file
           </Button>,
           <Button
             key="buttonAddNew"
@@ -616,6 +625,11 @@ const TableUser = () => {
             Tạo người dùng theo mẫu
           </Button>,
         ]}
+      />
+      <ImportUser
+        openModalImport={openModalImport}
+        setOpenModalImport={setOpenModalImport}
+        refreshTable={refreshTable}
       />
     </div>
   );
