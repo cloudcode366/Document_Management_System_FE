@@ -5,6 +5,7 @@ import {
   MenuUnfoldOutlined,
   QuestionCircleOutlined,
   BellOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, Dropdown, Avatar, Badge } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ import { LuUserCog } from "react-icons/lu";
 import { GrDocumentConfig } from "react-icons/gr";
 import { LuWorkflow } from "react-icons/lu";
 import { TbLogs } from "react-icons/tb";
+import { CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
 
 const { Content, Footer, Sider } = Layout;
@@ -80,21 +82,26 @@ const LayoutAdmin = () => {
     {
       label: (
         <label
-          style={{ cursor: "pointer" }}
+          style={{ cursor: "pointer", color: "#037cdc" }}
           onClick={() => navigate("/admin/profile")}
         >
           Quản lý tài khoản
         </label>
       ),
       key: "account",
+      icon: <CgProfile style={{ fontSize: "18px", color: "#037cdc" }} />,
     },
     {
       label: (
-        <label style={{ cursor: "pointer" }} onClick={() => navigate("/login")}>
+        <label
+          style={{ cursor: "pointer", color: "red" }}
+          onClick={() => navigate("/login")}
+        >
           Đăng xuất
         </label>
       ),
       key: "logout",
+      icon: <LogoutOutlined style={{ fontSize: "18px", color: "red" }} />,
     },
   ];
 

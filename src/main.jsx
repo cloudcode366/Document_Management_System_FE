@@ -28,6 +28,8 @@ import ListDocumentTypePage from "pages/client/document.types/list.document.type
 import ListProgressPage from "pages/client/progresses/list.progress";
 import ListTaskPage from "pages/client/tasks/list.task";
 import ListWorkflowPage from "pages/client/workflows/list.workflow";
+import viVN from "antd/locale/vi_VN";
+import { App, ConfigProvider } from "antd";
 
 const router = createBrowserRouter([
   {
@@ -158,6 +160,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <App>
+      <ConfigProvider locale={viVN}>
+        <RouterProvider router={router} />
+      </ConfigProvider>
+    </App>
   </StrictMode>
 );
