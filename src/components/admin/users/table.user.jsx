@@ -10,6 +10,9 @@ import { App, Avatar, Button, Popconfirm, Space, Tag } from "antd";
 import { useRef, useState } from "react";
 import dayjs from "dayjs";
 import ImportUser from "./import.user";
+import CreateUser from "./create.user";
+import UpdateUser from "./update.user";
+import DetailUser from "./detail.user";
 
 const data = [
   {
@@ -18,7 +21,7 @@ const data = [
     username: "admin",
     email: "admin@gmail.com",
     avatar: "",
-    phone: "123456789",
+    phone_number: "123456789",
     address: "Thanh pho Ho Chi Minh",
     createdAt: "2025-03-13T07:11:00.943Z",
     updatedAt: "2025-03-13T07:11:00.943Z",
@@ -37,7 +40,7 @@ const data = [
     username: "nguyenvana",
     email: "nguyenvana@gmail.com",
     avatar: "",
-    phone: "0987654321",
+    phone_number: "0987654321",
     address: "Ha Noi",
     createdAt: "2025-02-20T09:30:15.543Z",
     updatedAt: "2025-02-20T09:30:15.543Z",
@@ -62,7 +65,7 @@ const data = [
     username: "tranthib",
     email: "tranthib@gmail.com",
     avatar: "",
-    phone: "0912345678",
+    phone_number: "0912345678",
     address: "Da Nang",
     createdAt: "2025-01-05T12:45:30.123Z",
     updatedAt: "2025-01-05T12:45:30.123Z",
@@ -87,7 +90,7 @@ const data = [
     username: "levanc",
     email: "levanc@gmail.com",
     avatar: "",
-    phone: "0905123456",
+    phone_number: "0905123456",
     address: "Can Tho",
     createdAt: "2025-04-01T08:20:50.678Z",
     updatedAt: "2025-04-01T08:20:50.678Z",
@@ -106,7 +109,7 @@ const data = [
     username: "phamminhd",
     email: "phamminhd@gmail.com",
     avatar: "",
-    phone: "0966543210",
+    phone_number: "0966543210",
     address: "Hai Phong",
     createdAt: "2025-03-15T14:10:05.321Z",
     updatedAt: "2025-03-15T14:10:05.321Z",
@@ -131,7 +134,7 @@ const data = [
     username: "hoangthie",
     email: "hoangthie@gmail.com",
     avatar: "",
-    phone: "0978123456",
+    phone_number: "0978123456",
     address: "Binh Duong",
     createdAt: "2025-02-28T10:05:45.678Z",
     updatedAt: "2025-02-28T10:05:45.678Z",
@@ -156,7 +159,7 @@ const data = [
     username: "nguyenvanf",
     email: "nguyenvanf@gmail.com",
     avatar: "",
-    phone: "0987987654",
+    phone_number: "0987987654",
     address: "Hue",
     createdAt: "2025-01-10T15:30:25.432Z",
     updatedAt: "2025-01-10T15:30:25.432Z",
@@ -181,7 +184,7 @@ const data = [
     username: "tranminhg",
     email: "tranminhg@gmail.com",
     avatar: "",
-    phone: "0911122233",
+    phone_number: "0911122233",
     address: "Dong Nai",
     createdAt: "2025-03-05T08:20:30.987Z",
     updatedAt: "2025-03-05T08:20:30.987Z",
@@ -200,7 +203,7 @@ const data = [
     username: "lethih",
     email: "lethih@gmail.com",
     avatar: "",
-    phone: "0903344556",
+    phone_number: "0903344556",
     address: "Khanh Hoa",
     createdAt: "2025-02-18T12:50:40.654Z",
     updatedAt: "2025-02-18T12:50:40.654Z",
@@ -225,7 +228,7 @@ const data = [
     username: "phamvani",
     email: "phamvani@gmail.com",
     avatar: "",
-    phone: "0966778899",
+    phone_number: "0966778899",
     address: "Hai Duong",
     createdAt: "2025-03-22T17:40:55.789Z",
     updatedAt: "2025-03-22T17:40:55.789Z",
@@ -250,7 +253,7 @@ const data = [
     username: "phamvani",
     email: "phamvani@gmail.com",
     avatar: "",
-    phone: "0966778899",
+    phone_number: "0966778899",
     address: "Hai Duong",
     createdAt: "2025-03-22T17:40:55.789Z",
     updatedAt: "2025-03-22T17:40:55.789Z",
@@ -275,7 +278,7 @@ const data = [
     username: "phamvani",
     email: "phamvani@gmail.com",
     avatar: "",
-    phone: "0966778899",
+    phone_number: "0966778899",
     address: "Hai Duong",
     createdAt: "2025-03-22T17:40:55.789Z",
     updatedAt: "2025-03-22T17:40:55.789Z",
@@ -300,7 +303,7 @@ const data = [
     username: "phamvani",
     email: "phamvani@gmail.com",
     avatar: "",
-    phone: "0966778899",
+    phone_number: "0966778899",
     address: "Hai Duong",
     createdAt: "2025-03-22T17:40:55.789Z",
     updatedAt: "2025-03-22T17:40:55.789Z",
@@ -325,7 +328,7 @@ const data = [
     username: "phamvani",
     email: "phamvani@gmail.com",
     avatar: "",
-    phone: "0966778899",
+    phone_number: "0966778899",
     address: "Hai Duong",
     createdAt: "2025-03-22T17:40:55.789Z",
     updatedAt: "2025-03-22T17:40:55.789Z",
@@ -630,6 +633,24 @@ const TableUser = () => {
         openModalImport={openModalImport}
         setOpenModalImport={setOpenModalImport}
         refreshTable={refreshTable}
+      />
+      <CreateUser
+        openModalCreate={openModalCreate}
+        setOpenModalCreate={setOpenModalCreate}
+        refreshTable={refreshTable}
+      />
+      <UpdateUser
+        openModalUpdate={openModalUpdate}
+        setOpenModalUpdate={setOpenModalUpdate}
+        dataUpdate={dataUpdate}
+        setDataUpdate={setDataUpdate}
+        refreshTable={refreshTable}
+      />
+      <DetailUser
+        openViewDetail={openViewDetail}
+        setOpenViewDetail={setOpenViewDetail}
+        dataViewDetail={dataViewDetail}
+        setDataViewDetail={setDataViewDetail}
       />
     </div>
   );

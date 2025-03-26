@@ -71,7 +71,7 @@ const ImportUser = (props) => {
         fullName: "Nguyễn Văn A",
         username: "nguyenvana",
         email: "a@gmail.com",
-        phone: "0123456789",
+        phone_number: "0123456789",
         DateOfBirth: "2025-03-20T07:11:00.943Z",
         address: "Thanh pho Ho Chi Minh",
         gender: "NAM",
@@ -82,7 +82,84 @@ const ImportUser = (props) => {
         fullName: "Trần Thị B",
         username: "tranthib",
         email: "b@gmail.com",
-        phone: "0123456789",
+        phone_number: "0123456789",
+        DateOfBirth: "2025-03-13T07:11:00.943Z",
+        address: "Thanh pho Ho Chi Minh",
+        gender: "NAM",
+        position: "Chanh van phong",
+      },
+      {
+        key: "3",
+        fullName: "Trần Thị B",
+        username: "tranthib",
+        email: "b@gmail.com",
+        phone_number: "0123456789",
+        DateOfBirth: "2025-03-13T07:11:00.943Z",
+        address: "Thanh pho Ho Chi Minh",
+        gender: "NAM",
+        position: "Chanh van phong",
+      },
+      {
+        key: "4",
+        fullName: "Trần Thị B",
+        username: "tranthib",
+        email: "b@gmail.com",
+        phone_number: "0123456789",
+        DateOfBirth: "2025-03-13T07:11:00.943Z",
+        address: "Thanh pho Ho Chi Minh",
+        gender: "NAM",
+        position: "Chanh van phong",
+      },
+      {
+        key: "5",
+        fullName: "Trần Thị B",
+        username: "tranthib",
+        email: "b@gmail.com",
+        phone_number: "0123456789",
+        DateOfBirth: "2025-03-13T07:11:00.943Z",
+        address: "Thanh pho Ho Chi Minh",
+        gender: "NAM",
+        position: "Chanh van phong",
+      },
+      {
+        key: "6",
+        fullName: "Trần Thị B",
+        username: "tranthib",
+        email: "b@gmail.com",
+        phone_number: "0123456789",
+        DateOfBirth: "2025-03-13T07:11:00.943Z",
+        address: "Thanh pho Ho Chi Minh",
+        gender: "NAM",
+        position: "Chanh van phong",
+      },
+      {
+        key: "7",
+        fullName: "Trần Thị B",
+        username: "tranthib",
+        email: "b@gmail.com",
+        phone_number: "0123456789",
+        DateOfBirth: "2025-03-13T07:11:00.943Z",
+        address: "Thanh pho Ho Chi Minh",
+        gender: "NAM",
+        position: "Chanh van phong",
+      },
+      {
+        key: "8",
+        fullName: "Trần Thị B",
+        username: "tranthib",
+        email: "b@gmail.com",
+        phone_number: "0123456789",
+        DateOfBirth: "2025-03-13T07:11:00.943Z",
+        address: "Thanh pho Ho Chi Minh",
+        gender: "NAM",
+        position: "Chanh van phong",
+      },
+      {
+        key: "9",
+        fullName: "Trần Thị B",
+        username: "tranthib",
+        email: "b@gmail.com",
+        phone_number: "0123456789",
         DateOfBirth: "2025-03-13T07:11:00.943Z",
         address: "Thanh pho Ho Chi Minh",
         gender: "NAM",
@@ -109,6 +186,9 @@ const ImportUser = (props) => {
   const handleSubmit = async () => {
     setIsSubmit(true);
     try {
+      // Kiểm tra xem form có lỗi không
+      await form.validateFields();
+
       console.log("Dữ liệu gửi đi:", {
         userList,
       });
@@ -121,7 +201,7 @@ const ImportUser = (props) => {
       setUploadedFile(null);
       form.resetFields();
     } catch (error) {
-      message.error("Có lỗi xảy ra khi gửi dữ liệu.");
+      message.error("Vui lòng kiểm tra lại thông tin trước khi xác nhận.");
     }
     setIsSubmit(false);
   };
@@ -180,10 +260,10 @@ const ImportUser = (props) => {
     },
     {
       title: "Số điện thoại",
-      dataIndex: "phone",
+      dataIndex: "phone_number",
       render: (_, record, index) => (
         <Form.Item
-          name={["users", index, "phone"]}
+          name={["users", index, "phone_number"]}
           rules={[
             { required: true, message: "Vui lòng nhập số điện thoại!" },
             {
@@ -195,7 +275,7 @@ const ImportUser = (props) => {
           <Input
             maxLength={10} // Giới hạn chỉ nhập tối đa 10 ký tự
             onChange={(e) =>
-              handleEditCell(record.key, "phone", e.target.value)
+              handleEditCell(record.key, "phone_number", e.target.value)
             }
           />
         </Form.Item>
