@@ -18,7 +18,7 @@ import { TbLogs } from "react-icons/tb";
 import { CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
 
-const { Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 const LayoutAdmin = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -82,14 +82,14 @@ const LayoutAdmin = () => {
     {
       label: (
         <label
-          style={{ cursor: "pointer", color: "#037cdc" }}
+          style={{ cursor: "pointer", color: " #0387EF" }}
           onClick={() => navigate("/admin/profile")}
         >
           Quản lý tài khoản
         </label>
       ),
       key: "account",
-      icon: <CgProfile style={{ fontSize: "18px", color: "#037cdc" }} />,
+      icon: <CgProfile style={{ fontSize: "18px", color: " #0387EF" }} />,
     },
     {
       label: (
@@ -123,18 +123,22 @@ const LayoutAdmin = () => {
 
   return (
     <>
-      <Layout style={{ minHeight: "100vh" }} className="layout-admin">
+      <Layout
+        style={{ minHeight: "100vh", backgroundColor: "#e8edfa" }}
+        className="layout-admin"
+      >
         <Sider
-          style={{ backgroundColor: "#037CDC", color: "#ffffff" }}
+          style={{ backgroundColor: "#0387EF", color: "#ffffff" }}
           collapsible
           collapsed={collapsed}
           onCollapse={(value) => setCollapsed(value)}
-          width={225}
+          trigger={null}
+          width={270}
           collapsedWidth={80}
         >
           <div
             style={{
-              height: "50px",
+              height: "10%",
               position: "relative",
               width: "100%",
               display: "flex",
@@ -142,6 +146,7 @@ const LayoutAdmin = () => {
               justifyContent: "center",
               overflow: "hidden",
               marginBottom: "10px",
+              whiteSpace: "nowrap",
             }}
           >
             <img
@@ -150,9 +155,25 @@ const LayoutAdmin = () => {
               style={{
                 maxHeight: "40px",
                 objectFit: "contain",
-                display: "block",
               }}
             />
+            {!collapsed && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: "10px",
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                }}
+              >
+                <span>Hệ Thống</span>
+                <span>Quản Lý Văn Bản</span>
+              </div>
+            )}
             <div
               style={{
                 position: "absolute",
@@ -171,7 +192,7 @@ const LayoutAdmin = () => {
             items={items}
             onClick={(e) => setActiveMenu(e.key)}
             style={{
-              backgroundColor: "#037CDC",
+              backgroundColor: " #0387EF",
               color: "white",
               fontWeight: "bold",
             }}
@@ -179,78 +200,85 @@ const LayoutAdmin = () => {
           />
         </Sider>
         <Layout>
-          <div
-            className="admin-header"
-            style={{
-              height: "50px",
-              borderBottom: "1px solid #80868b",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "0 15px",
-              background: "white",
-            }}
-          >
-            <span>
-              {React.createElement(
-                collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
-                {
-                  className: "trigger",
-                  onClick: () => setCollapsed(!collapsed),
-                }
-              )}
-            </span>
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <QuestionCircleOutlined
-                style={{ fontSize: "16px", cursor: "pointer" }}
-                onClick={() => navigate("/admin/user-guide")}
-              />
-
-              <Badge count={2}>
-                <BellOutlined
+          <div style={{ backgroundColor: "#e8edfa" }}>
+            <div
+              className="admin-header"
+              style={{
+                height: "50px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 15px",
+                background: "white",
+                marginLeft: "20px",
+                borderRadius: "10px",
+                boxShadow:
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+              }}
+            >
+              <span>
+                {React.createElement(
+                  collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
+                  {
+                    className: "trigger",
+                    onClick: () => setCollapsed(!collapsed),
+                  }
+                )}
+              </span>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "20px" }}
+              >
+                <QuestionCircleOutlined
                   style={{ fontSize: "16px", cursor: "pointer" }}
-                  onClick={() => navigate("/admin")}
+                  onClick={() => navigate("/admin/user-guide")}
                 />
-              </Badge>
 
-              <Dropdown menu={{ items: itemsDropdown }} trigger={["click"]}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    gap: "10px",
-                  }}
-                >
+                <Badge count={2}>
+                  <BellOutlined
+                    style={{ fontSize: "16px", cursor: "pointer" }}
+                    onClick={() => navigate("/admin")}
+                  />
+                </Badge>
+
+                <Dropdown menu={{ items: itemsDropdown }} trigger={["click"]}>
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: "column",
-                      lineHeight: "1",
-                      textAlign: "right",
-                      gap: "4px",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      gap: "10px",
                     }}
                   >
-                    <span
+                    <div
                       style={{
-                        fontSize: "14px",
-                        color: "green",
-                        fontWeight: "bold",
+                        display: "flex",
+                        flexDirection: "column",
+                        lineHeight: "1",
+                        textAlign: "right",
+                        gap: "4px",
                       }}
                     >
-                      Quản trị viên
-                    </span>
-                    <span style={{ fontSize: "12px" }}>admin@gmail.com</span>
-                  </div>
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          color: "green",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Quản trị viên
+                      </span>
+                      <span style={{ fontSize: "12px" }}>admin@gmail.com</span>
+                    </div>
 
-                  <Avatar />
-                </div>
-              </Dropdown>
+                    <Avatar />
+                  </div>
+                </Dropdown>
+              </div>
             </div>
+            <Content style={{ marginLeft: "20px", right: 0 }}>
+              <Outlet />
+            </Content>
           </div>
-          <Content>
-            <Outlet />
-          </Content>
         </Layout>
       </Layout>
     </>

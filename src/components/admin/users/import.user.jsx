@@ -362,6 +362,13 @@ const ImportUser = (props) => {
     <Modal
       title="Tạo mới người dùng theo CSV hoặc XLSX file"
       width="90vw"
+      centered={true}
+      bodyProps={{
+        style: {
+          maxHeight: "70vh", // ✅ Giới hạn chiều cao modal
+          overflowY: "auto", // ✅ Tạo thanh cuộn trong modal
+        },
+      }}
       open={openModalImport}
       onCancel={() => {
         setOpenModalImport(false);

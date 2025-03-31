@@ -1,5 +1,11 @@
+import TableDivision from "@/components/admin/divisions/table.division";
+
 const ManageDivisionPage = () => {
-  return <div>ManageDivisionPage</div>;
+  return (
+    <>
+      <TableDivision />
+    </>
+  );
 };
 
 export default ManageDivisionPage;

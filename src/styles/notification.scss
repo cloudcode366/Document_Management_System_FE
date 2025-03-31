@@ -6,7 +6,6 @@
   padding: 20px 0 80px;
   width: 100%;
   height: 100vh;
-  overflow-y: auto;
 }
 
 .notification-card {
@@ -19,6 +18,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow-y: auto;
 }
 
 .notification-list {
@@ -28,6 +28,7 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
+  overflow-y: auto;
 }
 
 .notification-list li {

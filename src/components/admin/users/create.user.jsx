@@ -75,6 +75,14 @@ const CreateUser = (props) => {
         cancelText={"Hủy"}
         confirmLoading={isSubmit}
         maskClosable={false}
+        centered={true}
+        bodyProps={{
+          style: {
+            maxHeight: "70vh",
+            overflowY: "auto",
+            overflowX: "hidden",
+          },
+        }}
       >
         <Divider />
         <Form
@@ -123,24 +131,16 @@ const CreateUser = (props) => {
             </Col>
             <Col span={12}>
               <Form.Item
-                label="Vai trò"
-                name="role_id"
-                rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
+                label="Căn cước công dân"
+                name="identity_card"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập căn cước công dân!",
+                  },
+                ]}
               >
-                <Select
-                  showSearch
-                  placeholder="Vui lòng chọn vai trò"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {roleOptions.map((role) => (
-                    <Select.Option key={role.id} value={role.id}>
-                      {role.name}
-                    </Select.Option>
-                  ))}
-                </Select>
+                <Input />
               </Form.Item>
             </Col>
           </Row>
@@ -237,6 +237,30 @@ const CreateUser = (props) => {
                 rules={[{ required: true, message: "Vui lòng nhập chức vụ!" }]}
               >
                 <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Vai trò"
+                name="role_id"
+                rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Vui lòng chọn vai trò"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {roleOptions.map((role) => (
+                    <Select.Option key={role.id} value={role.id}>
+                      {role.name}
+                    </Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>

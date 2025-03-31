@@ -102,6 +102,14 @@ const UpdateUser = (props) => {
         title="Cập nhật người dùng"
         open={openModalUpdate}
         width={"80vw"}
+        centered={true}
+        bodyProps={{
+          style: {
+            maxHeight: "70vh",
+            overflowY: "auto",
+            overflowX: "hidden",
+          },
+        }}
         onOk={() => {
           form.submit();
         }}

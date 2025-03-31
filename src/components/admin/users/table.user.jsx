@@ -353,7 +353,7 @@ const TableUser = () => {
   const actionRef = useRef();
   const [meta, setMeta] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 20,
     pages: 0,
     total: 0,
   });
@@ -502,8 +502,8 @@ const TableUser = () => {
             />
             <Popconfirm
               placement="leftTop"
-              title="Xác nhận xóa user"
-              description="Bạn có chắc chắn muốn xóa user này?"
+              title="Xác nhận khóa người dùng"
+              description="Bạn có chắc chắn muốn khóa người dùng này?"
               onConfirm={() => handleDeleteUser(entity._id)}
               okText="Xác nhận"
               cancelText="Hủy"
@@ -546,15 +546,21 @@ const TableUser = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "flex-end",
         backgroundColor: "#e8edfa",
-        padding: "20px 0 80px",
+        padding: "20px 0",
         width: "100%",
         height: "100vh",
-        overflowY: "auto",
       }}
     >
       <ProTable
+        style={{
+          width: "100%",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+        scroll={{ y: "calc(100vh - 350px)" }}
         columns={columns}
         actionRef={actionRef}
         cardBordered
