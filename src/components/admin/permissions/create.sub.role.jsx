@@ -15,28 +15,30 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 
-const CreateDivision = (props) => {
-  const { openModalCreate, setOpenModalCreate, refreshTable } = props;
-  const [departmentName, setDepartmentName] = useState("");
+const CreateSubRole = (props) => {
+  const { openModalCreate, setOpenModalCreate } = props;
+  const [subRoleName, setSubRoleName] = useState("");
   const { message, notification } = App.useApp();
-  const [users, setUsers] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [selectedResources, setSelectedResources] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const handleSelectUser = (userId) => {
-    const user = users.find((u) => u.user_id === userId);
-    if (user && !selectedUsers.find((u) => u.user_id === userId)) {
-      setSelectedUsers([...selectedUsers, user]);
+  const handleSelectResources = (resourceId) => {
+    const resource = resources.find((u) => u.resource_id === resourceId);
+    if (resource && !selectedResources.find((u) => u.user_id === resourceId)) {
+      setSelectedResources([...selectedResources, resource]);
     }
   };
 
-  const handleRemoveUser = (userId) => {
-    setSelectedUsers(selectedUsers.filter((user) => user.user_id !== userId));
+  const handleRemoveUser = (resourceId) => {
+    setSelectedResources(
+      selectedResources.filter((u) => u.resource_id !== resourceId)
+    );
   };
 
   const handleClose = () => {
-    setDepartmentName("");
-    setSelectedUsers([]);
+    setSubRoleName("");
+    setSelectedResources([]);
     setOpenModalCreate(false);
   };
 
@@ -75,31 +77,10 @@ const CreateDivision = (props) => {
 
   const columns = [
     {
-      title: "Ảnh",
-      dataIndex: "avatar",
-      render: (avatar) => <Avatar src={avatar} />,
+      title: "Chức năng",
+      dataIndex: "name",
     },
-    {
-      title: "Họ và tên",
-      dataIndex: "fullName",
-    },
-    {
-      title: "Tên đăng nhập",
-      dataIndex: "username",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-    },
-    {
-      title: "Vai trò chính",
-      dataIndex: "role",
-      render: (role) => (
-        <Tag color={role === "DIVISION_HEAD" ? "orange" : "gold"}>
-          {role === "DIVISION_HEAD" ? "Lãnh đạo phòng ban" : "Chuyên viên"}
-        </Tag>
-      ),
-    },
+
     {
       title: "Xóa",
       dataIndex: "user_id",
@@ -114,7 +95,7 @@ const CreateDivision = (props) => {
   return (
     <>
       <Modal
-        title="Tạo mới phòng ban"
+        title="Tạo mới vai trò phụ"
         width={"80vw"}
         open={openModalCreate}
         onCancel={() => {
@@ -139,50 +120,53 @@ const CreateDivision = (props) => {
         ]}
         bodyProps={{
           style: {
-            maxHeight: "70vh",
+            maxHeight: "80vh",
             overflowY: "auto",
             overflowX: "hidden",
           },
         }}
       >
         <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
-          Tên phòng ban:
+          Tên vai trò phụ:
         </div>
         <Input
-          placeholder="Vui lòng nhập tên phòng ban"
-          value={departmentName}
-          onChange={(e) => setDepartmentName(e.target.value)}
-          style={{ marginBottom: 16 }}
+          placeholder="Vui lòng nhập tên vai trò phụ"
+          value={subRoleName}
+          onChange={(e) => setSubRoleName(e.target.value)}
+          style={{ marginBottom: 10 }}
         />
 
         <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
-          Thành viên phòng ban:
+          Các chức năng:
         </div>
         <Select
           showSearch
-          style={{ width: "100%", marginBottom: 16 }}
-          placeholder="Vui lòng chọn người dùng"
-          onSelect={handleSelectUser}
+          style={{ width: "100%", marginBottom: "15px" }}
+          placeholder="Vui lòng chọn chức năng"
+          onSelect={handleSelectResources}
           optionFilterProp="children"
         >
-          {users.map((user) => (
-            <Select.Option key={user.user_id} value={user.user_id}>
-              {user.fullName} ({user.username})
+          {resources.map((r) => (
+            <Select.Option key={r.resource_id} value={r.name}>
+              {r.name}
             </Select.Option>
           ))}
         </Select>
 
         <Table
-          dataSource={selectedUsers}
+          dataSource={selectedResources}
           columns={columns}
-          rowKey="user_id"
+          rowKey="resource_id"
           pagination={false}
           scroll={{ y: 400 }}
-          style={{ marginTop: "20px" }}
+          style={{
+            border: "1px solid #d9d9d9",
+            borderRadius: "8px",
+          }}
         />
       </Modal>
     </>
   );
 };
 
-export default CreateDivision;
+export default CreateSubRole;

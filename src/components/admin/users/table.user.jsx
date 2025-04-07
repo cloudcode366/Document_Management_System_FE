@@ -387,6 +387,7 @@ const TableUser = () => {
           </Avatar>
         );
       },
+      width: "5%",
     },
     {
       title: "Họ và tên",
@@ -395,6 +396,7 @@ const TableUser = () => {
       fieldProps: {
         placeholder: "Vui lòng nhập họ và tên",
       },
+      width: "10%",
     },
     {
       title: "Tên đăng nhập",
@@ -407,6 +409,7 @@ const TableUser = () => {
         labelCol: { span: 8 }, // Điều chỉnh label rộng hơn để không bị đè
         wrapperCol: { span: 18 }, // Đảm bảo input không chiếm hết không gian
       },
+      width: "10%",
     },
     {
       title: "Email",
@@ -415,6 +418,7 @@ const TableUser = () => {
       fieldProps: {
         placeholder: "Vui lòng nhập email",
       },
+      width: "10%",
     },
     {
       title: "Vai trò",
@@ -435,6 +439,7 @@ const TableUser = () => {
         placeholder: "Vui lòng chọn vai trò",
         showSearch: true,
       },
+      width: "10%",
     },
     {
       title: "Phòng ban",
@@ -456,6 +461,7 @@ const TableUser = () => {
         showSearch: true,
       },
       render: (_, entity) => entity?.division?.name || "-",
+      width: "15%",
     },
     {
       title: "Chức vụ",
@@ -464,6 +470,7 @@ const TableUser = () => {
       fieldProps: {
         placeholder: "Vui lòng nhập chức vụ",
       },
+      width: "15%",
     },
     {
       title: "Ngày tạo",
@@ -474,6 +481,7 @@ const TableUser = () => {
       render(dom, entity, index, action, schema) {
         return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
       },
+      width: "10%",
     },
     {
       title: "Trạng thái",
@@ -485,10 +493,12 @@ const TableUser = () => {
         ) : (
           <Tag color="red">Bị khóa</Tag>
         ),
+      width: "10%",
     },
     {
       title: "Hành động",
       hideInSearch: true,
+      width: "10%",
       render(dom, entity, index, action, schema) {
         return (
           <>
@@ -611,7 +621,9 @@ const TableUser = () => {
             );
           },
         }}
-        headerTitle="Quản lý người dùng"
+        headerTitle={
+          <span style={{ fontWeight: "bold" }}>Quản lý người dùng</span>
+        }
         toolBarRender={() => [
           <Button
             key="buttonImport"

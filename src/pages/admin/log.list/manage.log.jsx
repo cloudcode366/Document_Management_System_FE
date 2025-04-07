@@ -1,5 +1,11 @@
+import TableLogs from "@/components/admin/log.list/table.log";
+
 const ManageLogPage = () => {
-  return <div>ManageLogPage</div>;
+  return (
+    <div>
+      <TableLogs />
+    </div>
+  );
 };
 
 export default ManageLogPage;

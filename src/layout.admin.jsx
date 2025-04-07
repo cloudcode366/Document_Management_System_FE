@@ -6,16 +6,18 @@ import {
   QuestionCircleOutlined,
   BellOutlined,
   LogoutOutlined,
+  SignatureOutlined,
+  SignatureFilled,
 } from "@ant-design/icons";
 import { Layout, Menu, Dropdown, Avatar, Badge } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { GiOrganigram } from "react-icons/gi";
+import { GiDigitalTrace, GiOrganigram } from "react-icons/gi";
 import { LuUserCog } from "react-icons/lu";
 import { GrDocumentConfig } from "react-icons/gr";
 import { LuWorkflow } from "react-icons/lu";
 import { TbLogs } from "react-icons/tb";
-import { CgProfile } from "react-icons/cg";
+import { CgDigitalocean, CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
 
 const { Content, Sider } = Layout;
@@ -50,6 +52,21 @@ const LayoutAdmin = () => {
       label: <Link to="/admin/division">Quản lý phòng ban</Link>,
       key: "/admin/division",
       icon: <GiOrganigram />,
+    },
+    {
+      label: <span>Quản lý chữ ký</span>,
+      key: "/admin/signature",
+      icon: <SignatureOutlined />,
+      children: [
+        {
+          label: <Link to="/admin/digital-signature">Chữ ký số</Link>,
+          key: "/admin/digital-signature",
+        },
+        {
+          label: <Link to="/admin/initial-signature">Chữ ký nháy</Link>,
+          key: "/admin/initial-signature",
+        },
+      ],
     },
     {
       label: <Link to="/admin/permission">Quản lý phân quyền</Link>,
@@ -138,7 +155,7 @@ const LayoutAdmin = () => {
         >
           <div
             style={{
-              height: "10%",
+              height: "100px",
               position: "relative",
               width: "100%",
               display: "flex",

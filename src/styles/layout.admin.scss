@@ -1,4 +1,4 @@
-/* Chữ & icon màu trắng và đậm khi chưa chọn */
+/* Áp dụng cho các mục item thường */
 .custom-menu .ant-menu-item a,
 .custom-menu .ant-menu-item .anticon,
 .custom-menu .ant-menu-item svg {
@@ -6,14 +6,28 @@
   font-weight: bold !important;
 }
 
-/* Khi chọn item, chữ & icon chuyển sang màu xanh */
+/* Áp dụng cho label của submenu (ví dụ: "Quản lý chữ ký") */
+.custom-menu .ant-menu-submenu-title,
+.custom-menu .ant-menu-submenu-title .anticon,
+.custom-menu .ant-menu-submenu-title svg {
+  color: white !important;
+  font-weight: bold !important;
+}
+
+/* Khi chọn item con, thì item con được chọn màu xanh */
 .custom-menu .ant-menu-item-selected a,
 .custom-menu .ant-menu-item-selected .anticon,
 .custom-menu .ant-menu-item-selected svg {
   color: #0387ef !important;
 }
 
-/* Nền trắng khi chọn */
+/* Khi chọn item con, item đó có nền trắng */
 .custom-menu .ant-menu-item-selected {
   background-color: white !important;
+}
+
+/* Khi mở submenu, giữ màu trắng cho label cha */
+.custom-menu .ant-menu-submenu-open > .ant-menu-submenu-title {
+  color: white !important;
+  font-weight: bold !important;
 }

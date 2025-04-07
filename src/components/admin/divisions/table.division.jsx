@@ -1,12 +1,6 @@
-import { dateRangeValidate } from "@/services/helper";
-import {
-  CloudUploadOutlined,
-  DeleteTwoTone,
-  EditTwoTone,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { DeleteTwoTone, EditTwoTone, PlusOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
-import { App, Avatar, Button, Popconfirm, Tag } from "antd";
+import { App, Button, Popconfirm, Tag } from "antd";
 import { useRef, useState } from "react";
 import dayjs from "dayjs";
 import CreateDivision from "./create.division";
@@ -328,7 +322,6 @@ const TableDivision = () => {
   const [dataViewDetail, setDataViewDetail] = useState(null);
 
   const [openModalCreate, setOpenModalCreate] = useState(false);
-  const [openModalImport, setOpenModalImport] = useState(false);
 
   const [openModalUpdate, setOpenModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(null);
@@ -341,6 +334,7 @@ const TableDivision = () => {
       title: "Phòng ban",
       dataIndex: "name",
       copyable: true,
+      width: "30%",
       fieldProps: {
         placeholder: "Vui lòng nhập tên phòng ban",
       },
@@ -362,6 +356,7 @@ const TableDivision = () => {
       title: "Lãnh đạo",
       dataIndex: "list_users",
       hideInSearch: true,
+      width: "40%",
       render: (list_users) => {
         const leaders = list_users
           .filter((user) => user.role === "DIVISION_HEAD")
@@ -378,6 +373,7 @@ const TableDivision = () => {
       valueType: "date",
       sorter: true,
       hideInSearch: true,
+      width: "10%",
       render(dom, entity, index, action, schema) {
         return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
       },
@@ -386,6 +382,7 @@ const TableDivision = () => {
       title: "Trạng thái",
       dataIndex: "is_deleted",
       hideInSearch: true,
+      width: "10%",
       render: (is_deleted) =>
         is_deleted ? (
           <Tag color="red">Bị khóa</Tag>
@@ -396,6 +393,7 @@ const TableDivision = () => {
     {
       title: "Hành động",
       hideInSearch: true,
+      width: "10%",
       render(dom, entity, index, action, schema) {
         return (
           <>
@@ -510,7 +508,9 @@ const TableDivision = () => {
             );
           },
         }}
-        headerTitle="Quản lý phòng ban"
+        headerTitle={
+          <span style={{ fontWeight: "bold" }}>Quản lý phòng ban</span>
+        }
         toolBarRender={() => [
           <Button
             key="buttonAddNew"

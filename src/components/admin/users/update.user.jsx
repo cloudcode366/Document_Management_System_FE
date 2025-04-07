@@ -323,30 +323,6 @@ const UpdateUser = (props) => {
                 </Upload>
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Chữ ký nháy"
-                name="signature"
-                rules={[
-                  { required: true, message: "Vui lòng chọn ảnh đại diện!" },
-                ]}
-              >
-                <Image
-                  width={150}
-                  src={imageUrl}
-                  fallback="/default-avatar.png"
-                />
-                <Upload
-                  showUploadList={false}
-                  beforeUpload={() => false} // Không upload ngay, chỉ chọn ảnh
-                  onChange={handleImageChange}
-                >
-                  <Button icon={<UploadOutlined />} style={{ marginTop: 8 }}>
-                    Chọn ảnh mới
-                  </Button>
-                </Upload>
-              </Form.Item>
-            </Col>
           </Row>
         </Form>
       </Modal>
