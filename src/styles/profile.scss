@@ -1,0 +1,74 @@
+.profile-page {
+  height: 100vh;
+}
+
+.profile-card {
+  max-width: 1000px;
+  margin: 20px auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #fff;
+
+  .profile-avatar-info {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+
+    .tags {
+      margin-top: 4px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      .ant-tag {
+        margin-left: 4px;
+      }
+    }
+  }
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+
+    button {
+      display: flex;
+      align-items: center;
+    }
+  }
+}
+
+.profile-form {
+  padding-top: 24px;
+
+  .ant-form-item-label > label {
+    font-weight: 500;
+    color: #000;
+  }
+
+  .signature-box {
+    width: 220px;
+    height: 100px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    span {
+      color: #888;
+      font-size: 14px;
+    }
+
+    img {
+      max-height: 100%;
+      object-fit: contain;
+    }
+  }
+}
