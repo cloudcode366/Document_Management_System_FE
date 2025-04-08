@@ -1,6 +1,5 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import Layout from "@/layout";
 import "styles/global.scss";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import DashboardPage from "pages/client/dashboard/dashboard";
@@ -32,15 +31,17 @@ import viVN from "antd/locale/vi_VN";
 import { App, ConfigProvider } from "antd";
 import ManageDigitalSignature from "./pages/admin/digital.signatures/manage.digital.signature";
 import ManageInitialSignature from "./pages/admin/initial.signatures/manage.initial.signature";
+import ListAllDocumentPage from "./pages/client/documents/all.documents/list.all.documents";
+import LayoutClient from "@/layout";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: <LayoutClient />,
     children: [
       {
         index: true,
-        element: <DashboardPage />,
+        element: <ListAllDocumentPage />,
       },
       {
         path: "/user",
