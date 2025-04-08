@@ -64,7 +64,7 @@ jobs:
           SSH_HOST: ${{ secrets.SERVER_HOST }}
           SSH_PORT: ${{ secrets.SERVER_PORT }}
         run: |
-          sudo apt-get update && sudo apt-get install -y sshpass
+          
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST" << 'EOF'
             # Kéo image mới nhất
             docker pull wiramin/dmsfe:latest
