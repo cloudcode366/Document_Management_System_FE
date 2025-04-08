@@ -9,7 +9,7 @@ import {
 import React, { useRef, useState } from "react";
 import dayjs from "dayjs";
 import { dateRangeValidate } from "@/services/helper";
-import "./table.all.document.scss";
+import "./table.school.scoped.document.scss";
 import CreateDocument from "@/components/client/documents/progresses/create.document";
 
 const { TabPane } = Tabs;
@@ -17,52 +17,42 @@ const { TabPane } = Tabs;
 const dataSource = [
   {
     key: "1",
-    name: "Báo cáo kết quả hoạt động quý I",
-    reviewer: "Lê Phan Hoài Nam",
+    name: "Thông báo lịch nghỉ lễ 30/4 - 1/5",
+    reviewer: "Hà Công Hiếu",
     date: "2025-04-11T07:11:00.943Z",
     status: "Đang xử lý",
-    type: "Báo cáo",
-    tag: "văn bản đi",
+    type: "Thông báo",
+    tag: "văn bản toàn trường",
     hasAttachment: true,
   },
   {
     key: "2",
-    name: "Quyết định bổ nhiệm",
-    reviewer: "Hà Công Hiếu",
+    name: "Chương trình tổ chức trại hè năm 2025",
+    reviewer: "Tạ Gia Nhật Minh",
     date: "2025-03-30T07:11:00.943Z",
-    status: "Đã lưu",
-    type: "Quyết định",
-    tag: "văn bản đến",
+    status: "Đã hoàn thành",
+    type: "Chương trình",
+    tag: "văn bản toàn trường",
     hasAttachment: false,
   },
   {
     key: "3",
-    name: "Đề án dạy và học năm học 2024 - 2025",
-    reviewer: "Ngô Huỳnh Tấn Lộc",
+    name: "Báo cáo kết quả thi đua cán bộ công nhân viên chức các đơn vị trong nhà trường",
+    reviewer: "Hà Công Hiếu",
     date: "2025-02-15T07:11:00.943Z",
     status: "Đã lưu",
-    type: "Đề án",
+    type: "Báo cáo",
     tag: "văn bản toàn trường",
     hasAttachment: true,
   },
   {
     key: "4",
-    name: "Lịch phân công trực dịp lễ 30/4 - 1/5",
+    name: "Đề án nâng cao chất lượng dạy và học năm học 2024 - 2025",
     reviewer: "Tạ Gia Nhật Minh",
-    date: "2025-04-01T07:11:00.943Z",
+    date: "2025-04-11T07:11:00.943Z",
     status: "Đang xử lý",
-    type: "Thông báo",
-    tag: "văn bản phòng ban",
-    hasAttachment: true,
-  },
-  {
-    key: "5",
-    name: "Chương trình mừng xuân mừng đảng",
-    reviewer: "Ngô Huỳnh Tấn Lộc",
-    date: "2025-03-13T07:11:00.943Z",
-    status: "Đã hoàn thành",
-    type: "Chương trình",
-    tag: "hoàn thành",
+    type: "Đề án",
+    tag: "văn bản toàn trường",
     hasAttachment: true,
   },
 ];
@@ -143,13 +133,13 @@ const columns = [
     width: "10%",
     valueType: "option",
     render: () => [
-      // <DownloadOutlined key="download" style={{ color: "green" }} />,
+      //   <DownloadOutlined key="download" style={{ color: "green" }} />,
       <EditOutlined key="edit" style={{ marginLeft: 12, color: "#f57800" }} />,
     ],
   },
 ];
 
-const TableAllDocument = () => {
+const TableSchoolScopedDocument = () => {
   const [activeKey, setActiveKey] = useState("all");
   const actionRef = useRef();
   const [meta, setMeta] = useState({
@@ -182,11 +172,11 @@ const TableAllDocument = () => {
       >
         <Tabs activeKey={activeKey} onChange={setActiveKey}>
           <TabPane tab="TẤT CẢ" key="all" />
-          <TabPane tab="ĐẾN LƯỢT DUYỆT" key="review" />
+          {/* <TabPane tab="ĐẾN LƯỢT DUYỆT" key="review" />
           <TabPane tab="ĐANG CHỜ DUYỆT" key="waiting" />
           <TabPane tab="ĐÃ CHẤP NHẬN" key="accepted" />
           <TabPane tab="ĐÃ TỪ CHỐI" key="rejected" />
-          <TabPane tab="QUÁ HẠN" key="overdue" />
+          <TabPane tab="QUÁ HẠN" key="overdue" /> */}
         </Tabs>
 
         <ProTable
@@ -257,7 +247,9 @@ const TableAllDocument = () => {
             },
           }}
           headerTitle={
-            <span style={{ fontWeight: "bold" }}>Danh sách văn bản</span>
+            <span style={{ fontWeight: "bold" }}>
+              Danh sách văn bản nội bộ toàn trường
+            </span>
           }
           toolBarRender={() => [
             <Button
@@ -282,4 +274,4 @@ const TableAllDocument = () => {
   );
 };
 
-export default TableAllDocument;
+export default TableSchoolScopedDocument;

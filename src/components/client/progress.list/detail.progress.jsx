@@ -19,258 +19,113 @@ import {
   CloseCircleOutlined,
   PlusCircleOutlined,
 } from "@ant-design/icons";
-import CreateTask from "../tasks/create.task";
+import DetailTask from "@/components/client/documents/progresses/detail.task";
 import dayjs from "dayjs";
-import DetailTask from "../tasks/detail.task";
+import AddTask from "./add.task";
 
-const InitProgressDocument = (props) => {
+const DetailProgress = (props) => {
   const {
-    openInitProgressDocumentModal,
-    setOpenInitProgressDocumentModal,
+    openDetailProgressModal,
+    setOpenDetailProgressModal,
+    dataViewDetail,
+    setDataViewDetail,
     refreshTable,
-    dataInfoDocument,
-    setDataInfoDocument,
-    handleCloseConfirmInfoDocumentModal,
   } = props;
   const [workflowName, setWorkflowName] = useState("");
   const [workflowRoles, setWorkflowRoles] = useState([]);
   const [workflowDetails, setWorkflowDetails] = useState([]);
   const [mode, setMode] = useState("nhiemvu");
-  const [deadlineTime, setDeadlineTime] = useState(null);
-  const [reviewTaskTime, setReviewTaskTime] = useState(null);
+  //   const [deadlineTime, setDeadlineTime] = useState(null);
+  //   const [reviewTaskTime, setReviewTaskTime] = useState(null);
   const [listTask, setListTask] = useState([]);
-  const [openCreateTaskModal, setOpenCreateTaskModal] = useState(false);
+  const [openAddTaskModal, setOpenAddTaskModal] = useState(false);
   const [currentStepId, setCurrentStepId] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [openTaskDetailModal, setOpenTaskDetailModal] = useState(false);
   const { message, notification } = App.useApp();
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    if (dataInfoDocument) {
-      if (dataInfoDocument.workflow_id === 1) {
-        setWorkflowName("Văn bản đi");
-        setWorkflowRoles([
-          "Chuyên viên",
-          "Lãnh đạo phòng ban",
-          "Lãnh đạo trường",
-          "Chánh văn phòng",
-        ]);
-        setWorkflowDetails([
+    setWorkflowName("Văn bản phòng ban");
+    setWorkflowRoles(["Chuyên viên", "Lãnh đạo phòng ban"]);
+    setWorkflowDetails([
+      {
+        from: "Chuyên viên",
+        to: "Lãnh đạo phòng ban",
+        actions: [
           {
-            from: "Chuyên viên",
-            to: "Lãnh đạo phòng ban",
-            actions: [
-              {
-                content: "Khởi tạo và chuyển tiếp văn bản",
-                role: "Chuyên viên",
-                step_id: 1,
-              },
-              {
-                content: "Duyệt văn bản",
-                role: "Lãnh đạo phòng ban",
-                step_id: 2,
-              },
-            ],
+            content: "Khởi tạo và chuyển tiếp văn bản",
+            role: "Chuyên viên",
+            step_id: 1,
           },
           {
-            from: "Lãnh đạo phòng ban",
-            to: "Lãnh đạo trường",
-            actions: [
-              {
-                content: "Khởi tạo và chuyển tiếp văn bản",
-                role: "Lãnh đạo phòng ban",
-                step_id: 3,
-              },
-              {
-                content: "Duyệt văn bản",
-                role: "Lãnh đạo trường",
-                step_id: 4,
-              },
-            ],
+            content: "Duyệt văn bản",
+            role: "Lãnh đạo phòng ban",
+            step_id: 2,
           },
-          {
-            from: "Lãnh đạo trường",
-            to: "Chánh văn phòng",
-            actions: [
-              {
-                content: "Khởi tạo và chuyển tiếp văn bản",
-                role: "Lãnh đạo trường",
-                step_id: 5,
-              },
-              {
-                content: "Duyệt văn bản",
-                role: "Chánh văn phòng",
-                step_id: 6,
-              },
-              {
-                content: "Lưu trữ văn bản / gửi văn bản ra ngoài",
-                role: "Chánh văn phòng",
-                step_id: 7,
-              },
-            ],
-          },
-        ]);
-      }
-      if (dataInfoDocument.workflow_id === 2) {
-        setWorkflowName("Văn bản đến");
-        setWorkflowRoles([
-          "Nhân viên văn thư",
-          "Chánh văn phòng",
-          "Lãnh đạo trường",
-        ]);
-        setWorkflowDetails([
-          {
-            from: "Nhân viên văn thư",
-            to: "Chánh văn phòng",
-            actions: [
-              {
-                content: "Khởi tạo và lưu trữ văn bản",
-                role: "Nhân viên văn thư",
-                step_id: 1,
-              },
-              {
-                content: "Duyệt và phân bổ văn bản",
-                role: "Chánh văn phòng",
-                step_id: 2,
-              },
-            ],
-          },
-          {
-            from: "Chánh văn phòng",
-            to: "Lãnh đạo trường",
-            actions: [
-              {
-                content: "Xem văn bản đã được phân bổ",
-                role: "Lãnh đạo phòng ban",
-                step_id: 3,
-              },
-            ],
-          },
-        ]);
-      }
-      if (dataInfoDocument.workflow_id === 3) {
-        setWorkflowName("Văn bản phòng ban");
-        setWorkflowRoles(["Chuyên viên", "Lãnh đạo phòng ban"]);
-        setWorkflowDetails([
-          {
-            from: "Chuyên viên",
-            to: "Lãnh đạo phòng ban",
-            actions: [
-              {
-                content: "Khởi tạo và chuyển tiếp văn bản",
-                role: "Chuyên viên",
-                step_id: 1,
-              },
-              {
-                content: "Duyệt văn bản",
-                role: "Lãnh đạo phòng ban",
-                step_id: 2,
-              },
-            ],
-          },
-        ]);
-      }
-      if (dataInfoDocument.workflow_id === 4) {
-        setWorkflowName("Văn bản toàn trường");
-        setWorkflowRoles([
-          "Chuyên viên",
-          "Lãnh đạo phòng ban",
-          "Lãnh đạo trường",
-          "Chánh văn phòng",
-        ]);
-        setWorkflowDetails([
-          {
-            from: "Chuyên viên",
-            to: "Lãnh đạo phòng ban",
-            actions: [
-              {
-                content: "Khởi tạo và chuyển tiếp văn bản",
-                role: "Chuyên viên",
-                step_id: 1,
-              },
-              {
-                content: "Duyệt văn bản",
-                role: "Lãnh đạo phòng ban",
-                step_id: 2,
-              },
-            ],
-          },
-          {
-            from: "Lãnh đạo phòng ban",
-            to: "Lãnh đạo trường",
-            actions: [
-              {
-                content: "Khởi tạo và chuyển tiếp văn bản",
-                role: "Lãnh đạo phòng ban",
-                step_id: 3,
-              },
-              {
-                content: "Duyệt văn bản",
-                role: "Lãnh đạo trường",
-                step_id: 4,
-              },
-            ],
-          },
-          {
-            from: "Lãnh đạo trường",
-            to: "Chánh văn phòng",
-            actions: [
-              {
-                content: "Khởi tạo và chuyển tiếp văn bản",
-                role: "Lãnh đạo trường",
-                step_id: 5,
-              },
-              {
-                content: "Duyệt văn bản",
-                role: "Chánh văn phòng",
-                step_id: 6,
-              },
-              {
-                content: "Lưu trữ văn bản / gửi văn bản ra ngoài",
-                role: "Chánh văn phòng",
-                step_id: 7,
-              },
-            ],
-          },
-        ]);
-      }
-    }
-  }, [dataInfoDocument]);
+        ],
+      },
+    ]);
+    setListTask({
+      1: [
+        {
+          title: "Soạn dự thảo văn bản",
+          thanhvien: "Nguyễn Văn A",
+          start_date: "08/04/2025 08:00",
+          end_date: "09/04/2025 17:00",
+          status: "Đã hoàn thành",
+        },
+        {
+          title: "Rà soát nội dung văn bản",
+          thanhvien: "Trần Thị B",
+          start_date: "07/04/2025 08:00",
+          end_date: "08/04/2025 17:00",
+          status: "Đã quá hạn",
+        },
+      ],
+      2: [
+        {
+          title: "Duyệt nội dung văn bản",
+          thanhvien: "Phạm Văn C",
+          start_date: "08/04/2025 08:00",
+          end_date: "09/04/2025 17:00",
+          status: "Đang thực hiện",
+        },
+      ],
+    });
+  }, []);
 
-  const handleDeadlineTimeChange = (time) => {
-    setDeadlineTime(time);
-    console.log("Thời gian deadline:", time?.format("HH:mm"));
-  };
+  //   const handleDeadlineTimeChange = (time) => {
+  //     setDeadlineTime(time);
+  //     console.log("Thời gian deadline:", time?.format("HH:mm"));
+  //   };
 
-  const handleReviewTaskTimeChange = (time) => {
-    setReviewTaskTime(time);
-    console.log("Thời gian đã chọn:", time?.format("HH:mm"));
-  };
+  //   const handleReviewTaskTimeChange = (time) => {
+  //     setReviewTaskTime(time);
+  //     console.log("Thời gian đã chọn:", time?.format("HH:mm"));
+  //   };
 
   const handleCancel = () => {
-    handleCloseConfirmInfoDocumentModal();
-    setOpenInitProgressDocumentModal(false);
-    setWorkflowName("");
-    setWorkflowRoles([]);
-    setWorkflowDetails([]);
-    setDeadlineTime(null);
-    setReviewTaskTime(null);
+    setOpenDetailProgressModal(false);
+    // setDataViewDetail(null);
+    // setWorkflowName("");
+    // setWorkflowRoles([]);
+    // setWorkflowDetails([]);
+    // setDeadlineTime(null);
+    // setReviewTaskTime(null);
     setMode("nhiemvu");
     setListTask([]);
+    setHasChanges(false);
   };
 
   const handleSubmit = () => {
+    console.log(`>>> List task: `, listTask);
     const result = {
-      workflow_id: dataInfoDocument.workflow_id,
-      document_name: dataInfoDocument.name,
-      deadline: deadlineTime,
-      review_time: mode === "thoigian" ? reviewTaskTime : null,
-      mode: mode,
       tasks: listTask,
     };
-    console.log("Submit data:", result);
+    console.log("Cập nhật task trong progress detail:", result);
     notification.success({
-      message: "Khởi tạo luồng xử lý văn bản thành công",
+      message: "Cập nhật nhiệm vụ thành công",
     });
     handleCancel();
   };
@@ -278,19 +133,18 @@ const InitProgressDocument = (props) => {
   return (
     <div>
       <Modal
-        open={openInitProgressDocumentModal}
+        open={openDetailProgressModal}
         title={
           <span style={{ fontSize: "20px", fontWeight: "bold" }}>
-            Khởi tạo luồng xử lý văn bản
+            Thông tin chi tiết luồng xử lý văn bản
           </span>
         }
         onOk={handleSubmit}
         onCancel={handleCancel}
         maskClosable={false}
         centered
-        closable={false}
         width="80vw"
-        okText={"Tạo luồng"}
+        okText={"Cập nhật"}
         bodyProps={{
           style: {
             maxHeight: "70vh",
@@ -298,11 +152,21 @@ const InitProgressDocument = (props) => {
             overflowX: "hidden",
           },
         }}
+        okButtonProps={{
+          style: {
+            display: hasChanges ? undefined : "none",
+          },
+        }}
+        cancelButtonProps={{
+          style: {
+            display: hasChanges ? undefined : "none",
+          },
+        }}
       >
         <Row gutter={40}>
           <Col span={12}>
             <strong style={{ fontSize: "16px" }}>Tên văn bản:</strong>{" "}
-            <span style={{ fontSize: "16px" }}>{dataInfoDocument.name}</span>
+            <span style={{ fontSize: "16px" }}>{dataViewDetail?.title}</span>
           </Col>
           <Col span={12}>
             <strong style={{ fontSize: "16px" }}>Luồng xử lý:</strong>{" "}
@@ -314,19 +178,43 @@ const InitProgressDocument = (props) => {
             <Form.Item
               label={
                 <span style={{ fontSize: "16px", fontWeight: "bold" }}>
-                  Thời hạn xử lý văn bản
+                  Ngày khởi tạo văn bản
                 </span>
               }
-              required
-              tooltip="Chọn thời hạn xử lý văn bản"
             >
               <DatePicker
                 showTime
                 format="DD/MM/YYYY HH:mm"
                 style={{ width: "100%" }}
                 placeholder="Chọn ngày và giờ"
-                value={deadlineTime}
-                onChange={handleDeadlineTimeChange}
+                value={
+                  dataViewDetail?.created_date
+                    ? dayjs(dataViewDetail.created_date)
+                    : null
+                }
+                readOnly
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label={
+                <span style={{ fontSize: "16px", fontWeight: "bold" }}>
+                  Thời hạn xử lý văn bản
+                </span>
+              }
+            >
+              <DatePicker
+                showTime
+                format="DD/MM/YYYY HH:mm"
+                style={{ width: "100%" }}
+                placeholder="Chọn ngày và giờ"
+                value={
+                  dataViewDetail?.end_date
+                    ? dayjs(dataViewDetail.end_date)
+                    : null
+                }
+                readOnly
               />
             </Form.Item>
           </Col>
@@ -380,14 +268,15 @@ const InitProgressDocument = (props) => {
             <Form.Item
               label={
                 <span style={{ fontSize: "16px", fontWeight: "bold" }}>
-                  Chọn phương thức xử lý văn bản
+                  Phương thức xử lý văn bản
                 </span>
               }
               required
             >
               <Radio.Group
                 onChange={(e) => setMode(e.target.value)}
-                value={mode}
+                value={dataViewDetail?.phuongThucXuLy}
+                disabled
               >
                 <Radio value="nhiemvu">
                   <span style={{ fontSize: "14px" }}>
@@ -403,7 +292,7 @@ const InitProgressDocument = (props) => {
             </Form.Item>
           </Col>
 
-          {mode === "thoigian" && (
+          {dataViewDetail?.phuongThucXuLy === "thoigian" && (
             <Col span={12}>
               <Form.Item
                 label="Chọn thời gian"
@@ -416,8 +305,9 @@ const InitProgressDocument = (props) => {
                   format="DD/MM/YYYY HH:mm"
                   style={{ width: "100%" }}
                   placeholder="Chọn ngày và giờ"
-                  value={reviewTaskTime}
-                  onChange={handleReviewTaskTimeChange}
+                  value={dataViewDetail?.reviewTaskTime}
+                  //   onChange={handleReviewTaskTimeChange}
+                  readOnly
                 />
               </Form.Item>
             </Col>
@@ -460,7 +350,7 @@ const InitProgressDocument = (props) => {
                       }}
                       onClick={() => {
                         setCurrentStepId(action.step_id);
-                        setOpenCreateTaskModal(true);
+                        setOpenAddTaskModal(true);
                       }}
                     >
                       Tạo nhiệm vụ
@@ -483,10 +373,15 @@ const InitProgressDocument = (props) => {
                           }}
                           style={{
                             width: 300,
-                            height: 250, // ✅ Chiều cao cố định
+                            height: 250,
                             borderRadius: 12,
                             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                            backgroundColor: "#fafafa",
+                            backgroundColor:
+                              task.status === "Đã hoàn thành"
+                                ? "#e6fffb"
+                                : task.status === "Đã quá hạn"
+                                ? "#fff1f0"
+                                : "#fafafa",
                             padding: 16,
                             display: "flex",
                             flexDirection: "column",
@@ -495,40 +390,63 @@ const InitProgressDocument = (props) => {
                             position: "relative",
                           }}
                         >
-                          <div
-                            onClick={(e) => {
-                              e.stopPropagation(); // Ngăn việc mở modal xem chi tiết
-                              Modal.confirm({
-                                title:
-                                  "Bạn có chắc chắn muốn xoá nhiệm vụ này?",
-                                content: "Hành động này không thể hoàn tác.",
-                                okText: "Xác nhận",
-                                cancelText: "Hủy",
-                                onOk: () => {
-                                  const updatedTasks = listTask[
-                                    action.step_id
-                                  ].filter((_, idx) => idx !== taskIdx);
-                                  setListTask((prev) => ({
-                                    ...prev,
-                                    [action.step_id]: updatedTasks,
-                                  }));
-                                },
-                              });
-                            }}
-                            style={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              cursor: "pointer",
-                              zIndex: 10,
-                              padding: 4,
-                              background: "#fff",
-                              borderRadius: "50%",
-                              boxShadow: "0 0 4px rgba(0,0,0,0.2)",
-                            }}
-                          >
-                            <CloseCircleOutlined size={14} color="#ff4d4f" />
-                          </div>
+                          {["Đã hoàn thành", "Đã quá hạn"].includes(
+                            task.status
+                          ) ? (
+                            <Tag
+                              color={
+                                task.status === "Đã hoàn thành"
+                                  ? "#52c41a"
+                                  : "#ff4d4f"
+                              }
+                              style={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                zIndex: 10,
+                                fontWeight: 500,
+                              }}
+                            >
+                              {task.status}
+                            </Tag>
+                          ) : (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                Modal.confirm({
+                                  title:
+                                    "Bạn có chắc chắn muốn xoá nhiệm vụ này?",
+                                  content: "Hành động này không thể hoàn tác.",
+                                  okText: "Xác nhận",
+                                  cancelText: "Hủy",
+                                  onOk: () => {
+                                    const updatedTasks = listTask[
+                                      action.step_id
+                                    ].filter((_, idx) => idx !== taskIdx);
+                                    setListTask((prev) => ({
+                                      ...prev,
+                                      [action.step_id]: updatedTasks,
+                                    }));
+                                    setHasChanges(true);
+                                  },
+                                });
+                              }}
+                              style={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                cursor: "pointer",
+                                zIndex: 10,
+                                padding: 4,
+                                background: "#fff",
+                                borderRadius: "50%",
+                                boxShadow: "0 0 4px rgba(0,0,0,0.2)",
+                              }}
+                            >
+                              <CloseCircleOutlined size={14} color="#ff4d4f" />
+                            </div>
+                          )}
+
                           <div
                             style={{
                               fontSize: "16px",
@@ -566,12 +484,13 @@ const InitProgressDocument = (props) => {
           </div>
         ))}
       </Modal>
-      <CreateTask
-        openCreateTaskModal={openCreateTaskModal}
-        setOpenCreateTaskModal={setOpenCreateTaskModal}
+      <AddTask
+        openAddTaskModal={openAddTaskModal}
+        setOpenAddTaskModal={setOpenAddTaskModal}
         listTask={listTask}
         setListTask={setListTask}
         stepId={currentStepId}
+        setHasChanges={setHasChanges}
       />
       <DetailTask
         openTaskDetailModal={openTaskDetailModal}
@@ -583,4 +502,4 @@ const InitProgressDocument = (props) => {
   );
 };
 
-export default InitProgressDocument;
+export default DetailProgress;

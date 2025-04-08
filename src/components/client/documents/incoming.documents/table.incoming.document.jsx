@@ -9,7 +9,7 @@ import {
 import React, { useRef, useState } from "react";
 import dayjs from "dayjs";
 import { dateRangeValidate } from "@/services/helper";
-import "./table.all.document.scss";
+import "./table.incoming.document.scss";
 import CreateDocument from "@/components/client/documents/progresses/create.document";
 
 const { TabPane } = Tabs;
@@ -17,52 +17,52 @@ const { TabPane } = Tabs;
 const dataSource = [
   {
     key: "1",
-    name: "Báo cáo kết quả hoạt động quý I",
-    reviewer: "Lê Phan Hoài Nam",
+    name: "Quyết định khen thưởng thành tích thi đua dịp lễ 30/4 - 1/5",
+    reviewer: "Sở GD&ĐT",
     date: "2025-04-11T07:11:00.943Z",
-    status: "Đang xử lý",
-    type: "Báo cáo",
-    tag: "văn bản đi",
+    status: "Đã lưu",
+    type: "Quyết định",
+    tag: "văn bản đến",
     hasAttachment: true,
   },
   {
     key: "2",
-    name: "Quyết định bổ nhiệm",
-    reviewer: "Hà Công Hiếu",
+    name: "Quyết định áp dục chương trình đào tạo kiểu mới cho năm 2024 - 2025",
+    reviewer: "Sở GD&ĐT",
     date: "2025-03-30T07:11:00.943Z",
     status: "Đã lưu",
-    type: "Quyết định",
+    type: "Quết định",
     tag: "văn bản đến",
     hasAttachment: false,
   },
   {
     key: "3",
-    name: "Đề án dạy và học năm học 2024 - 2025",
-    reviewer: "Ngô Huỳnh Tấn Lộc",
+    name: "Thông báo lịch nghỉ lễ 30/4 - 1/5",
+    reviewer: "Sở GD&ĐT",
     date: "2025-02-15T07:11:00.943Z",
     status: "Đã lưu",
-    type: "Đề án",
-    tag: "văn bản toàn trường",
+    type: "Thông báo",
+    tag: "văn bản đến",
     hasAttachment: true,
   },
   {
     key: "4",
-    name: "Lịch phân công trực dịp lễ 30/4 - 1/5",
-    reviewer: "Tạ Gia Nhật Minh",
+    name: "Quyết định bổ nhiệm nhân sự cấp cao về trường",
+    reviewer: "Sở GD&ĐT",
     date: "2025-04-01T07:11:00.943Z",
-    status: "Đang xử lý",
-    type: "Thông báo",
-    tag: "văn bản phòng ban",
+    status: "Đã lưu",
+    type: "Quyết định",
+    tag: "văn bản đến",
     hasAttachment: true,
   },
   {
     key: "5",
-    name: "Chương trình mừng xuân mừng đảng",
-    reviewer: "Ngô Huỳnh Tấn Lộc",
+    name: "Chương trình hưởng ứng tinh thần dịp lễ 30/4 - 1/5",
+    reviewer: "Sở GD&ĐT",
     date: "2025-03-13T07:11:00.943Z",
-    status: "Đã hoàn thành",
+    status: "Đã lưu",
     type: "Chương trình",
-    tag: "hoàn thành",
+    tag: "văn bản đến",
     hasAttachment: true,
   },
 ];
@@ -105,7 +105,7 @@ const columns = [
     ),
   },
   {
-    title: "Người duyệt",
+    title: "Đơn vị ban hành",
     dataIndex: "reviewer",
     width: "20%",
     hideInSearch: true,
@@ -143,13 +143,13 @@ const columns = [
     width: "10%",
     valueType: "option",
     render: () => [
-      // <DownloadOutlined key="download" style={{ color: "green" }} />,
+      //   <DownloadOutlined key="download" style={{ color: "green" }} />,
       <EditOutlined key="edit" style={{ marginLeft: 12, color: "#f57800" }} />,
     ],
   },
 ];
 
-const TableAllDocument = () => {
+const TableIncomingDocument = () => {
   const [activeKey, setActiveKey] = useState("all");
   const actionRef = useRef();
   const [meta, setMeta] = useState({
@@ -182,11 +182,11 @@ const TableAllDocument = () => {
       >
         <Tabs activeKey={activeKey} onChange={setActiveKey}>
           <TabPane tab="TẤT CẢ" key="all" />
-          <TabPane tab="ĐẾN LƯỢT DUYỆT" key="review" />
+          {/* <TabPane tab="ĐẾN LƯỢT DUYỆT" key="review" />
           <TabPane tab="ĐANG CHỜ DUYỆT" key="waiting" />
           <TabPane tab="ĐÃ CHẤP NHẬN" key="accepted" />
           <TabPane tab="ĐÃ TỪ CHỐI" key="rejected" />
-          <TabPane tab="QUÁ HẠN" key="overdue" />
+          <TabPane tab="QUÁ HẠN" key="overdue" /> */}
         </Tabs>
 
         <ProTable
@@ -257,7 +257,7 @@ const TableAllDocument = () => {
             },
           }}
           headerTitle={
-            <span style={{ fontWeight: "bold" }}>Danh sách văn bản</span>
+            <span style={{ fontWeight: "bold" }}>Danh sách văn bản đến</span>
           }
           toolBarRender={() => [
             <Button
@@ -282,4 +282,4 @@ const TableAllDocument = () => {
   );
 };
 
-export default TableAllDocument;
+export default TableIncomingDocument;

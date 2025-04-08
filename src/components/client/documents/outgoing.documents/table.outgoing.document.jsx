@@ -9,7 +9,7 @@ import {
 import React, { useRef, useState } from "react";
 import dayjs from "dayjs";
 import { dateRangeValidate } from "@/services/helper";
-import "./table.all.document.scss";
+import "./table.outgoing.document.scss";
 import CreateDocument from "@/components/client/documents/progresses/create.document";
 
 const { TabPane } = Tabs;
@@ -27,12 +27,12 @@ const dataSource = [
   },
   {
     key: "2",
-    name: "Quyết định bổ nhiệm",
+    name: "Báo cáo chương trình dạy và học năm 2024 - 2025",
     reviewer: "Hà Công Hiếu",
     date: "2025-03-30T07:11:00.943Z",
-    status: "Đã lưu",
-    type: "Quyết định",
-    tag: "văn bản đến",
+    status: "Đã hoàn thành",
+    type: "Báo cáo",
+    tag: "văn bản đi",
     hasAttachment: false,
   },
   {
@@ -42,17 +42,17 @@ const dataSource = [
     date: "2025-02-15T07:11:00.943Z",
     status: "Đã lưu",
     type: "Đề án",
-    tag: "văn bản toàn trường",
+    tag: "văn bản đi",
     hasAttachment: true,
   },
   {
     key: "4",
-    name: "Lịch phân công trực dịp lễ 30/4 - 1/5",
+    name: "Báo cáo thành tích thi đua dịp lễ 30/4 - 1/5",
     reviewer: "Tạ Gia Nhật Minh",
     date: "2025-04-01T07:11:00.943Z",
     status: "Đang xử lý",
-    type: "Thông báo",
-    tag: "văn bản phòng ban",
+    type: "Báo cáo",
+    tag: "văn bản đi",
     hasAttachment: true,
   },
   {
@@ -62,7 +62,7 @@ const dataSource = [
     date: "2025-03-13T07:11:00.943Z",
     status: "Đã hoàn thành",
     type: "Chương trình",
-    tag: "hoàn thành",
+    tag: "văn bản đi",
     hasAttachment: true,
   },
 ];
@@ -143,13 +143,13 @@ const columns = [
     width: "10%",
     valueType: "option",
     render: () => [
-      // <DownloadOutlined key="download" style={{ color: "green" }} />,
+      <DownloadOutlined key="download" style={{ color: "green" }} />,
       <EditOutlined key="edit" style={{ marginLeft: 12, color: "#f57800" }} />,
     ],
   },
 ];
 
-const TableAllDocument = () => {
+const TableOutgoingDocument = () => {
   const [activeKey, setActiveKey] = useState("all");
   const actionRef = useRef();
   const [meta, setMeta] = useState({
@@ -257,7 +257,7 @@ const TableAllDocument = () => {
             },
           }}
           headerTitle={
-            <span style={{ fontWeight: "bold" }}>Danh sách văn bản</span>
+            <span style={{ fontWeight: "bold" }}>Danh sách văn bản đi</span>
           }
           toolBarRender={() => [
             <Button
@@ -282,4 +282,4 @@ const TableAllDocument = () => {
   );
 };
 
-export default TableAllDocument;
+export default TableOutgoingDocument;

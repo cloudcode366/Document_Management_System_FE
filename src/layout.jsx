@@ -20,6 +20,7 @@ import { TbLogs } from "react-icons/tb";
 import { CgDigitalocean, CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
 import { CgFileDocument } from "react-icons/cg";
+import { GiProgression } from "react-icons/gi";
 
 const { Content, Sider } = Layout;
 
@@ -67,9 +68,14 @@ const LayoutClient = () => {
         },
         {
           label: <Link to="/school-scoped-document">Văn bản toàn trường</Link>,
-          key: "/school-scoped-documentt",
+          key: "/school-scoped-document",
         },
       ],
+    },
+    {
+      label: <Link to="/progress">Danh sách văn bản khởi tạo</Link>,
+      key: "/progress",
+      icon: <GiProgression />,
     },
     {
       label: <Link to="/user-guide">Hướng dẫn sử dụng</Link>,

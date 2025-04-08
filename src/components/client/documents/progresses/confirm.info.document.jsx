@@ -14,7 +14,7 @@ import {
 import { FilePdfOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useState } from "react";
-import InitProgressDocument from "./init.progress.document";
+import InitProgressDocument from "@/components/client/documents/progresses/init.progress.document";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;

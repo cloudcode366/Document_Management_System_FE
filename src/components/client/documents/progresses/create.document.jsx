@@ -12,9 +12,8 @@ import {
   DatePicker,
 } from "antd";
 import { useState } from "react";
-import templateFile from "assets/template/DMS_CreateUserForm.xlsx?url";
 import dayjs from "dayjs";
-import ConfirmInfoDocument from "./confirm.info.document";
+import ConfirmInfoDocument from "@/components/client/documents/progresses/confirm.info.document";
 
 const { Dragger } = Upload;
 const { Option } = Select;

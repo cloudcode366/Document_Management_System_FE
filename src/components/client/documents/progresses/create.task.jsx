@@ -25,17 +25,20 @@ const CreateTask = (props) => {
         end_date: values.end_date
           ? dayjs(values.end_date).format("DD-MM-YYYY HH:mm")
           : null,
-        stepId, // Gắn task với step hiện tại
+        stepId: stepId, // Bắt buộc phải có để phân loại
       };
 
-      console.log("Dữ liệu nhiệm vụ:", taskData);
+      console.log("✅ Dữ liệu nhiệm vụ mới:", taskData);
 
-      const updatedList = {
-        ...listTask,
-        [stepId]: [...(listTask[stepId] || []), taskData],
-      };
+      // Tạo bản sao và cập nhật task cho step tương ứng
+      setListTask((prev) => {
+        const updated = {
+          ...prev,
+          [stepId]: [...(prev[stepId] || []), taskData],
+        };
+        return updated;
+      });
 
-      setListTask(updatedList);
       setOpenCreateTaskModal(false);
       form.resetFields();
     });
