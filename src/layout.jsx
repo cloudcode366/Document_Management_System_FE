@@ -79,6 +79,7 @@ const LayoutClient = () => {
       icon: <GiProgression />,
     },
     {
+
       label: <Link to="/document-template">Mẫu văn bản</Link>,
       key: "/document-template",
       icon: <GiProgression />,
