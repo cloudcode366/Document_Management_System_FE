@@ -114,7 +114,7 @@ const DetailProgress = (props) => {
     // setDeadlineTime(null);
     // setReviewTaskTime(null);
     setMode("nhiemvu");
-    setListTask([]);
+    // setListTask([]);
     setHasChanges(false);
   };
 
@@ -144,7 +144,7 @@ const DetailProgress = (props) => {
         maskClosable={false}
         centered
         width="80vw"
-        okText={"Cập nhật"}
+        okText={"Hoàn thành"}
         bodyProps={{
           style: {
             maxHeight: "70vh",
@@ -159,14 +159,14 @@ const DetailProgress = (props) => {
         }}
         cancelButtonProps={{
           style: {
-            display: hasChanges ? undefined : "none",
+            display: "none",
           },
         }}
       >
         <Row gutter={40}>
           <Col span={12}>
             <strong style={{ fontSize: "16px" }}>Tên văn bản:</strong>{" "}
-            <span style={{ fontSize: "16px" }}>{dataViewDetail?.title}</span>
+            <span style={{ fontSize: "16px" }}>{dataViewDetail?.name}</span>
           </Col>
           <Col span={12}>
             <strong style={{ fontSize: "16px" }}>Luồng xử lý:</strong>{" "}

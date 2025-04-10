@@ -1,5 +1,11 @@
+import TableDocumentTemplate from "@/components/client/document.templates/table.document.template";
+
 const ListDocumentTemplatePage = () => {
-  return <div>ListDocumentTemplatePage</div>;
+  return (
+    <div>
+      <TableDocumentTemplate />
+    </div>
+  );
 };
 
 export default ListDocumentTemplatePage;
