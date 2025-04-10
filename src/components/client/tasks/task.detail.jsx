@@ -1,4 +1,5 @@
 import React from "react";
+import { MdOutlineMoreVert } from "react-icons/md";
 
 const TaskDetail = () => {
   // Sample task data
@@ -148,7 +149,7 @@ const TaskDetail = () => {
                   fontSize: "14px",
                 }}
               >
-                + Get Mentors
+                Mở văn bản
               </button>
             </div>
 
@@ -184,7 +185,7 @@ const TaskDetail = () => {
                   margin: "0 0 10px 0",
                 }}
               >
-                Nguồn tham gia
+                Người tham gia
               </h4>
               {task.assignees.map((assignee, index) => (
                 <div
@@ -277,37 +278,91 @@ const TaskDetail = () => {
                   10/02/2025
                 </span>
               </div>
+              {/* <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px", // khoảng cách giữa text và ảnh
+                    marginTop: "12px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#5f6368",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Người tham gia
+                  </div>
+                  <div style={{ display: "flex" }}>
+                    {[
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                    ].map((src, index) => (
+                      <img
+                        key={index}
+                        src={src}
+                        alt={`avatar-${index}`}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          border: "2px solid white",
+                          marginLeft: index === 0 ? 0 : -10,
+                          zIndex: 10 - index, // để ảnh xếp chồng đẹp
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div> */}
+
               <div
                 style={{
                   fontSize: "14px",
-                  color: "#5f6368",
+                  marginBottom: "8px",
                   marginTop: "12px",
                 }}
               >
-                Người tham gia
-              </div>
-              <div style={{ display: "flex", marginTop: "8px", gap: "-8px" }}>
-                {[
-                  "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                  "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                  "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                  "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                  "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                ].map((src, index) => (
-                  <img
-                    key={index}
-                    src={src}
-                    alt={`avatar-${index}`}
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      border: "2px solid white",
-                      marginLeft: index === 0 ? 0 : -10,
-                    }}
-                  />
-                ))}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span style={{ color: "#5f6368" }}>Người tham gia</span>
+                  <div style={{ display: "flex" }}>
+                    {[
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
+                    ].map((src, index) => (
+                      <img
+                        key={index}
+                        src={src}
+                        alt={`avatar-${index}`}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          border: "2px solid white",
+                          marginLeft: index === 0 ? 0 : -10,
+                          zIndex: 10 - index,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -379,7 +434,7 @@ const TaskDetail = () => {
                   cursor: "pointer",
                 }}
               >
-                🗑️
+                <MdOutlineMoreVert />
               </button>
             </div>
           </div>
