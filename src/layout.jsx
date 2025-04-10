@@ -21,6 +21,7 @@ import { CgDigitalocean, CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
 import { CgFileDocument } from "react-icons/cg";
 import { GiProgression } from "react-icons/gi";
+import { LuBookMinus } from "react-icons/lu";
 
 const { Content, Sider } = Layout;
 
@@ -76,6 +77,11 @@ const LayoutClient = () => {
       label: <Link to="/progress">Danh sách văn bản khởi tạo</Link>,
       key: "/progress",
       icon: <GiProgression />,
+    },
+    {
+      label: <Link to="/task">Nhiệm vụ</Link>,
+      key: "/task",
+      icon: <LuBookMinus />,
     },
     {
       label: <Link to="/user-guide">Hướng dẫn sử dụng</Link>,
