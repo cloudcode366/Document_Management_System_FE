@@ -78,6 +78,11 @@ const LayoutClient = () => {
       icon: <GiProgression />,
     },
     {
+      label: <Link to="/document-template">Mẫu văn bản</Link>,
+      key: "/document-template",
+      icon: <GiProgression />,
+    },
+    {
       label: <Link to="/user-guide">Hướng dẫn sử dụng</Link>,
       key: "/admin/user-guide",
       icon: <QuestionCircleOutlined />,
@@ -271,9 +276,11 @@ const LayoutClient = () => {
                           fontWeight: "bold",
                         }}
                       >
-                        Quản trị viên
+                        Ngô Huỳnh Tấn Lộc
                       </span>
-                      <span style={{ fontSize: "12px" }}>admin@gmail.com</span>
+                      <span style={{ fontSize: "12px" }}>
+                        locnht1@gmail.com
+                      </span>
                     </div>
 
                     <Avatar />

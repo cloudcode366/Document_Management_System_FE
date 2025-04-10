@@ -33,6 +33,9 @@ import ManageDigitalSignature from "./pages/admin/digital.signatures/manage.digi
 import ManageInitialSignature from "./pages/admin/initial.signatures/manage.initial.signature";
 import ListAllDocumentPage from "./pages/client/documents/all.documents/list.all.documents";
 import LayoutClient from "@/layout";
+import DetailDocument from "pages/client/documents/detail.document";
+import DraftDocument from "./pages/client/documents/draft.document";
+import ApproveDocument from "./components/client/documents/approve.document/approve.document";
 
 const router = createBrowserRouter([
   {
@@ -62,6 +65,18 @@ const router = createBrowserRouter([
       {
         path: "/division-scoped-document",
         element: <ListDivisionScopedDocumentPage />,
+      },
+      {
+        path: "/detail-document",
+        element: <DetailDocument />,
+      },
+      {
+        path: "/approve-document",
+        element: <ApproveDocument />,
+      },
+      {
+        path: "/draft-document",
+        element: <DraftDocument />,
       },
       {
         path: "/archived-document",
