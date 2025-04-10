@@ -104,6 +104,11 @@ const LayoutClient = () => {
       icon: <LuBookMinus />,
     },
     {
+      label: <Link to="/document-template">Mẫu văn bản</Link>,
+      key: "/document-template",
+      icon: <GiProgression />,
+    },
+    {
       label: <Link to="/user-guide">Hướng dẫn sử dụng</Link>,
       key: "/admin/user-guide",
       icon: <QuestionCircleOutlined />,

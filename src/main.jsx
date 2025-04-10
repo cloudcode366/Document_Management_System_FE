@@ -41,6 +41,9 @@ import DetailDocument from "pages/client/documents/detail.document";
 import DraftDocument from "./pages/client/documents/draft.document";
 import ApproveDocument from "./components/client/documents/approve.document/approve.document";
 import TaskDetailPage from "./pages/client/tasks/task.detail";
+import DetailDocument from "pages/client/documents/detail.document";
+import DraftDocument from "./pages/client/documents/draft.document";
+import ApproveDocument from "./components/client/documents/approve.document/approve.document";
 
 const router = createBrowserRouter([
   {
