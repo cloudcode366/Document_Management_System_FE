@@ -21,6 +21,7 @@ import {
 } from "@ant-design/icons";
 import CreateTask from "@/components/client/documents/progresses/create.task";
 import DetailTask from "@/components/client/documents/progresses/detail.task";
+import { useNavigate } from "react-router-dom";
 
 const InitProgressDocument = (props) => {
   const {
@@ -43,6 +44,7 @@ const InitProgressDocument = (props) => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [openTaskDetailModal, setOpenTaskDetailModal] = useState(false);
   const { message, notification } = App.useApp();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (dataInfoDocument) {
@@ -272,6 +274,7 @@ const InitProgressDocument = (props) => {
       message: "Khởi tạo luồng xử lý văn bản thành công",
     });
     handleCancel();
+    navigate("/detail-document");
   };
 
   return (
