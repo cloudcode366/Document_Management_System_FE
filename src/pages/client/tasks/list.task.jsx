@@ -1,5 +1,7 @@
+import AllTasks from "@/components/client/tasks/all.tasks";
+
 const ListTaskPage = () => {
-  return <div>ListTaskPage</div>;
+  return <div><AllTasks/></div>;
 };
 
 export default ListTaskPage;
