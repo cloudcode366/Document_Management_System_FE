@@ -94,6 +94,11 @@ const LayoutClient = () => {
       icon: <GiProgression />,
     },
     {
+      label: <Link to="/task">Nhiệm vụ</Link>,
+      key: "/task",
+      icon: <LuBookMinus />,
+    },
+    {
       label: <Link to="/user-guide">Hướng dẫn sử dụng</Link>,
       key: "/admin/user-guide",
       icon: <QuestionCircleOutlined />,
