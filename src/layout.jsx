@@ -79,17 +79,6 @@ const LayoutClient = () => {
       icon: <GiProgression />,
     },
     {
-
-      label: <Link to="/document-template">Mẫu văn bản</Link>,
-      key: "/document-template",
-      icon: <GiProgression />,
-    },
-    {
-      label: <Link to="/task">Nhiệm vụ</Link>,
-      key: "/task",
-      icon: <LuBookMinus />,
-    },
-    {
       label: <Link to="/document-template">Mẫu văn bản</Link>,
       key: "/document-template",
       icon: <GiProgression />,

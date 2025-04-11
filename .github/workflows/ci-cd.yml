@@ -36,7 +36,7 @@ jobs:
           IMAGE_NAME="wiramin/dmsfe"
           TAGGED_IMAGE="$IMAGE_NAME:${{ github.run_number }}"
           LATEST_IMAGE="$IMAGE_NAME:latest"
-          
+
           echo "Building image: $TAGGED_IMAGE"
           docker build -t "$TAGGED_IMAGE" .
           docker tag "$TAGGED_IMAGE" "$LATEST_IMAGE"
@@ -64,7 +64,7 @@ jobs:
           SSH_HOST: ${{ secrets.SERVER_HOST }}
           SSH_PORT: ${{ secrets.SERVER_PORT }}
         run: |
-          
+
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST" << 'EOF'
             # Kéo image mới nhất
             docker pull wiramin/dmsfe:latest
@@ -77,7 +77,7 @@ jobs:
             docker rm dmsfe || true
             
             # Chạy container mới
-            docker run -d --name dmsfe -p 8008:80 wiramin/dmsfe:latest
+            docker run -d --name dmsfe -p 8084:80 wiramin/dmsfe:latest
             
             # Xóa các image cũ của wiramin/dmsfe, trừ image đang dùng
             docker images wiramin/dmsfe --format '{{.ID}}' | grep -v "$NEW_IMAGE_ID" | sort -u | xargs -r docker rmi -f
