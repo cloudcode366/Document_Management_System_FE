@@ -3,29 +3,43 @@ import "./login.scss";
 import { App, Button, Divider, Form, Input } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useCurrentApp } from "@/components/context/app.context";
+import { loginAPI } from "@/services/api.service";
 
 const LoginPage = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const { message, notification } = App.useApp();
   const navigate = useNavigate();
-  // const { setIsAuthenticated, setUser } = useCurrentApp();
+  const { setIsAuthenticated, setUser, user } = useCurrentApp();
 
   const onFinish = async (values) => {
-    // setLoading(true);
-    // const res = await loginAPI(values.email, values.password);
-    // if (res.data) {
-    //   message.success(`Đăng nhập thành công`);
-    //   localStorage.setItem("access_token", res.data.access_token);
-    //   setUser(res.data.user);
-    //   navigate("/");
-    // } else {
-    //   notification.error({
-    //     message: "Đăng nhập không thành công",
-    //     description: JSON.stringify(res.message),
-    //   });
-    // }
-    // setLoading(false);
+    setLoading(true);
+    const res = await loginAPI(values.username, values.password);
+    if (res.data.statusCode === 201) {
+      message.success(`Đăng nhập thành công!`);
+      localStorage.setItem("access_token", res.data.content.token);
+      localStorage.setItem("user_id", res.data.content.userDto.userId);
+      const data = res.data.content.userDto;
+      const mainRole = data?.roles?.find((r) => r.createdDate === null);
+      const subRole = data?.roles?.filter((r) => r.createdDate !== null);
+      setUser({ ...data, mainRole, subRole });
+      setIsAuthenticated(true);
+      if (mainRole === "Admin") navigate("/admin");
+      else navigate("/");
+    } else {
+      let errorMessage = res?.data?.content;
+
+      if (errorMessage === "Email not exists or Password not exists") {
+        errorMessage = "Email không tồn tại hoặc sai mật khẩu!";
+      }
+
+      notification.error({
+        message: "Đăng nhập không thành công",
+        description: errorMessage,
+      });
+    }
+    setLoading(false);
   };
 
   return (

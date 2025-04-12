@@ -29,14 +29,17 @@ import ListTaskPage from "pages/client/tasks/list.task";
 import ListWorkflowPage from "pages/client/workflows/list.workflow";
 import viVN from "antd/locale/vi_VN";
 import { App, ConfigProvider } from "antd";
-import ManageDigitalSignature from "./pages/admin/digital.signatures/manage.digital.signature";
-import ManageInitialSignature from "./pages/admin/initial.signatures/manage.initial.signature";
-import ListAllDocumentPage from "./pages/client/documents/all.documents/list.all.documents";
+import ManageDigitalSignature from "pages/admin/digital.signatures/manage.digital.signature";
+import ManageInitialSignature from "pages/admin/initial.signatures/manage.initial.signature";
+import ListAllDocumentPage from "pages/client/documents/all.documents/list.all.documents";
 import LayoutClient from "@/layout";
-import DraftDocument from "./pages/client/documents/draft.document";
-import ApproveDocument from "./components/client/documents/approve.document/approve.document";
-import TaskDetailPage from "./pages/client/tasks/task.detail";
+import DraftDocument from "pages/client/documents/draft.document";
+import ApproveDocument from "components/client/documents/approve.document/approve.document";
+import TaskDetailPage from "pages/client/tasks/task.detail";
 import DetailDocument from "pages/client/documents/detail.document";
+import { AppProvider } from "components/context/app.context";
+import ProtectedRoute from "components/auth";
+import "nprogress/nprogress.css";
 
 const router = createBrowserRouter([
   {
@@ -45,83 +48,163 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <ListAllDocumentPage />,
+        element: (
+          <ProtectedRoute>
+            <ListAllDocumentPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/user",
-        element: <ListUserPage />,
+        element: (
+          <ProtectedRoute>
+            <ListUserPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/incoming-document",
-        element: <ListInComingDocumentPage />,
+        element: (
+          <ProtectedRoute>
+            <ListInComingDocumentPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/outgoing-document",
-        element: <ListOutgoingDocumentPage />,
+        element: (
+          <ProtectedRoute>
+            <ListOutgoingDocumentPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/school-scoped-document",
-        element: <ListSchoolScopedDocumentPage />,
+        element: (
+          <ProtectedRoute>
+            <ListSchoolScopedDocumentPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/division-scoped-document",
-        element: <ListDivisionScopedDocumentPage />,
+        element: (
+          <ProtectedRoute>
+            <ListDivisionScopedDocumentPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/detail-document",
-        element: <DetailDocument />,
+        element: (
+          <ProtectedRoute>
+            <DetailDocument />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/approve-document",
-        element: <ApproveDocument />,
+        element: (
+          <ProtectedRoute>
+            <ApproveDocument />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/draft-document",
-        element: <DraftDocument />,
+        element: (
+          <ProtectedRoute>
+            <DraftDocument />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/archived-document",
-        element: <ListArchivedDocumentPage />,
+        element: (
+          <ProtectedRoute>
+            <ListArchivedDocumentPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/document-template",
-        element: <ListDocumentTemplatePage />,
+        element: (
+          <ProtectedRoute>
+            <ListDocumentTemplatePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/document-type",
-        element: <ListDocumentTypePage />,
+        element: (
+          <ProtectedRoute>
+            <ListDocumentTypePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/progress",
-        element: <ListProgressPage />,
+        element: (
+          <ProtectedRoute>
+            <ListProgressPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/task",
-        element: <ListTaskPage />,
+        element: (
+          <ProtectedRoute>
+            <ListTaskPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/task-detail",
-        element: <TaskDetailPage />,
+        element: (
+          <ProtectedRoute>
+            <TaskDetailPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/workflow",
-        element: <ListWorkflowPage />,
+        element: (
+          <ProtectedRoute>
+            <ListWorkflowPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/change-password",
-        element: <ChangePasswordPage />,
+        element: (
+          <ProtectedRoute>
+            <ChangePasswordPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/notification",
-        element: <NotificationPage />,
+        element: (
+          <ProtectedRoute>
+            <NotificationPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/profile",
-        element: <ProfilePage />,
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/user-guide",
-        element: <UserGuidePage />,
+        element: (
+          <ProtectedRoute>
+            <UserGuidePage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
@@ -131,51 +214,99 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <NotificationPage />,
+        element: (
+          <ProtectedRoute>
+            <NotificationPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "user",
-        element: <ManageUserPage />,
+        element: (
+          <ProtectedRoute>
+            <ManageUserPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "division",
-        element: <ManageDivisionPage />,
+        element: (
+          <ProtectedRoute>
+            <ManageDivisionPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "document-type",
-        element: <ManageDocumentTypePage />,
+        element: (
+          <ProtectedRoute>
+            <ManageDocumentTypePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "log",
-        element: <ManageLogPage />,
+        element: (
+          <ProtectedRoute>
+            <ManageLogPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "permission",
-        element: <ManagePermissionPage />,
+        element: (
+          <ProtectedRoute>
+            <ManagePermissionPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "workflow",
-        element: <ManageWorkflowPage />,
+        element: (
+          <ProtectedRoute>
+            <ManageWorkflowPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "change-password",
-        element: <ChangePasswordPage />,
+        element: (
+          <ProtectedRoute>
+            <ChangePasswordPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "profile",
-        element: <ProfilePage />,
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "user-guide",
-        element: <UserGuidePage />,
+        element: (
+          <ProtectedRoute>
+            <UserGuidePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "digital-signature",
-        element: <ManageDigitalSignature />,
+        element: (
+          <ProtectedRoute>
+            <ManageDigitalSignature />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "initial-signature",
-        element: <ManageInitialSignature />,
+        element: (
+          <ProtectedRoute>
+            <ManageInitialSignature />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
@@ -192,9 +323,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <App>
-      <ConfigProvider locale={viVN}>
-        <RouterProvider router={router} />
-      </ConfigProvider>
+      <AppProvider>
+        <ConfigProvider locale={viVN}>
+          <RouterProvider router={router} />
+        </ConfigProvider>
+      </AppProvider>
     </App>
   </StrictMode>
 );

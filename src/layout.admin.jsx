@@ -19,6 +19,7 @@ import { LuWorkflow } from "react-icons/lu";
 import { TbLogs } from "react-icons/tb";
 import { CgDigitalocean, CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
+import { useCurrentApp } from "components/context/app.context";
 
 const { Content, Sider } = Layout;
 
@@ -28,19 +29,15 @@ const LayoutAdmin = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentKey = location.pathname;
+  const { user, setUser, setIsAuthenticated, isAuthenticated } =
+    useCurrentApp();
 
-  // const { user, setUser, setIsAuthenticated, isAuthenticated } =
-  //   useCurrentApp();
-
-  // const handleLogout = async () => {
-  //   //todo
-  //   const res = await logoutAPI();
-  //   if (res.data) {
-  //     setUser(null);
-  //     setIsAuthenticated(false);
-  //     localStorage.removeItem("access_token");
-  //   }
-  // };
+  const handleLogout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
+  };
 
   const items = [
     {
@@ -118,7 +115,12 @@ const LayoutAdmin = () => {
         </label>
       ),
       key: "logout",
-      icon: <LogoutOutlined style={{ fontSize: "18px", color: "red" }} />,
+      icon: (
+        <LogoutOutlined
+          style={{ fontSize: "18px", color: "red" }}
+          onClick={() => handleLogout()}
+        />
+      ),
     },
   ];
 
@@ -126,17 +128,17 @@ const LayoutAdmin = () => {
   //   user?.avatar
   // }`;
 
-  // if (isAuthenticated === false) {
-  //   return <Outlet />;
-  // }
+  if (isAuthenticated === false) {
+    return <Outlet />;
+  }
 
-  // const isAdminRoute = location.pathname.includes("admin");
-  // if (isAuthenticated === true && isAdminRoute === true) {
-  //   const role = user?.role;
-  //   if (role === "USER") {
-  //     return <Outlet />;
-  //   }
-  // }
+  const isAdminRoute = location.pathname.includes("admin");
+  if (isAuthenticated === true && isAdminRoute === true) {
+    const role = user?.role;
+    if (role === "USER") {
+      return <Outlet />;
+    }
+  }
 
   return (
     <>
