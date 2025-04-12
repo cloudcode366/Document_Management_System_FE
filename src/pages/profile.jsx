@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Avatar,
@@ -13,11 +13,13 @@ import {
 import { UserOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "@/styles/profile.scss";
-import { CgPassword } from "react-icons/cg";
-import { GiPassport } from "react-icons/gi";
 import { TbPasswordUser } from "react-icons/tb";
 import UpdateProfile from "@/components/update.profile";
 import { useNavigate } from "react-router-dom";
+import { useCurrentApp } from "@/components/context/app.context";
+import { viewProfileUserAPI } from "@/services/api.service";
+import { convertRoleName } from "@/services/helper";
+import { BeatLoader } from "react-spinners";
 
 const { Title, Text } = Typography;
 
@@ -25,31 +27,44 @@ const ProfilePage = () => {
   const [openModalUpdate, setOpenModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(null);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
 
-  const user = {
-    user_id: "67d28507e4cb13ef8cfe35fd",
-    fullName: "Ngô Huỳnh Tấn Lộc",
-    username: "locnht1",
-    email: "admin@gmail.com",
-    avatar: "",
-    phone_number: "123456789",
-    address: "Thanh pho Ho Chi Minh",
-    createdAt: "2025-03-13T07:11:00.943Z",
-    updatedAt: "2025-03-13T07:11:00.943Z",
-    gender: "NAM",
-    identity_card: "0123456789",
-    is_enabled: true,
-    division: { division_id: 1, name: "Phong Cong Nghe Thong Tin" },
-    position: "Chuyên viên phòng Công nghệ thông tin",
-    DateOfBirth: "2003-11-23",
-    role: "ADMIN",
-    subRole: "",
-    signature: [{ certificate_id: "", issued_by: "", signature_image_url: "" }],
-  };
+  useEffect(() => {
+    const fetchAccount = async () => {
+      setLoading(true);
+      const userId = localStorage.getItem("user_id");
+      const res = await viewProfileUserAPI(userId);
+      if (res.data.statusCode === 200) {
+        const data = res.data.content;
+        const mainRole = data?.roles?.find((r) => r.createdDate === null);
+        const subRole = data?.roles?.filter((r) => r.createdDate !== null);
+        setProfile({ ...data, mainRole, subRole });
+      }
+      setLoading(false);
+    };
+
+    fetchAccount();
+  }, []);
 
   const reloadPage = () => {
     window.location.reload();
   };
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <BeatLoader size={25} color="#364AD6" />
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">
@@ -59,17 +74,29 @@ const ProfilePage = () => {
             <Avatar
               size={80}
               icon={<UserOutlined />}
-              src={user.avatar || undefined}
+              src={profile?.avatar || undefined}
             />
             <div>
               <Title level={4} style={{ marginBottom: 0 }}>
-                {user.fullName}
+                {profile?.fullName}
               </Title>
-              <Text type="secondary">{user.position}</Text>
+              <Text type="secondary">{profile?.position}</Text>
               <div className="tags">
                 <Text>Vai trò chính: </Text>
-                <Tag color="orange">{user.role}</Tag>
-                <Text>Vai trò phụ: {user.subRole || "—"}</Text>
+                <Tag color="orange">
+                  {convertRoleName(profile?.mainRole?.roleName) || "—"}
+                </Tag>
+
+                <Text>Vai trò phụ: </Text>
+                {profile?.subRole?.length > 0 ? (
+                  profile?.subRole.map((r) => (
+                    <Tag key={r.roleId} color="blue">
+                      {r.roleName}
+                    </Tag>
+                  ))
+                ) : (
+                  <Text>—</Text>
+                )}
               </div>
             </div>
           </div>
@@ -79,7 +106,7 @@ const ProfilePage = () => {
               icon={<EditOutlined />}
               onClick={() => {
                 setOpenModalUpdate(true);
-                setDataUpdate(user);
+                setDataUpdate(profile);
               }}
             >
               Cập nhật hồ sơ
@@ -92,7 +119,7 @@ const ProfilePage = () => {
                 borderColor: "#52c41a",
               }}
               onClick={() => {
-                navigate("/admin/change-password");
+                navigate("/change-password");
               }}
             >
               Thay đổi mật khẩu
@@ -103,50 +130,54 @@ const ProfilePage = () => {
         <Form layout="vertical" className="profile-form">
           <Row gutter={24}>
             <Col span={12}>
-              <Form.Item label="Họ và tên">
-                <Input value={user.fullName} readOnly />
+              <Form.Item label="Email">
+                <Input value={profile?.email} readOnly />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Tên đăng nhập">
-                <Input value={user.username} readOnly />
+                <Input value={profile?.userName} readOnly />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Căn cước công dân">
-                <Input value={user.identity_card} readOnly />
+                <Input value={profile?.identityCard} readOnly />
               </Form.Item>
             </Col>
+
             <Col span={12}>
-              <Form.Item label="Email">
-                <Input value={user.email} readOnly />
+              <Form.Item label="Phòng ban">
+                <Input value={profile?.divisionDto?.divisionName} readOnly />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Số điện thoại">
-                <Input value={user.phone_number} readOnly />
+                <Input value={profile?.phoneNumber} readOnly />
               </Form.Item>
             </Col>
 
             <Col span={12}>
               <Form.Item label="Địa chỉ">
-                <Input value={user.address} readOnly />
+                <Input value={profile?.address} readOnly />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Giới tính">
-                <Input value={user.gender === "NAM" ? "Nam" : "Nữ"} readOnly />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Ngày sinh">
                 <Input
-                  value={dayjs(user.DateOfBirth).format("DD-MM-YYYY")}
+                  value={profile?.gender === "MALE" ? "Nam" : "Nữ"}
                   readOnly
                 />
               </Form.Item>
             </Col>
             <Col span={12}>
+              <Form.Item label="Ngày sinh">
+                <Input
+                  value={dayjs(profile?.dateOfBirth).format("DD - MM - YYYY")}
+                  readOnly
+                />
+              </Form.Item>
+            </Col>
+            {/* <Col span={12}>
               <Form.Item label="Chữ ký số">
                 <div className="signature-box">
                   {user.signature[0]?.signature_image_url ? (
@@ -173,7 +204,7 @@ const ProfilePage = () => {
                   )}
                 </div>
               </Form.Item>
-            </Col>
+            </Col> */}
           </Row>
         </Form>
       </Card>

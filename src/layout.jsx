@@ -9,7 +9,7 @@ import {
   SignatureOutlined,
   SignatureFilled,
 } from "@ant-design/icons";
-import { Layout, Menu, Dropdown, Avatar, Badge } from "antd";
+import { Layout, Menu, Dropdown, Avatar, Badge, App } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { GiDigitalTrace, GiOrganigram } from "react-icons/gi";
@@ -22,6 +22,7 @@ import "@/styles/layout.admin.scss";
 import { CgFileDocument } from "react-icons/cg";
 import { GiProgression } from "react-icons/gi";
 import { LuBookMinus } from "react-icons/lu";
+import { useCurrentApp } from "components/context/app.context";
 
 const { Content, Sider } = Layout;
 
@@ -31,19 +32,25 @@ const LayoutClient = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentKey = location.pathname;
+  const { message, notification } = App.useApp();
 
-  // const { user, setUser, setIsAuthenticated, isAuthenticated } =
-  //   useCurrentApp();
+  const { user, setUser, setIsAuthenticated, isAuthenticated } =
+    useCurrentApp();
 
-  // const handleLogout = async () => {
-  //   //todo
-  //   const res = await logoutAPI();
-  //   if (res.data) {
-  //     setUser(null);
-  //     setIsAuthenticated(false);
-  //     localStorage.removeItem("access_token");
-  //   }
-  // };
+  const handleLogout = () => {
+    console.log(">>> Logging out...");
+    localStorage.clear();
+    console.log(
+      ">>> LocalStorage after clear:",
+      localStorage.getItem("access_token"),
+      localStorage.getItem("user_id")
+    );
+
+    setUser(null);
+    setIsAuthenticated(false);
+    message.success("Đăng xuất thành công!");
+    navigate("/login");
+  };
 
   const items = [
     {
@@ -89,16 +96,6 @@ const LayoutClient = () => {
       icon: <LuBookMinus />,
     },
     {
-      label: <Link to="/task">Nhiệm vụ</Link>,
-      key: "/task",
-      icon: <LuBookMinus />,
-    },
-    {
-      label: <Link to="/document-template">Mẫu văn bản</Link>,
-      key: "/document-template",
-      icon: <GiProgression />,
-    },
-    {
       label: <Link to="/user-guide">Hướng dẫn sử dụng</Link>,
       key: "/admin/user-guide",
       icon: <QuestionCircleOutlined />,
@@ -108,10 +105,7 @@ const LayoutClient = () => {
   const itemsDropdown = [
     {
       label: (
-        <label
-          style={{ cursor: "pointer", color: " #0387EF" }}
-          onClick={() => navigate("/profile")}
-        >
+        <label style={{ cursor: "pointer", color: " #0387EF" }}>
           Quản lý tài khoản
         </label>
       ),
@@ -120,12 +114,7 @@ const LayoutClient = () => {
     },
     {
       label: (
-        <label
-          style={{ cursor: "pointer", color: "red" }}
-          onClick={() => navigate("/login")}
-        >
-          Đăng xuất
-        </label>
+        <label style={{ cursor: "pointer", color: "red" }}>Đăng xuất</label>
       ),
       key: "logout",
       icon: <LogoutOutlined style={{ fontSize: "18px", color: "red" }} />,
@@ -136,17 +125,17 @@ const LayoutClient = () => {
   //   user?.avatar
   // }`;
 
-  // if (isAuthenticated === false) {
-  //   return <Outlet />;
-  // }
+  if (isAuthenticated === false) {
+    return <Outlet />;
+  }
 
-  // const isAdminRoute = location.pathname.includes("admin");
-  // if (isAuthenticated === true && isAdminRoute === true) {
-  //   const role = user?.role;
-  //   if (role === "USER") {
-  //     return <Outlet />;
-  //   }
-  // }
+  const isAdminRoute = location.pathname.includes("admin");
+  if (isAuthenticated === true && isAdminRoute === true) {
+    const role = user?.role;
+    if (role === "USER") {
+      return <Outlet />;
+    }
+  }
 
   return (
     <>
@@ -267,7 +256,16 @@ const LayoutClient = () => {
                   />
                 </Badge>
 
-                <Dropdown menu={{ items: itemsDropdown }} trigger={["click"]}>
+                <Dropdown
+                  menu={{
+                    items: itemsDropdown,
+                    onClick: ({ key }) => {
+                      if (key === "logout") handleLogout();
+                      else if (key === "account") navigate("/profile");
+                    },
+                  }}
+                  trigger={["click"]}
+                >
                   <div
                     style={{
                       display: "flex",
@@ -292,14 +290,12 @@ const LayoutClient = () => {
                           fontWeight: "bold",
                         }}
                       >
-                        Ngô Huỳnh Tấn Lộc
+                        {user?.fullName}
                       </span>
-                      <span style={{ fontSize: "12px" }}>
-                        locnht1@gmail.com
-                      </span>
+                      <span style={{ fontSize: "12px" }}>{user?.email}</span>
                     </div>
 
-                    <Avatar />
+                    <Avatar src={user?.avatar?.replace(/^"|"$/g, "")} />
                   </div>
                 </Dropdown>
               </div>
