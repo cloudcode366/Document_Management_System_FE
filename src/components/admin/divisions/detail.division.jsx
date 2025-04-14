@@ -1,4 +1,4 @@
-import { Avatar, Descriptions, Drawer, Table, Tag } from "antd";
+import { Descriptions, Drawer, Image, Table, Tag } from "antd";
 
 const DetailDivision = (props) => {
   const {
@@ -17,28 +17,41 @@ const DetailDivision = (props) => {
     {
       title: "Ảnh",
       dataIndex: "avatar",
-      render: (avatar) => <Avatar src={avatar} />,
+      render(dom, entity) {
+        return (
+          <Image
+            width={40}
+            height={40}
+            src={entity?.avatar || undefined}
+            fallback="/default-avatar.png"
+            style={{
+              objectFit: "cover",
+              borderRadius: "50%",
+            }}
+          />
+        );
+      },
+      width: "10%",
     },
     {
       title: "Họ và tên",
       dataIndex: "fullName",
+      width: "20%",
     },
     {
       title: "Tên đăng nhập",
-      dataIndex: "username",
+      dataIndex: "userName",
+      width: "20%",
     },
     {
       title: "Email",
       dataIndex: "email",
+      width: "25%",
     },
     {
-      title: "Vai trò chính",
-      dataIndex: "role",
-      render: (role) => (
-        <Tag color={role === "DIVISION_HEAD" ? "orange" : "gold"}>
-          {role === "DIVISION_HEAD" ? "Lãnh đạo phòng ban" : "Chuyên viên"}
-        </Tag>
-      ),
+      title: "Chức vụ",
+      dataIndex: "position",
+      width: "25%",
     },
   ];
 
@@ -50,13 +63,20 @@ const DetailDivision = (props) => {
           width={"60vw"}
           open={openViewDetail}
           onClose={onClose}
+          styles={{ body: { padding: 0, overflow: "hidden", height: "100vh" } }}
         >
           <Descriptions bordered column={2}>
-            <Descriptions.Item label="Tên phòng ban">
-              {dataViewDetail?.name}
+            <Descriptions.Item
+              label="Tên phòng ban"
+              labelStyle={{ fontWeight: "bold" }}
+            >
+              {dataViewDetail?.divisionName}
             </Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">
-              {dataViewDetail?.is_deleted ? (
+            <Descriptions.Item
+              label="Trạng thái"
+              labelStyle={{ fontWeight: "bold" }}
+            >
+              {dataViewDetail?.isDeleted ? (
                 <Tag color="red">Bị khóa</Tag>
               ) : (
                 <Tag color="green">Hoạt động</Tag>
@@ -64,11 +84,12 @@ const DetailDivision = (props) => {
             </Descriptions.Item>
           </Descriptions>
           <Table
-            dataSource={dataViewDetail.list_users || []}
+            dataSource={dataViewDetail.users || []}
             columns={columns}
-            rowKey="user_id"
+            rowKey="userId"
             pagination={false}
-            scroll={{ y: 400 }}
+            style={{ padding: 10 }}
+            scroll={{ y: "100%" }}
           />
         </Drawer>
       )}

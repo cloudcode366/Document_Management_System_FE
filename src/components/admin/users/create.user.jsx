@@ -1,67 +1,70 @@
-import {
-  App,
-  Col,
-  DatePicker,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Row,
-  Select,
-} from "antd";
+import { App, Col, DatePicker, Form, Input, Modal, Row, Select } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
+import { createUserByFormAPI } from "@/services/api.service";
 
 const CreateUser = (props) => {
-  const { openModalCreate, setOpenModalCreate, refreshTable } = props;
+  const {
+    openModalCreate,
+    setOpenModalCreate,
+    refreshTable,
+    divisions,
+    roles,
+  } = props;
   const [isSubmit, setIsSubmit] = useState(false);
   const { message, notification } = App.useApp();
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    //   const { fullName, password, email, phone } = values;
-    //   setIsSubmit(true);
-    //   const res = await createUserAPI(fullName, email, password, phone);
-    //   if (res && res.data) {
-    //     message.success(`Tạo mới user thành công`);
-    //     form.resetFields();
-    //     setOpenModalCreate(false);
-    //     refreshTable();
-    //   } else {
-    //     notification.error({
-    //       message: "Đã có lỗi xảy ra",
-    //       description: res.message,
-    //     });
-    //   }
-    //   setIsSubmit(false);
-    const formattedValues = {
-      ...values,
-      dateOfBirth: values.dateOfBirth
-        ? values.dateOfBirth.format("YYYY-MM-DD")
-        : null,
-    };
-    console.log("Submitted Data:", formattedValues);
-    form.resetFields();
+    const {
+      fullName,
+      userName,
+      email,
+      phoneNumber,
+      identityCard,
+      divisionId,
+      roleId,
+      dateOfBirth,
+      position,
+      address,
+      gender,
+    } = values;
+    setIsSubmit(true);
+    const res = await createUserByFormAPI(
+      fullName,
+      userName,
+      email,
+      phoneNumber,
+      identityCard,
+      divisionId,
+      roleId,
+      dateOfBirth,
+      position,
+      address,
+      gender
+    );
+    if (res && res.data && res.data.statusCode === 201) {
+      message.success(`Tạo mới tài khoản thành công`);
+      form.resetFields();
+      setOpenModalCreate(false);
+      refreshTable();
+    } else {
+      notification.error({
+        message: "Đã có lỗi xảy ra",
+        description: res.message,
+      });
+    }
+    setIsSubmit(false);
   };
-
-  const departmentOptions = [
-    { id: 1, name: "Phòng Nhân sự" },
-    { id: 2, name: "Phòng Kế toán" },
-    { id: 3, name: "Phòng IT" },
-  ];
-
-  const roleOptions = [
-    { id: 1, name: "LEADER" },
-    { id: 2, name: "DIVISION HEAD" },
-    { id: 3, name: "CHIEF" },
-    { id: 4, name: "CLERICAL ASSISTANT" },
-    { id: 5, name: "SPECIALIST" },
-  ];
 
   return (
     <>
       <Modal
-        title="Tạo người dùng theo mẫu"
+        title={
+          <div style={{ borderBottom: "1px solid #80868b", paddingBottom: 8 }}>
+            Tạo mới tài khoản
+          </div>
+        }
         width={"80vw"}
         open={openModalCreate}
         onOk={() => {
@@ -69,6 +72,7 @@ const CreateUser = (props) => {
         }}
         onCancel={() => {
           setOpenModalCreate(false);
+          setIsSubmit(false);
           form.resetFields();
         }}
         okText={"Tạo mới"}
@@ -84,7 +88,6 @@ const CreateUser = (props) => {
           },
         }}
       >
-        <Divider />
         <Form
           form={form}
           name="basic"
@@ -107,7 +110,7 @@ const CreateUser = (props) => {
             <Col span={12}>
               <Form.Item
                 label="Tên đăng nhập"
-                name="username"
+                name="userName"
                 rules={[
                   { required: true, message: "Vui lòng nhập tên đăng nhập!" },
                 ]}
@@ -132,7 +135,7 @@ const CreateUser = (props) => {
             <Col span={12}>
               <Form.Item
                 label="Căn cước công dân"
-                name="identity_card"
+                name="identityCard"
                 rules={[
                   {
                     required: true,
@@ -157,7 +160,7 @@ const CreateUser = (props) => {
             <Col span={12}>
               <Form.Item
                 label="Số điện thoại"
-                name="phone_number"
+                name="phoneNumber"
                 rules={[
                   { required: true, message: "Vui lòng nhập số điện thoại!" },
                   {
@@ -180,9 +183,8 @@ const CreateUser = (props) => {
                 ]}
               >
                 <Select placeholder="Vui lòng chọn giới tính">
-                  <Select.Option value="NAM">Nam</Select.Option>
-                  <Select.Option value="NỮ">Nữ</Select.Option>
-                  <Select.Option value="KHÁC">Khác</Select.Option>
+                  <Select.Option value="MALE">Nam</Select.Option>
+                  <Select.Option value="FEMALE">Nữ</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -195,7 +197,7 @@ const CreateUser = (props) => {
                 ]}
               >
                 <DatePicker
-                  format="DD/MM/YYYY"
+                  format="DD - MM - YYYY"
                   style={{ width: "100%" }}
                   placeholder="Vui lòng chọn ngày sinh"
                   disabledDate={(current) =>
@@ -209,7 +211,7 @@ const CreateUser = (props) => {
             <Col span={12}>
               <Form.Item
                 label="Phòng ban"
-                name="division_id"
+                name="divisionId"
                 rules={[
                   { required: true, message: "Vui lòng chọn phòng ban!" },
                 ]}
@@ -222,9 +224,12 @@ const CreateUser = (props) => {
                     option.children.toLowerCase().includes(input.toLowerCase())
                   }
                 >
-                  {departmentOptions.map((dept) => (
-                    <Select.Option key={dept.id} value={dept.id}>
-                      {dept.name}
+                  {divisions.map((division) => (
+                    <Select.Option
+                      key={division.divisionId}
+                      value={division.divisionId}
+                    >
+                      {division.divisionName}
                     </Select.Option>
                   ))}
                 </Select>
@@ -244,7 +249,7 @@ const CreateUser = (props) => {
             <Col span={12}>
               <Form.Item
                 label="Vai trò"
-                name="role_id"
+                name="roleId"
                 rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
               >
                 <Select
@@ -255,9 +260,9 @@ const CreateUser = (props) => {
                     option.children.toLowerCase().includes(input.toLowerCase())
                   }
                 >
-                  {roleOptions.map((role) => (
-                    <Select.Option key={role.id} value={role.id}>
-                      {role.name}
+                  {roles.map((role) => (
+                    <Select.Option key={role.roleId} value={role.roleId}>
+                      {role.roleName}
                     </Select.Option>
                   ))}
                 </Select>

@@ -1,16 +1,6 @@
-import {
-  App,
-  Col,
-  DatePicker,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Row,
-  Select,
-} from "antd";
+import { App, Col, Form, Input, Modal, Row } from "antd";
 import { useState } from "react";
-import dayjs from "dayjs";
+import { createDocumentTypeAPI } from "@/services/api.service";
 
 const CreateDocumentType = (props) => {
   const { openModalCreate, setOpenModalCreate, refreshTable } = props;
@@ -19,42 +9,44 @@ const CreateDocumentType = (props) => {
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    //   const { fullName, password, email, phone } = values;
-    //   setIsSubmit(true);
-    //   const res = await createUserAPI(fullName, email, password, phone);
-    //   if (res && res.data) {
-    //     message.success(`Tạo mới user thành công`);
-    //     form.resetFields();
-    //     setOpenModalCreate(false);
-    //     refreshTable();
-    //   } else {
-    //     notification.error({
-    //       message: "Đã có lỗi xảy ra",
-    //       description: res.message,
-    //     });
-    //   }
-    //   setIsSubmit(false);
-    const formattedValues = {
-      ...values,
-      dateOfBirth: values.dateOfBirth
-        ? values.dateOfBirth.format("YYYY-MM-DD")
-        : null,
-    };
-    console.log("Submitted Data:", formattedValues);
-    form.resetFields();
+    const { documentTypeName } = values;
+    setIsSubmit(true);
+    const res = await createDocumentTypeAPI(documentTypeName);
+    if (res && res.data && res.data.statusCode === 201) {
+      message.success(`Tạo mới loại văn bản thành công`);
+      form.resetFields();
+      setOpenModalCreate(false);
+      refreshTable();
+    } else {
+      let errorMessage = res?.data?.content;
+
+      if (errorMessage === "Document Type name already exists") {
+        errorMessage = "Loại văn bản này đã tồn tại!";
+      }
+      notification.error({
+        message: "Đã có lỗi xảy ra",
+        description: errorMessage,
+      });
+    }
+    setIsSubmit(false);
   };
 
   return (
     <>
       <Modal
-        title="Tạo loại văn bản"
-        width={"50vw"}
+        title={
+          <div style={{ borderBottom: "1px solid #80868b", paddingBottom: 8 }}>
+            Tạo loại văn bản
+          </div>
+        }
+        width={"40vw"}
         open={openModalCreate}
         onOk={() => {
           form.submit();
         }}
         onCancel={() => {
           setOpenModalCreate(false);
+          setIsSubmit(false);
           form.resetFields();
         }}
         okText={"Tạo mới"}
@@ -81,9 +73,12 @@ const CreateDocumentType = (props) => {
             <Col span={24}>
               <Form.Item
                 label="Tên văn bản"
-                name="fullName"
+                name="documentTypeName"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên văn bản!" },
+                  {
+                    required: true,
+                    message: "Vui lòng nhập tên loại văn bản!",
+                  },
                 ]}
               >
                 <Input />

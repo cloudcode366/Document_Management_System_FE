@@ -1,6 +1,6 @@
-import { Avatar, Badge, Descriptions, Drawer } from "antd";
+import { Avatar, Badge, Descriptions, Drawer, Image, Tag } from "antd";
 import dayjs from "dayjs";
-import { FORMATE_DATE_VN } from "@/services/helper";
+import { convertRoleName, FORMATE_DATE_VN } from "@/services/helper";
 
 const DetailUser = (props) => {
   const {
@@ -15,9 +15,6 @@ const DetailUser = (props) => {
     setDataViewDetail(null);
   };
 
-  const avatarURL = `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${
-    dataViewDetail?.avatar
-  }`;
   return (
     <>
       <Drawer
@@ -27,53 +24,109 @@ const DetailUser = (props) => {
         open={openViewDetail}
       >
         <Descriptions bordered column={2}>
-          <Descriptions.Item label="Họ và tên">
+          <Descriptions.Item
+            label="Họ và tên"
+            labelStyle={{ fontWeight: "bold" }}
+          >
             {dataViewDetail?.fullName}
           </Descriptions.Item>
-          <Descriptions.Item label="Căn cước công dân">
-            {dataViewDetail?.identity_card}
+          <Descriptions.Item
+            label="Căn cước công dân"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            {dataViewDetail?.identityCard}
           </Descriptions.Item>
-          <Descriptions.Item label="Tên đăng nhập">
-            {dataViewDetail?.username}
+          <Descriptions.Item
+            label="Tên đăng nhập"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            {dataViewDetail?.userName}
           </Descriptions.Item>
-          <Descriptions.Item label="Email">
+          <Descriptions.Item label="Email" labelStyle={{ fontWeight: "bold" }}>
             {dataViewDetail?.email}
           </Descriptions.Item>
-          <Descriptions.Item label="Địa chỉ">
+          <Descriptions.Item
+            label="Địa chỉ"
+            labelStyle={{ fontWeight: "bold" }}
+          >
             {dataViewDetail?.address}
           </Descriptions.Item>
-          <Descriptions.Item label="Số điện thoại">
-            {dataViewDetail?.phone}
+          <Descriptions.Item
+            label="Số điện thoại"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            {dataViewDetail?.phoneNumber}
           </Descriptions.Item>
-          <Descriptions.Item label="Giới tính">
+          <Descriptions.Item
+            label="Giới tính"
+            labelStyle={{ fontWeight: "bold" }}
+          >
             {dataViewDetail?.gender}
           </Descriptions.Item>
-          <Descriptions.Item label="Trạng thái">
-            {dataViewDetail?.is_enabled}
+          <Descriptions.Item
+            label="Trạng thái"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            {dataViewDetail?.isDeleted ? (
+              <Tag color="red">Bị khóa</Tag>
+            ) : (
+              <Tag color="green">Hoạt động</Tag>
+            )}
           </Descriptions.Item>
-          <Descriptions.Item label="Phòng ban">
-            {dataViewDetail?.division.name}
+          <Descriptions.Item
+            label="Phòng ban"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            {dataViewDetail?.divisionDto.divisionName}
           </Descriptions.Item>
-          <Descriptions.Item label="Chức vụ">
+          <Descriptions.Item
+            label="Chức vụ"
+            labelStyle={{ fontWeight: "bold" }}
+          >
             {dataViewDetail?.position}
           </Descriptions.Item>
-          <Descriptions.Item label="Vai trò">
-            <Badge status="processing" text={dataViewDetail?.role} />
+          <Descriptions.Item
+            label="Vai trò"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            <Tag color="geekblue">
+              {convertRoleName(dataViewDetail?.mainRole?.roleName) || "—"}
+            </Tag>
           </Descriptions.Item>
-          <Descriptions.Item label="Vai trò phụ">
-            <Badge status="processing" text={dataViewDetail?.sub_role} />
+          <Descriptions.Item
+            label="Vai trò phụ"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            {dataViewDetail?.subRoles && dataViewDetail.subRoles.length > 0
+              ? dataViewDetail.subRoles.map((role) => role.roleName).join(", ")
+              : "—"}
           </Descriptions.Item>
-          <Descriptions.Item label="Ngày sinh">
-            {dayjs(dataViewDetail?.DateOfBirth).format(FORMATE_DATE_VN)}
+          <Descriptions.Item
+            label="Ngày sinh"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            {dayjs(dataViewDetail?.dateOfBirth).format(FORMATE_DATE_VN)}
           </Descriptions.Item>
-          <Descriptions.Item label="Created At">
+          <Descriptions.Item
+            label="Ngày tạo"
+            labelStyle={{ fontWeight: "bold" }}
+          >
             {dayjs(dataViewDetail?.createdAt).format(FORMATE_DATE_VN)}
           </Descriptions.Item>
-          <Descriptions.Item label="Avatar">
-            <Avatar size={40} src={avatarURL}></Avatar>
-          </Descriptions.Item>
-          <Descriptions.Item label="Chữ ký nháy">
-            <Avatar size={40} src={avatarURL}></Avatar>
+          <Descriptions.Item
+            label="Ảnh đại diện"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            <Image
+              width={200}
+              height={200}
+              src={dataViewDetail?.avatar || undefined}
+              fallback="/default-avatar.png"
+              style={{
+                objectFit: "cover",
+                borderRadius: "30px",
+              }}
+            />
           </Descriptions.Item>
         </Descriptions>
       </Drawer>

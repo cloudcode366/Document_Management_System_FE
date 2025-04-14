@@ -13,19 +13,35 @@ export const AppProvider = (props) => {
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAccount = async () => {
-      const token = localStorage.getItem("access_token");
-      const userId = localStorage.getItem("user_id");
+    const token = localStorage.getItem("access_token");
+    const userId = localStorage.getItem("user_id");
 
-      if (token && userId) {
-        const res = await viewProfileUserAPI(userId);
-        if (res.data.statusCode === 200) {
-          setUser(res.data.content);
-          setIsAuthenticated(true);
-        }
-      }
-
+    if (!token || !userId) {
       setIsAppLoading(false);
+      setIsAuthenticated(false);
+      return;
+    }
+
+    const fetchAccount = async () => {
+      try {
+        const res = await viewProfileUserAPI(userId);
+        console.log("API viewProfileUserAPI", res.data);
+
+        if (res.data.statusCode === 200) {
+          const data = res.data.content;
+          const mainRole = data?.roles?.find((r) => r.createdDate === null);
+          const subRole = data?.roles?.filter((r) => r.createdDate !== null);
+          setUser({ ...data, mainRole, subRole });
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error("Lỗi khi gọi API viewProfileUserAPI:", err);
+        setIsAuthenticated(false);
+      } finally {
+        setIsAppLoading(false);
+      }
     };
 
     fetchAccount();

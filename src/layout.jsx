@@ -1,28 +1,21 @@
 import React, { useState } from "react";
 import {
-  UserOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   QuestionCircleOutlined,
   BellOutlined,
   LogoutOutlined,
-  SignatureOutlined,
-  SignatureFilled,
 } from "@ant-design/icons";
 import { Layout, Menu, Dropdown, Avatar, Badge, App } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { GiDigitalTrace, GiOrganigram } from "react-icons/gi";
-import { LuUserCog } from "react-icons/lu";
-import { GrDocumentConfig } from "react-icons/gr";
-import { LuWorkflow } from "react-icons/lu";
-import { TbLogs } from "react-icons/tb";
-import { CgDigitalocean, CgProfile } from "react-icons/cg";
+import { CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
 import { CgFileDocument } from "react-icons/cg";
 import { GiProgression } from "react-icons/gi";
 import { LuBookMinus } from "react-icons/lu";
 import { useCurrentApp } from "components/context/app.context";
+import { BeatLoader } from "react-spinners";
 
 const { Content, Sider } = Layout;
 
@@ -34,21 +27,14 @@ const LayoutClient = () => {
   const currentKey = location.pathname;
   const { message, notification } = App.useApp();
 
-  const { user, setUser, setIsAuthenticated, isAuthenticated } =
+  const { user, setUser, isAppLoading, isAuthenticated, setIsAuthenticated } =
     useCurrentApp();
 
   const handleLogout = () => {
-    console.log(">>> Logging out...");
+    message.success("Đăng xuất thành công!");
     localStorage.clear();
-    console.log(
-      ">>> LocalStorage after clear:",
-      localStorage.getItem("access_token"),
-      localStorage.getItem("user_id")
-    );
-
     setUser(null);
     setIsAuthenticated(false);
-    message.success("Đăng xuất thành công!");
     navigate("/login");
   };
 
@@ -127,14 +113,6 @@ const LayoutClient = () => {
 
   if (isAuthenticated === false) {
     return <Outlet />;
-  }
-
-  const isAdminRoute = location.pathname.includes("admin");
-  if (isAuthenticated === true && isAdminRoute === true) {
-    const role = user?.role;
-    if (role === "USER") {
-      return <Outlet />;
-    }
   }
 
   return (

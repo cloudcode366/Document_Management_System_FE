@@ -9,6 +9,7 @@ import {
   Row,
   Col,
   Typography,
+  Image,
 } from "antd";
 import { UserOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -20,13 +21,16 @@ import { useCurrentApp } from "@/components/context/app.context";
 import { viewProfileUserAPI } from "@/services/api.service";
 import { convertRoleName } from "@/services/helper";
 import { BeatLoader } from "react-spinners";
+import "styles/loading.scss";
 
 const { Title, Text } = Typography;
 
 const ProfilePage = () => {
+  const { user } = useCurrentApp();
+  const navigate = useNavigate();
+
   const [openModalUpdate, setOpenModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(null);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
 
@@ -54,6 +58,7 @@ const ProfilePage = () => {
   if (loading) {
     return (
       <div
+        className="full-screen-overlay"
         style={{
           position: "fixed",
           top: "50%",
@@ -71,23 +76,29 @@ const ProfilePage = () => {
       <Card className="profile-card">
         <div className="profile-header">
           <div className="profile-avatar-info">
-            <Avatar
-              size={80}
-              icon={<UserOutlined />}
+            <Image
+              width={200}
+              height={200}
               src={profile?.avatar || undefined}
+              fallback="/default-avatar.png"
+              style={{
+                objectFit: "cover",
+                borderRadius: "30px",
+              }}
             />
+
             <div>
               <Title level={4} style={{ marginBottom: 0 }}>
                 {profile?.fullName}
               </Title>
               <Text type="secondary">{profile?.position}</Text>
               <div className="tags">
-                <Text>Vai trò chính: </Text>
-                <Tag color="orange">
+                <Text style={{ fontWeight: "500" }}>Vai trò chính: </Text>
+                <Tag color="geekblue">
                   {convertRoleName(profile?.mainRole?.roleName) || "—"}
                 </Tag>
 
-                <Text>Vai trò phụ: </Text>
+                <Text style={{ fontWeight: "500" }}>Vai trò phụ: </Text>
                 {profile?.subRole?.length > 0 ? (
                   profile?.subRole.map((r) => (
                     <Tag key={r.roleId} color="blue">
@@ -119,7 +130,11 @@ const ProfilePage = () => {
                 borderColor: "#52c41a",
               }}
               onClick={() => {
-                navigate("/change-password");
+                navigate(
+                  user.mainRole.roleName === "Admin"
+                    ? "/admin/change-password"
+                    : "/change-password"
+                );
               }}
             >
               Thay đổi mật khẩu

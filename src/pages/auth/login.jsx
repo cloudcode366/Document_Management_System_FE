@@ -25,8 +25,8 @@ const LoginPage = () => {
       const subRole = data?.roles?.filter((r) => r.createdDate !== null);
       setUser({ ...data, mainRole, subRole });
       setIsAuthenticated(true);
-      if (mainRole === "Admin") navigate("/admin");
-      else navigate("/");
+      navigate(mainRole.roleName === "Admin" ? "/admin" : "/");
+      console.log(`>>> Check data: `, data);
     } else {
       let errorMessage = res?.data?.content;
 
@@ -34,11 +34,16 @@ const LoginPage = () => {
         errorMessage = "Email không tồn tại hoặc sai mật khẩu!";
       }
 
+      if (errorMessage === "User has been deleted") {
+        errorMessage = "Tài khoản này đã bị khóa hoạt động!";
+      }
+
       notification.error({
         message: "Đăng nhập không thành công",
         description: errorMessage,
       });
     }
+
     setLoading(false);
   };
 

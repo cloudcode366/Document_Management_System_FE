@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Row, Col, Divider, Tag, Space, Form } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
+import { BeatLoader } from "react-spinners";
+import { viewWorkflowDetailsWithFlowAndStepAPI } from "@/services/api.service";
 
 const DetailWorkflow = (props) => {
   const {
@@ -9,15 +11,47 @@ const DetailWorkflow = (props) => {
     dataViewDetail,
     setDataViewDetail,
   } = props;
+  const [workflowDetail, setWorkflowDetail] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const handleCancel = () => {
     setOpenViewDetail(false);
     setDataViewDetail(null);
   };
 
+  useEffect(() => {
+    const fetchWorkflow = async () => {
+      setLoading(true);
+      const workflowId = dataViewDetail.workflowId;
+      const res = await viewWorkflowDetailsWithFlowAndStepAPI(workflowId);
+      if (res.data.statusCode === 200) {
+        const data = res.data.content;
+        setWorkflowDetail(res);
+      }
+      setLoading(false);
+    };
+
+    fetchWorkflow();
+  }, []);
+
   if (!dataViewDetail) {
-    return null; // Nếu không có dữ liệu, không hiển thị modal
+    return null;
   }
+
+  // if (loading) {
+  //   return (
+  //     <div
+  //       style={{
+  //         position: "fixed",
+  //         top: "50%",
+  //         left: "50%",
+  //         transform: "translate(-50%, -50%)",
+  //       }}
+  //     >
+  //       <BeatLoader size={25} color="#364AD6" />
+  //     </div>
+  //   );
+  // }
 
   return (
     <Modal
@@ -43,7 +77,9 @@ const DetailWorkflow = (props) => {
       <Row gutter={16}>
         <Col span={12}>
           <strong style={{ fontSize: "16px" }}>Tên luồng xử lý:</strong>{" "}
-          <span style={{ fontSize: "16px" }}>{dataViewDetail.name}</span>
+          <span style={{ fontSize: "16px" }}>
+            {dataViewDetail.workflowDetail}
+          </span>
         </Col>
         <Col span={12}>
           <strong style={{ fontSize: "16px" }}>Loại văn bản:</strong>{" "}

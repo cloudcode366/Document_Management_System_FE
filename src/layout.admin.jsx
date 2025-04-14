@@ -6,18 +6,16 @@ import {
   QuestionCircleOutlined,
   BellOutlined,
   LogoutOutlined,
-  SignatureOutlined,
-  SignatureFilled,
 } from "@ant-design/icons";
-import { Layout, Menu, Dropdown, Avatar, Badge } from "antd";
+import { Layout, Menu, Dropdown, Avatar, Badge, App } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { GiDigitalTrace, GiOrganigram } from "react-icons/gi";
+import { GiOrganigram } from "react-icons/gi";
 import { LuUserCog } from "react-icons/lu";
 import { GrDocumentConfig } from "react-icons/gr";
 import { LuWorkflow } from "react-icons/lu";
 import { TbLogs } from "react-icons/tb";
-import { CgDigitalocean, CgProfile } from "react-icons/cg";
+import { CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
 import { useCurrentApp } from "components/context/app.context";
 
@@ -28,15 +26,17 @@ const LayoutAdmin = () => {
   const [activeMenu, setActiveMenu] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const { message, notification } = App.useApp();
   const currentKey = location.pathname;
   const { user, setUser, setIsAuthenticated, isAuthenticated } =
     useCurrentApp();
 
   const handleLogout = () => {
+    message.success("Đăng xuất thành công!");
+    localStorage.clear();
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_id");
+    navigate("/login");
   };
 
   const items = [
@@ -49,21 +49,6 @@ const LayoutAdmin = () => {
       label: <Link to="/admin/division">Quản lý phòng ban</Link>,
       key: "/admin/division",
       icon: <GiOrganigram />,
-    },
-    {
-      label: <span>Quản lý chữ ký</span>,
-      key: "/admin/signature",
-      icon: <SignatureOutlined />,
-      children: [
-        {
-          label: <Link to="/admin/digital-signature">Chữ ký số</Link>,
-          key: "/admin/digital-signature",
-        },
-        {
-          label: <Link to="/admin/initial-signature">Chữ ký nháy</Link>,
-          key: "/admin/initial-signature",
-        },
-      ],
     },
     {
       label: <Link to="/admin/permission">Quản lý phân quyền</Link>,
@@ -95,10 +80,7 @@ const LayoutAdmin = () => {
   const itemsDropdown = [
     {
       label: (
-        <label
-          style={{ cursor: "pointer", color: " #0387EF" }}
-          onClick={() => navigate("/admin/profile")}
-        >
+        <label style={{ cursor: "pointer", color: " #0387EF" }}>
           Quản lý tài khoản
         </label>
       ),
@@ -107,37 +89,18 @@ const LayoutAdmin = () => {
     },
     {
       label: (
-        <label
-          style={{ cursor: "pointer", color: "red" }}
-          onClick={() => navigate("/login")}
-        >
-          Đăng xuất
-        </label>
+        <label style={{ cursor: "pointer", color: "red" }}>Đăng xuất</label>
       ),
       key: "logout",
-      icon: (
-        <LogoutOutlined
-          style={{ fontSize: "18px", color: "red" }}
-          onClick={() => handleLogout()}
-        />
-      ),
+      icon: <LogoutOutlined style={{ fontSize: "18px", color: "red" }} />,
     },
   ];
 
   // const urlAvatar = `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${
   //   user?.avatar
   // }`;
-
   if (isAuthenticated === false) {
     return <Outlet />;
-  }
-
-  const isAdminRoute = location.pathname.includes("admin");
-  if (isAuthenticated === true && isAdminRoute === true) {
-    const role = user?.role;
-    if (role === "USER") {
-      return <Outlet />;
-    }
   }
 
   return (
@@ -259,7 +222,16 @@ const LayoutAdmin = () => {
                   />
                 </Badge>
 
-                <Dropdown menu={{ items: itemsDropdown }} trigger={["click"]}>
+                <Dropdown
+                  menu={{
+                    items: itemsDropdown,
+                    onClick: ({ key }) => {
+                      if (key === "logout") handleLogout();
+                      else if (key === "account") navigate("/admin/profile");
+                    },
+                  }}
+                  trigger={["click"]}
+                >
                   <div
                     style={{
                       display: "flex",
@@ -284,12 +256,12 @@ const LayoutAdmin = () => {
                           fontWeight: "bold",
                         }}
                       >
-                        Quản trị viên
+                        {user?.fullName}
                       </span>
-                      <span style={{ fontSize: "12px" }}>admin@gmail.com</span>
+                      <span style={{ fontSize: "12px" }}>{user?.email}</span>
                     </div>
 
-                    <Avatar />
+                    <Avatar src={user?.avatar?.replace(/^"|"$/g, "")} />
                   </div>
                 </Dropdown>
               </div>
