@@ -12,6 +12,7 @@ import { dateRangeValidate } from "@/services/helper";
 import "./table.all.document.scss";
 import CreateDocument from "@/components/client/documents/progresses/create.document";
 import { useNavigate } from "react-router-dom";
+import { useCurrentApp } from "@/components/context/app.context";
 
 const { TabPane } = Tabs;
 
@@ -128,6 +129,7 @@ const tagColor = {
 
 const TableAllDocument = () => {
   const [activeKey, setActiveKey] = useState("all");
+  const { isAppLoading, user, isAuthenticated } = useCurrentApp();
   const actionRef = useRef();
   const [meta, setMeta] = useState({
     current: 1,
@@ -217,6 +219,9 @@ const TableAllDocument = () => {
     },
   ];
 
+  console.log(`>>> Check app context: `, isAppLoading, user, isAuthenticated);
+  console.log("isAppLoading tại TableAllDocument:", isAppLoading);
+
   const refreshTable = () => {
     actionRef.current?.reload();
   };
@@ -265,39 +270,39 @@ const TableAllDocument = () => {
             if (activeKey === "overdue") return doc.status === "Đã quá hạn";
             return false;
           })}
-          request={async (params, sort, filter) => {
-            console.log(params, sort, filter);
+          // request={async (params, sort, filter) => {
+          //   console.log(params, sort, filter);
 
-            let query = "";
-            if (params) {
-              query += `current=${params.current}&pageSize=${params.pageSize}`;
-              if (params.email) {
-                query += `&email=/${params.email}/i`;
-              }
-              if (params.fullName) {
-                query += `&fullName=/${params.fullName}/i`;
-              }
+          //   let query = "";
+          //   if (params) {
+          //     query += `current=${params.current}&pageSize=${params.pageSize}`;
+          //     if (params.email) {
+          //       query += `&email=/${params.email}/i`;
+          //     }
+          //     if (params.fullName) {
+          //       query += `&fullName=/${params.fullName}/i`;
+          //     }
 
-              const createdDateRange = dateRangeValidate(params.createdAtRange);
-              if (createdDateRange) {
-                query += `&createdAt>=${createdDateRange[0]}&createdAt<=${createdDateRange[1]}`;
-              }
-            }
+          //     const createdDateRange = dateRangeValidate(params.createdAtRange);
+          //     if (createdDateRange) {
+          //       query += `&createdAt>=${createdDateRange[0]}&createdAt<=${createdDateRange[1]}`;
+          //     }
+          //   }
 
-            // default
+          //   // default
 
-            if (sort && sort.createdAt) {
-              query += `&sort=${
-                sort.createdAt === "ascend" ? "createdAt" : "-createdAt"
-              }`;
-            } else query += `&sort=-createdAt`;
-            return {
-              data: dataSource,
-              page: 1,
-              success: true,
-              total: 10,
-            };
-          }}
+          //   if (sort && sort.createdAt) {
+          //     query += `&sort=${
+          //       sort.createdAt === "ascend" ? "createdAt" : "-createdAt"
+          //     }`;
+          //   } else query += `&sort=-createdAt`;
+          //   return {
+          //     data: dataSource,
+          //     page: 1,
+          //     success: true,
+          //     total: 10,
+          //   };
+          // }}
           rowKey="key"
           pagination={{
             current: meta.current,

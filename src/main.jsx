@@ -44,7 +44,11 @@ import "nprogress/nprogress.css";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LayoutClient />,
+    element: (
+      <ProtectedRoute>
+        <LayoutClient />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -210,7 +214,11 @@ const router = createBrowserRouter([
   },
   {
     path: "admin",
-    element: <LayoutAdmin />,
+    element: (
+      <ProtectedRoute>
+        <LayoutAdmin />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,

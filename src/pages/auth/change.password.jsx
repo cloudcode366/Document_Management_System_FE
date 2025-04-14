@@ -9,6 +9,7 @@ import {
   createVerifyOtpAPI,
 } from "@/services/api.service";
 import { BeatLoader } from "react-spinners";
+import "styles/loading.scss";
 
 const { Title } = Typography;
 
@@ -99,7 +100,9 @@ const ChangePasswordPage = () => {
       );
       if (res.data.statusCode === 200) {
         message.success("Đổi mật khẩu thành công!");
-        navigate(user.mainRole === "Admin" ? "/admin/profile" : "/profile");
+        navigate(
+          user.mainRole.roleName === "Admin" ? "/admin/profile" : "/profile"
+        );
       } else {
         throw new Error(res?.data?.content || "Đổi mật khẩu thất bại.");
       }
@@ -118,12 +121,15 @@ const ChangePasswordPage = () => {
   const onClose = () => {
     setOtpCode("");
     setCurrentStep(1);
-    navigate(user.mainRole === "Admin" ? "/admin/profile" : "/profile");
+    navigate(
+      user.mainRole.roleName === "Admin" ? "/admin/profile" : "/profile"
+    );
   };
 
   if (firstLoading) {
     return (
       <div
+        className="full-screen-overlay"
         style={{
           position: "fixed",
           top: "50%",

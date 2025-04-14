@@ -1,99 +1,56 @@
-import { DeleteTwoTone, PlusOutlined } from "@ant-design/icons";
+import { DeleteTwoTone, PlusOutlined, UnlockOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
-import { App, Button, Popconfirm, Tag, Typography } from "antd";
+import { App, Button, Popconfirm, Tag, Tooltip } from "antd";
 import { useRef, useState } from "react";
-import dayjs from "dayjs";
-import CreateDocumentType from "./create.document.type";
-
-const data = [
-  {
-    document_type_id: "dt1",
-    name: "Quyết định",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt2",
-    name: "Thông báo",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt3",
-    name: "Nghị quyết",
-    is_deleted: true,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt4",
-    name: "Chỉ thị",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt5",
-    name: "Quy chế",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt6",
-    name: "Quy định",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt7",
-    name: "Hướng dẫn",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt8",
-    name: "Kế hoạch",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt9",
-    name: "Chương trình",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt10",
-    name: "Đề án",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    document_type_id: "dt11",
-    name: "Báo cáo",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-];
+import CreateDocumentType from "@/components/admin/document.types/create.document.type";
+import {
+  changeStatusDocumentTypeAPI,
+  viewAllDocumentTypesAPI,
+} from "@/services/api.service";
 
 const TableDocumentType = () => {
   const actionRef = useRef();
-  const [meta, setMeta] = useState({
-    current: 1,
-    pageSize: 20,
-    pages: 0,
-    total: 0,
-  });
-
-  const [openModalCreate, setOpenModalCreate] = useState(false);
-
-  const [isDeleteDivision, setIsDeleteDivision] = useState(false);
   const { message, notification } = App.useApp();
+
+  const [meta, setMeta] = useState({
+    limit: 10,
+    total: 1,
+    page: 1,
+  });
+  const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [isDeleteDocumentType, setIsDeleteDocumentType] = useState(false);
+
+  const handleDeleteDocumentType = async (
+    documentTypeId,
+    documentTypeName,
+    isDeleted
+  ) => {
+    setIsDeleteDocumentType(true);
+    const res = await changeStatusDocumentTypeAPI(documentTypeId);
+    if (res && res.data && res.data.statusCode === 200) {
+      if (isDeleted) {
+        message.success(
+          `Mở sử dụng loại văn bản ${documentTypeName} thành công`
+        );
+      } else {
+        message.success(`Khóa loại văn bản ${documentTypeName} thành công`);
+      }
+      refreshTable();
+    } else {
+      notification.error({
+        message: `Đã có lỗi xảy ra`,
+        description: res.data.content,
+      });
+    }
+    setIsDeleteDocumentType(false);
+  };
 
   const columns = [
     {
       title: "Loại văn bản",
-      dataIndex: "name",
+      dataIndex: "documentTypeName",
       copyable: true,
-      width: "40%",
+      width: "60%",
       fieldProps: {
         placeholder: "Vui lòng nhập tên loại văn bản",
       },
@@ -103,23 +60,12 @@ const TableDocumentType = () => {
       },
     },
     {
-      title: "Ngày tạo",
-      dataIndex: "createdAt",
-      valueType: "date",
-      sorter: true,
-      hideInSearch: true,
-      width: "20%",
-      render(dom, entity, index, action, schema) {
-        return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
-      },
-    },
-    {
       title: "Trạng thái",
-      dataIndex: "is_deleted",
+      dataIndex: "isDeleted",
       hideInSearch: true,
       width: "20%",
-      render: (is_deleted) =>
-        is_deleted ? (
+      render: (isDeleted) =>
+        isDeleted ? (
           <Tag color="red">Bị khóa</Tag>
         ) : (
           <Tag color="green">Hoạt động</Tag>
@@ -130,25 +76,55 @@ const TableDocumentType = () => {
       hideInSearch: true,
       width: "20%",
       render(dom, entity, index, action, schema) {
-        return (
-          <>
-            <Popconfirm
-              placement="leftTop"
-              title="Xác nhận khóa loại văn bản"
-              description="Bạn có chắc chắn muốn khóa loại văn bản này?"
-              onConfirm={() => handleDeleteDocumentType(entity._id)}
-              okText="Xác nhận"
-              cancelText="Hủy"
-              okButtonProps={{ loading: isDeleteDivision }}
-            >
-              <span style={{ cursor: "pointer", marginLeft: 20 }}>
+        return !entity.isDeleted ? (
+          <Popconfirm
+            placement="leftTop"
+            title="Xác nhận khóa loại văn bản"
+            description="Bạn có chắc chắn muốn khóa loại văn bản này?"
+            onConfirm={() =>
+              handleDeleteDocumentType(
+                entity.documentTypeId,
+                entity.documentTypeName,
+                entity.isDeleted
+              )
+            }
+            okText="Xác nhận"
+            cancelText="Hủy"
+            okButtonProps={{ loading: isDeleteDocumentType }}
+          >
+            <span style={{ cursor: "pointer", marginLeft: 20 }}>
+              <Tooltip title="Khóa loại văn bản này">
                 <DeleteTwoTone
                   twoToneColor="#ff4d4f"
                   style={{ cursor: "pointer" }}
                 />
-              </span>
-            </Popconfirm>
-          </>
+              </Tooltip>
+            </span>
+          </Popconfirm>
+        ) : (
+          <Popconfirm
+            placement="leftTop"
+            title="Xác nhận mở lại loại văn bản"
+            description="Bạn có chắc chắn muốn mở lại loại văn bản này?"
+            onConfirm={() =>
+              handleDeleteDocumentType(
+                entity.documentTypeId,
+                entity.documentTypeName,
+                entity.isDeleted
+              )
+            }
+            okText="Xác nhận"
+            cancelText="Hủy"
+            okButtonProps={{ loading: isDeleteDocumentType }}
+          >
+            <span style={{ cursor: "pointer", marginLeft: 20 }}>
+              <Tooltip title="Mở lại loại văn bản này">
+                <UnlockOutlined
+                  style={{ color: "green", fontSize: 18, cursor: "pointer" }}
+                />
+              </Tooltip>
+            </span>
+          </Popconfirm>
         );
       },
     },
@@ -156,21 +132,6 @@ const TableDocumentType = () => {
 
   const refreshTable = () => {
     actionRef.current?.reload();
-  };
-
-  const handleDeleteDocumentType = async (_id) => {
-    // setIsDeleteUser(true);
-    // const res = await deleteUserAPI(_id);
-    // if (res && res.data) {
-    //   message.success(`Xóa user thành công`);
-    //   refreshTable();
-    // } else {
-    //   notification.error({
-    //     message: `Đã có lỗi xảy ra`,
-    //     description: res.message,
-    //   });
-    // }
-    // setIsDeleteUser(false);
   };
 
   return (
@@ -197,42 +158,33 @@ const TableDocumentType = () => {
         actionRef={actionRef}
         cardBordered
         request={async (params, sort, filter) => {
-          console.log(params, sort, filter);
-
           let query = "";
           if (params) {
-            query += `current=${params.current}&pageSize=${params.pageSize}`;
-            if (params.name) {
-              query += `&name=/${params.name}/i`;
+            if (params.documentTypeName) {
+              query += `documentTypeName=${params.documentTypeName}`;
             }
+            query += `&page=${params.current}&limit=${params.pageSize}`;
           }
 
-          // default
-
-          if (sort && sort.createdAt) {
-            query += `&sort=${
-              sort.createdAt === "ascend" ? "createdAt" : "-createdAt"
-            }`;
-          } else query += `&sort=-createdAt`;
+          const res = await viewAllDocumentTypesAPI(query);
+          if (res.data) {
+            setMeta(res.data.meatadataDto);
+          }
           return {
-            data: data,
+            data: res.data?.content,
             page: 1,
             success: true,
-            total: 10,
+            total: res.data?.meatadataDto.total,
           };
         }}
-        rowKey="_id"
+        rowKey="documentTypeId"
         pagination={{
-          current: meta.current,
-          pageSize: meta.pageSize,
+          current: meta.page,
+          pageSize: meta.limit,
           showSizeChanger: true,
           total: meta.total,
           showTotal: (total, range) => {
-            return (
-              <div>
-                {range[0]} - {range[1]} trên {total} dòng
-              </div>
-            );
+            return <div>{/* {range[0]} - {range[1]} trên {total} dòng */}</div>;
           },
         }}
         headerTitle={

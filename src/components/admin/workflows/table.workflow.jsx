@@ -5,83 +5,14 @@ import { useRef, useState } from "react";
 import dayjs from "dayjs";
 import CreateWorkflow from "./create.workflow";
 import DetailWorkflow from "./detail.workflow";
-
-const data = [
-  {
-    workflow_id: "dt1",
-    name: "Luồng xử lý văn bản đi (mặc định)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt2",
-    name: "Luồng xử lý văn bản đến (mặc định)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt3",
-    name: "Luồng xử lý văn bản nội bộ phạm vi phòng ban (mặc định)",
-    is_deleted: true,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt4",
-    name: "Luồng xử lý văn bản nội bộ phạm vi toàn trường (mặc định)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt5",
-    name: "Luồng xử lý văn bản đi (20/03/2025)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt6",
-    name: "Luồng xử lý văn bản đến (20/03/2025)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt7",
-    name: "Luồng xử lý văn bản nội bộ phạm vi toàn trường (20/03/2025)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt8",
-    name: "Luồng xử lý văn bản đi (25/03/2025)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt9",
-    name: "Luồng xử lý văn bản đến (25/03/2025)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt10",
-    name: "Luồng xử lý văn bản nội bộ phạm vi toàn trường (25/03/2025)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-  {
-    workflow_id: "dt11",
-    name: "Luồng xử lý văn bản nội bộ phạm vi phòng ban (25/03/2025)",
-    is_deleted: false,
-    createdAt: "2025-03-13T07:11:00.943Z",
-  },
-];
+import { viewAllWorkflowsAPI } from "@/services/api.service";
 
 const TableWorkflow = () => {
   const actionRef = useRef();
   const [meta, setMeta] = useState({
-    current: 1,
-    pageSize: 20,
-    pages: 0,
-    total: 0,
+    limit: 10,
+    total: 1,
+    page: 1,
   });
 
   const [openModalCreate, setOpenModalCreate] = useState(false);
@@ -95,7 +26,7 @@ const TableWorkflow = () => {
   const columns = [
     {
       title: "Luồng xử lý",
-      dataIndex: "name",
+      dataIndex: "workflowName",
       copyable: true,
       fieldProps: {
         placeholder: "Vui lòng nhập tên luồng xử lý",
@@ -109,23 +40,43 @@ const TableWorkflow = () => {
         return (
           <a
             onClick={() => {
-              //   setDataViewDetail(entity);
+              setDataViewDetail(entity);
               setOpenViewDetail(true);
             }}
             style={{ cursor: "pointer" }}
           >
-            {entity.name}
+            {entity.workflowName}
           </a>
         );
+      },
+    },
+    {
+      title: "Phạm vi",
+      dataIndex: "scope",
+      hideInSearch: true,
+      width: "15%",
+      render(dom, entity) {
+        switch (entity.scope) {
+          case "OutGoing":
+            return "Văn bản đi";
+          case "InComing":
+            return "Văn bản đến";
+          case "Division":
+            return "Nội bộ phòng ban";
+          case "School":
+            return "Nội bộ toàn trường";
+          default:
+            return "-";
+        }
       },
     },
     {
       title: "Ngày tạo",
       dataIndex: "createdAt",
       valueType: "date",
-      sorter: true,
+      // sorter: true,
       hideInSearch: true,
-      width: "20%",
+      width: "15%",
       render(dom, entity, index, action, schema) {
         return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
       },
@@ -134,7 +85,7 @@ const TableWorkflow = () => {
       title: "Trạng thái",
       dataIndex: "is_deleted",
       hideInSearch: true,
-      width: "20%",
+      width: "15%",
       render: (is_deleted) =>
         is_deleted ? (
           <Tag color="red">Bị khóa</Tag>
@@ -145,7 +96,7 @@ const TableWorkflow = () => {
     {
       title: "Hành động",
       hideInSearch: true,
-      width: "20%",
+      width: "15%",
       render(dom, entity, index, action, schema) {
         return (
           <>
@@ -214,42 +165,33 @@ const TableWorkflow = () => {
         actionRef={actionRef}
         cardBordered
         request={async (params, sort, filter) => {
-          console.log(params, sort, filter);
-
           let query = "";
           if (params) {
-            query += `current=${params.current}&pageSize=${params.pageSize}`;
-            if (params.name) {
-              query += `&name=/${params.name}/i`;
+            if (params.workflowName) {
+              query += `workflowName=${params.workflowName}`;
             }
+            query += `&page=${params.current}&limit=${params.pageSize}`;
           }
 
-          // default
-
-          if (sort && sort.createdAt) {
-            query += `&sort=${
-              sort.createdAt === "ascend" ? "createdAt" : "-createdAt"
-            }`;
-          } else query += `&sort=-createdAt`;
+          const res = await viewAllWorkflowsAPI(query);
+          if (res.data) {
+            setMeta(res.data.meatadataDto);
+          }
           return {
-            data: data,
+            data: res.data?.content,
             page: 1,
             success: true,
-            total: 10,
+            total: res.data?.meatadataDto.total,
           };
         }}
-        rowKey="_id"
+        rowKey="workflowId"
         pagination={{
-          current: meta.current,
-          pageSize: meta.pageSize,
+          current: meta.page,
+          pageSize: meta.limit,
           showSizeChanger: true,
           total: meta.total,
           showTotal: (total, range) => {
-            return (
-              <div>
-                {range[0]} - {range[1]} trên {total} dòng
-              </div>
-            );
+            return <div>{/* {range[0]} - {range[1]} trên {total} dòng */}</div>;
           },
         }}
         headerTitle={

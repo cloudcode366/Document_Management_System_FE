@@ -15,6 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { UploadOutlined } from "@ant-design/icons";
+import { updateAvatarAPI, updateUserByAdminAPI } from "@/services/api.service";
 
 const UpdateUser = (props) => {
   const {
@@ -23,79 +24,116 @@ const UpdateUser = (props) => {
     refreshTable,
     setDataUpdate,
     dataUpdate,
+    divisions,
+    roles,
   } = props;
   const [isSubmit, setIsSubmit] = useState(false);
   const { message, notification } = App.useApp();
   const [form] = Form.useForm();
-  const [imageUrl, setImageUrl] = useState(dataUpdate?.avatar || "");
+  const [imageUrl, setImageUrl] = useState("/default-avatar.png");
+  const [avatarRawUrl, setAvatarRawUrl] = useState("");
 
   useEffect(() => {
-    if (dataUpdate) {
-      form.setFieldsValue({
-        user_id: dataUpdate.user_id,
-        fullName: dataUpdate.fullName,
-        username: dataUpdate.username,
-        email: dataUpdate.email,
-        avatar: dataUpdate.avatar,
-        phone_number: dataUpdate.phone_number,
-        address: dataUpdate.address,
-        gender: dataUpdate.gender,
-        division_id: dataUpdate.division
-          ? dataUpdate.division.division_id
-          : undefined,
-        position: dataUpdate.position,
-        dateOfBirth: dataUpdate.DateOfBirth
-          ? dayjs(dataUpdate.DateOfBirth)
-          : null,
-        role_id: dataUpdate.role ? dataUpdate.role.role_id : undefined,
-        sub_role: dataUpdate.subRole ? dataUpdate.subRole.role_id : undefined,
-        signature: "",
-      });
-      setImageUrl(dataUpdate.avatar);
-    }
-  }, [dataUpdate]);
+    if (openModalUpdate && dataUpdate) {
+      const {
+        fullName,
+        email,
+        address,
+        phoneNumber,
+        gender,
+        dateOfBirth,
+        position,
+        divisionId,
+        avatar,
+      } = dataUpdate;
 
-  const handleImageChange = (info) => {
+      const avatarWithTimestamp = avatar
+        ? `${avatar}?t=${Date.now()}`
+        : "/default-avatar.png";
+
+      form.setFieldsValue({
+        fullName,
+        email,
+        address,
+        phoneNumber,
+        gender,
+        dateOfBirth: dateOfBirth ? dayjs(dateOfBirth) : null,
+        position,
+        divisionId,
+        avatar: avatar || "",
+      });
+
+      setImageUrl(avatarWithTimestamp);
+      setAvatarRawUrl(avatar || "");
+    }
+  }, [openModalUpdate, dataUpdate, form]);
+
+  const handleImageChange = async (info) => {
     const file = info.file;
-    if (file) {
-      const newImageUrl = URL.createObjectURL(file);
-      setImageUrl(newImageUrl);
-      form.setFieldsValue({ avatar: newImageUrl });
+    if (!file) return;
+
+    try {
+      const res = await updateAvatarAPI(dataUpdate.userId, file);
+      const newAvatarUrl = res?.data?.content;
+      if (newAvatarUrl) {
+        setAvatarRawUrl(newAvatarUrl);
+        setImageUrl(`${newAvatarUrl}?t=${Date.now()}`);
+        form.setFieldsValue({ avatar: newAvatarUrl });
+        message.success("Tải ảnh đại diện thành công!");
+      } else {
+        message.error("Không nhận được đường dẫn ảnh từ server.");
+      }
+    } catch (err) {
+      console.error("Upload avatar failed:", err);
+      message.error("Tải ảnh lên thất bại.");
     }
   };
-
-  const departmentOptions = [
-    { id: 1, name: "Phòng Nhân sự" },
-    { id: 2, name: "Phòng Kế toán" },
-    { id: 3, name: "Phòng IT" },
-  ];
-
-  const roleOptions = [
-    { id: 1, name: "LEADER" },
-    { id: 2, name: "DIVISION HEAD" },
-    { id: 3, name: "CHIEF" },
-    { id: 4, name: "CLERICAL ASSISTANT" },
-    { id: 5, name: "SPECIALIST" },
-  ];
 
   const onFinish = async (values) => {
-    // const { _id, fullName, phone } = values;
-    // setIsSubmit(true);
-    // const res = await updateUserAPI(_id, fullName, phone);
-    // if (res && res.data) {
-    //   message.success(`Cập nhật user thành công`);
-    //   form.resetFields();
-    //   setOpenModalUpdate(false);
-    //   setDataUpdate(null);
-    //   refreshTable();
-    // } else {
-    //   notification.error({
-    //     message: "Đã có lỗi xảy ra",
-    //     description: res.message,
-    //   });
-    // }
-    // setIsSubmit(false);
+    try {
+      setIsSubmit(true);
+      const {
+        fullName,
+        email,
+        address,
+        phoneNumber,
+        gender,
+        dateOfBirth,
+        position,
+        divisionId,
+      } = values;
+      await updateUserByAdminAPI(
+        dataUpdate.userId,
+        fullName,
+        email,
+        address,
+        phoneNumber,
+        gender,
+        dateOfBirth ? dayjs(dateOfBirth).format("YYYY-MM-DD") : null,
+        position,
+        divisionId,
+        avatarRawUrl
+      );
+
+      message.success(`Cập nhật tài khoản ${dataUpdate.userName} thành công!`);
+      handleClose();
+      refreshTable();
+    } catch (error) {
+      console.error("Update user failed:", error);
+      notification.error({ message: "Cập nhật tài khoản thất bại!" });
+    } finally {
+      setIsSubmit(false);
+    }
   };
+
+  const handleClose = () => {
+    setOpenModalUpdate(false);
+    setDataUpdate(null);
+    setImageUrl("");
+    setAvatarRawUrl("");
+    form.resetFields();
+  };
+
   return (
     <>
       <Modal
@@ -113,11 +151,7 @@ const UpdateUser = (props) => {
         onOk={() => {
           form.submit();
         }}
-        onCancel={() => {
-          setOpenModalUpdate(false);
-          setDataUpdate(null);
-          form.resetFields();
-        }}
+        onCancel={handleClose}
         okText={"Cập nhật"}
         cancelText={"Hủy"}
         confirmLoading={isSubmit}
@@ -169,7 +203,7 @@ const UpdateUser = (props) => {
             <Col span={12}>
               <Form.Item
                 label="Số điện thoại"
-                name="phone_number"
+                name="phoneNumber"
                 rules={[
                   { required: true, message: "Vui lòng nhập số điện thoại!" },
                   {
@@ -192,9 +226,8 @@ const UpdateUser = (props) => {
                 ]}
               >
                 <Select placeholder="Vui lòng chọn giới tính">
-                  <Select.Option value="NAM">Nam</Select.Option>
-                  <Select.Option value="NỮ">Nữ</Select.Option>
-                  <Select.Option value="KHÁC">Khác</Select.Option>
+                  <Select.Option value="MALE">Nam</Select.Option>
+                  <Select.Option value="FEMALE">Nữ</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -207,12 +240,12 @@ const UpdateUser = (props) => {
                 ]}
               >
                 <DatePicker
-                  format="DD/MM/YYYY"
+                  format="DD - MM - YYYY"
                   style={{ width: "100%" }}
                   placeholder="Vui lòng chọn ngày sinh"
                   disabledDate={(current) =>
                     current && current > dayjs().endOf("day")
-                  } // Không cho chọn ngày trong tương lai
+                  }
                 />
               </Form.Item>
             </Col>
@@ -221,7 +254,7 @@ const UpdateUser = (props) => {
             <Col span={12}>
               <Form.Item
                 label="Phòng ban"
-                name="division_id"
+                name="divisionId"
                 rules={[
                   { required: true, message: "Vui lòng chọn phòng ban!" },
                 ]}
@@ -234,9 +267,12 @@ const UpdateUser = (props) => {
                     option.children.toLowerCase().includes(input.toLowerCase())
                   }
                 >
-                  {departmentOptions.map((dept) => (
-                    <Select.Option key={dept.id} value={dept.id}>
-                      {dept.name}
+                  {divisions.map((division) => (
+                    <Select.Option
+                      key={division.divisionId}
+                      value={division.divisionId}
+                    >
+                      {division.divisionName}
                     </Select.Option>
                   ))}
                 </Select>
@@ -252,52 +288,7 @@ const UpdateUser = (props) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label="Vai trò"
-                name="role_id"
-                rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
-              >
-                <Select
-                  showSearch
-                  placeholder="Vui lòng chọn vai trò"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {roleOptions.map((role) => (
-                    <Select.Option key={role.id} value={role.id}>
-                      {role.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Vai trò phụ"
-                name="sub_role"
-                rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
-              >
-                <Select
-                  showSearch
-                  placeholder="Vui lòng chọn vai trò"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {roleOptions.map((role) => (
-                    <Select.Option key={role.id} value={role.id}>
-                      {role.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -314,7 +305,7 @@ const UpdateUser = (props) => {
                 />
                 <Upload
                   showUploadList={false}
-                  beforeUpload={() => false} // Không upload ngay, chỉ chọn ảnh
+                  beforeUpload={() => false}
                   onChange={handleImageChange}
                 >
                   <Button icon={<UploadOutlined />} style={{ marginTop: 8 }}>
