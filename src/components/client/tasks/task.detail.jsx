@@ -1,7 +1,42 @@
-import React from "react";
+import { getTaskById, viewProfileUserAPI } from "@/services/api.service";
+import { convertScopeName } from "@/services/helper";
+import React, { useEffect, useState } from "react";
 import { MdOutlineMoreVert } from "react-icons/md";
+import { useParams } from "react-router-dom";
 
 const TaskDetail = () => {
+  const { taskId } = useParams();
+  const [taskData, setTaskData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchTask = async () => {
+      try {
+        const data = await getTaskById(taskId);
+        setTaskData(data);
+        const res = await viewProfileUserAPI(data.taskDto.userId);
+        const mainRole = res?.data?.content?.roles?.find(
+          (r) => r.createdDate === null
+        );
+        const subRole = res?.data?.content?.roles?.filter(
+          (r) => r.createdDate !== null
+        );
+        setProfile({ ...res?.data?.content, mainRole, subRole });
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTask();
+  }, [taskId]);
+
+  if (loading) return <p>Đang tải dữ liệu...</p>;
+  if (error) return <p>Lỗi: {error}</p>;
+
   // Sample task data
   const task = {
     documentType: "Quyết định",
@@ -43,15 +78,24 @@ const TaskDetail = () => {
     },
   };
 
+  console.log(`>>> Check profile: `, profile);
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // vì tháng bắt đầu từ 0
+    const year = date.getFullYear();
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
+  };
+
   return (
     <div
       style={{ display: "flex", height: "100vh", backgroundColor: "#f5f5f5" }}
     >
-      {/* Main Content */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* Task Detail Content */}
         <div style={{ display: "flex", flex: 1, padding: "20px", gap: "20px" }}>
-          {/* Left Section: Document Preview and Task Details */}
           <div
             style={{
               flex: 2,
@@ -60,7 +104,6 @@ const TaskDetail = () => {
               gap: "20px",
             }}
           >
-            {/* Document Preview */}
             <div
               style={{
                 height: "200px",
@@ -86,7 +129,6 @@ const TaskDetail = () => {
                   filter: "blur(5px)",
                 }}
               />
-              {/* Zoom Icon Button */}
               <button
                 style={{
                   position: "absolute",
@@ -108,7 +150,6 @@ const TaskDetail = () => {
               </button>
             </div>
 
-            {/* Task Metadata */}
             <div
               style={{
                 display: "flex",
@@ -120,13 +161,20 @@ const TaskDetail = () => {
                 <h3
                   style={{ fontSize: "18px", fontWeight: "bold", margin: "0" }}
                 >
-                  Khởi tạo văn bản
+                  {taskData.taskDto.title}
                 </h3>
-                <p style={{ fontSize: "14px", color: "#333", margin: "5px 0" }}>
-                  {task.documentType}. {task.workflow}. {task.flow}
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#5f6368",
+                    paddingTop: "10px",
+                  }}
+                >
+                  {convertScopeName(taskData.scope)} · {taskData.stepAction}
                 </p>
                 <div
                   style={{
+                    paddingTop: "10px",
                     display: "flex",
                     alignItems: "center",
                     gap: "5px",
@@ -135,7 +183,10 @@ const TaskDetail = () => {
                   }}
                 >
                   <span>🕒</span>
-                  <span>{task.creationDate}</span>
+                  <span>
+                    {formatDateTime(taskData.taskDto.startDate)} -{" "}
+                    {formatDateTime(taskData.taskDto.endDate)}
+                  </span>
                 </div>
               </div>
               <button
@@ -153,7 +204,6 @@ const TaskDetail = () => {
               </button>
             </div>
 
-            {/* Description */}
             <div>
               <h4
                 style={{
@@ -172,11 +222,10 @@ const TaskDetail = () => {
                   wordBreak: "break-word",
                 }}
               >
-                {task.description}
+                {taskData.taskDto.description}
               </p>
             </div>
 
-            {/* Assignees */}
             <div>
               <h4
                 style={{
@@ -187,43 +236,40 @@ const TaskDetail = () => {
               >
                 Người tham gia
               </h4>
-              {task.assignees.map((assignee, index) => (
-                <div
-                  key={index}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "10px 0",
+                  borderBottom: "1px dashed #ddd",
+                }}
+              >
+                <img
+                  src={profile.avatar}
+                  alt={profile.fullName}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 0",
-                    borderBottom: "1px dashed #ddd",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
                   }}
-                >
-                  <img
-                    src={assignee.avatar}
-                    alt={assignee.name}
+                />
+                <div>
+                  <p
                     style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      objectFit: "cover",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      margin: "0",
                     }}
-                  />
-                  <div>
-                    <p
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: "bold",
-                        margin: "0",
-                      }}
-                    >
-                      {assignee.name}
-                    </p>
-                    <p style={{ fontSize: "12px", color: "#666", margin: "0" }}>
-                      {assignee.role}
-                    </p>
-                  </div>
+                  >
+                    {profile.fullName}
+                  </p>
+                  <p style={{ fontSize: "12px", color: "#666", margin: "0" }}>
+                    {profile.mainRole.roleName}
+                  </p>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
           <div
@@ -238,7 +284,6 @@ const TaskDetail = () => {
               gap: "24px",
             }}
           >
-            {/* Phân bổ nhiệm vụ */}
             <div>
               <p style={{ fontSize: "12px", fontWeight: 500, color: "#444" }}>
                 Phân bổ nhiệm vụ
@@ -246,14 +291,29 @@ const TaskDetail = () => {
               <h2
                 style={{ fontSize: "20px", fontWeight: 600, margin: "4px 0" }}
               >
-                Khởi tạo văn bản
+                {taskData.taskDto.title}
               </h2>
-              <p style={{ fontSize: "14px", color: "#5f6368", margin: 0 }}>
-                Văn bản ra · Luồng 1
-              </p>
+
+              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
+                <span style={{ float: "right", fontWeight: 500 }}>
+                  {taskData.documentTypeName}
+                </span>
+              </div>
+              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
+                <span style={{ float: "right", fontWeight: 500 }}>
+                  {taskData.workflowName}
+                </span>
+              </div>
+              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                <span style={{ color: "#5f6368" }}>Nhiệm vụ chính:</span>
+                <span style={{ float: "right", fontWeight: 500 }}>
+                  {taskData.taskDto.taskType}
+                </span>
+              </div>
             </div>
 
-            {/* Tổng quan nhiệm vụ */}
             <div>
               <h3
                 style={{
@@ -266,62 +326,22 @@ const TaskDetail = () => {
               </h3>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Người tạo</span>
-                <span style={{ float: "right", fontWeight: 500 }}>Nam Le</span>
+                <span style={{ float: "right", fontWeight: 500 }}>
+                  {taskData.userNameCreateTask}
+                </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Bước</span>
-                <span style={{ float: "right", fontWeight: 500 }}>1</span>
+                <span style={{ float: "right", fontWeight: 500 }}>
+                  {taskData.stepAction}
+                </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Ngày tạo</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  10/02/2025
+                  {formatDateTime(taskData.taskDto.createdDate)}
                 </span>
               </div>
-              {/* <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px", // khoảng cách giữa text và ảnh
-                    marginTop: "12px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#5f6368",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    Người tham gia
-                  </div>
-                  <div style={{ display: "flex" }}>
-                    {[
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                    ].map((src, index) => (
-                      <img
-                        key={index}
-                        src={src}
-                        alt={`avatar-${index}`}
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          border: "2px solid white",
-                          marginLeft: index === 0 ? 0 : -10,
-                          zIndex: 10 - index, // để ảnh xếp chồng đẹp
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div> */}
 
               <div
                 style={{
@@ -339,7 +359,20 @@ const TaskDetail = () => {
                 >
                   <span style={{ color: "#5f6368" }}>Người tham gia</span>
                   <div style={{ display: "flex" }}>
-                    {[
+                    <img
+                      src={profile.avatar}
+                      alt={profile.fullName}
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "2px solid white",
+                        marginLeft: 0 ? 0 : -10,
+                        zIndex: 10,
+                      }}
+                    />
+                    {/* {[
                       "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
                       "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
                       "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
@@ -360,13 +393,12 @@ const TaskDetail = () => {
                           zIndex: 10 - index,
                         }}
                       />
-                    ))}
+                    ))} */}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Kéo và thả */}
             <div
               style={{
                 border: "2px dashed #ddd",
@@ -390,7 +422,6 @@ const TaskDetail = () => {
               </p>
             </div>
 
-            {/* File đã tải */}
             <div
               style={{
                 border: "1px solid #e0e0e0",
