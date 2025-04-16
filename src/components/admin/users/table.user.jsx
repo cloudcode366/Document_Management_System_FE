@@ -44,6 +44,7 @@ const TableUser = () => {
   const [divisions, setDivisions] = useState([]);
   const [divisionNames, setDivisionNames] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [subRoles, setSubRoles] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchDivisions = async () => {
@@ -75,8 +76,14 @@ const TableUser = () => {
           roleId: role.roleId,
           roleName: convertRoleName(role.roleName),
         }));
-
       setRoles(newRolesData);
+      const newSubRolesData = res.data.content
+        .filter((r) => r.createdDate !== null)
+        .map((role) => ({
+          roleId: role.roleId,
+          roleName: role.roleName,
+        }));
+      setSubRoles(newSubRolesData);
     }
     setLoading(false);
   };
@@ -168,9 +175,13 @@ const TableUser = () => {
         const mainRole = record.roles?.find(
           (role) => role.createdDate === null
         );
-        return convertRoleName(mainRole?.roleName) || "-";
+        return (
+          <Tag color="geekblue" style={{ fontSize: "14px" }}>
+            {convertRoleName(mainRole?.roleName) || "-"}
+          </Tag>
+        );
       },
-      width: "10%",
+      width: "15%",
     },
     {
       title: "Vai trò chính",
@@ -255,9 +266,13 @@ const TableUser = () => {
       hideInSearch: true,
       render: (isDeleted) =>
         isDeleted ? (
-          <Tag color="red">Bị khóa</Tag>
+          <Tag color="red" style={{ fontSize: "14px" }}>
+            Bị khóa
+          </Tag>
         ) : (
-          <Tag color="green">Hoạt động</Tag>
+          <Tag color="green" style={{ fontSize: "14px" }}>
+            Hoạt động
+          </Tag>
         ),
       width: "10%",
     },
@@ -496,7 +511,7 @@ const TableUser = () => {
         setDataUpdate={setDataUpdate}
         refreshTable={refreshTable}
         divisions={divisions}
-        roles={roles}
+        subRoles={subRoles}
       />
       <DetailUser
         openViewDetail={openViewDetail}

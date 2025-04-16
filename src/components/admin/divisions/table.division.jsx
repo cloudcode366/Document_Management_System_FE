@@ -80,9 +80,13 @@ const TableDivision = () => {
       width: "20%",
       render: (isDeleted) =>
         isDeleted ? (
-          <Tag color="red">Bị khóa</Tag>
+          <Tag color="red" style={{ fontSize: "14px" }}>
+            Bị khóa
+          </Tag>
         ) : (
-          <Tag color="green">Hoạt động</Tag>
+          <Tag color="green" style={{ fontSize: "14px" }}>
+            Hoạt động
+          </Tag>
         ),
     },
     {

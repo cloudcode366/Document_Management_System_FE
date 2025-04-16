@@ -1,17 +1,25 @@
 import { createSubRoleAPI } from "@/services/api.service";
-import { App, Col, Form, Input, Modal, Row } from "antd";
+import { convertRoleName } from "@/services/helper";
+import { App, Col, Form, Input, Modal, Row, Select } from "antd";
 import { useState } from "react";
 
 const CreateSubRole = (props) => {
-  const { openModalCreate, setOpenModalCreate, reloadPage } = props;
+  const {
+    openModalCreate,
+    setOpenModalCreate,
+    reloadPage,
+    mainRoles,
+    setMainRoles,
+  } = props;
   const { message, notification } = App.useApp();
   const [isSubmit, setIsSubmit] = useState(false);
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    const { roleName } = values;
+    const { subRoleName, roleName } = values;
     setIsSubmit(true);
-    const res = await createSubRoleAPI(roleName);
+    const payload = `${subRoleName}_${roleName}`;
+    const res = await createSubRoleAPI(payload);
     if (res && res.data && res.data.statusCode === 201) {
       message.success(`Tạo mới vai trò phụ thành công!`);
       form.resetFields();
@@ -69,16 +77,40 @@ const CreateSubRole = (props) => {
           onFinish={onFinish}
           autoComplete="off"
         >
-          <Row>
-            <Col span={24}>
+          <Row gutter={16}>
+            <Col span={12}>
               <Form.Item
                 label="Tên vai trò phụ"
-                name="roleName"
+                name="subRoleName"
                 rules={[
                   { required: true, message: "Vui lòng nhập tên vai trò!" },
                 ]}
               >
-                <Input />
+                <Input placeholder="Vui lòng nhập tên vai trò phụ" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Vai trò chính"
+                name="roleName"
+                rules={[
+                  { required: true, message: "Vui lòng chọn vai trò chính!" },
+                ]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Vui lòng chọn vai trò chính"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {mainRoles?.map((role) => (
+                    <Select.Option key={role.roleName} value={role.roleName}>
+                      {convertRoleName(role.roleName)}
+                    </Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>

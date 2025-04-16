@@ -18,12 +18,31 @@ const DetailUser = (props) => {
   return (
     <>
       <Drawer
-        title="Thông tin chi tiết"
+        title="Chi tiết tài khoản"
         width="50vw"
         onClose={onClose}
         open={openViewDetail}
+        contentStyle={{
+          backgroundColor: "#f9fafc ",
+          height: "100%",
+        }}
       >
-        <Descriptions bordered column={2}>
+        <Descriptions
+          bordered
+          column={2}
+          style={{
+            backgroundColor: "#ffffff",
+            padding: "12px",
+            borderRadius: 10,
+          }}
+          labelStyle={{
+            fontWeight: "bold",
+            fontSize: 15,
+            backgroundColor: "#F2F2F2",
+            padding: "8px 12px",
+            color: "#1d1d1f",
+          }}
+        >
           <Descriptions.Item
             label="Họ và tên"
             labelStyle={{ fontWeight: "bold" }}
@@ -68,9 +87,13 @@ const DetailUser = (props) => {
             labelStyle={{ fontWeight: "bold" }}
           >
             {dataViewDetail?.isDeleted ? (
-              <Tag color="red">Bị khóa</Tag>
+              <Tag color="red" style={{ fontSize: "14px" }}>
+                Bị khóa
+              </Tag>
             ) : (
-              <Tag color="green">Hoạt động</Tag>
+              <Tag color="green" style={{ fontSize: "14px" }}>
+                Hoạt động
+              </Tag>
             )}
           </Descriptions.Item>
           <Descriptions.Item
@@ -89,7 +112,7 @@ const DetailUser = (props) => {
             label="Vai trò"
             labelStyle={{ fontWeight: "bold" }}
           >
-            <Tag color="geekblue">
+            <Tag color="geekblue" style={{ fontSize: "14px" }}>
               {convertRoleName(dataViewDetail?.mainRole?.roleName) || "—"}
             </Tag>
           </Descriptions.Item>

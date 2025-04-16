@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Tabs, Table, Spin, Tag, Typography, Empty, Button } from "antd";
-import { viewRoleResourcesAPI } from "@/services/api.service";
+import { viewAllRoles, viewRoleResourcesAPI } from "@/services/api.service";
 import { PlusOutlined } from "@ant-design/icons";
 import UpdateResource from "components/admin/permissions/update.resource";
 import { convertPermissionName, convertRoleName } from "@/services/helper";
@@ -53,6 +53,7 @@ const RolePermissionMatrix = () => {
   const [openModalCreate, setOpenModalCreate] = useState(false);
   const [openModalUpdate, setOpenModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState(null);
+  const [mainRoles, setMainRoles] = useState(null);
 
   const fetchData = async (type) => {
     setLoading(true);
@@ -70,8 +71,25 @@ const RolePermissionMatrix = () => {
     setLoading(false);
   };
 
+  const fetchRoles = async () => {
+    setLoading(true);
+    const res = await viewAllRoles();
+    if (res?.data?.statusCode === 200) {
+      const mainRole = res.data.content.filter((r) => r.createdDate === null);
+      const newRolesData = mainRole
+        .filter((role) => role.roleName !== "Admin")
+        .map((role) => ({
+          roleId: role.roleId,
+          roleName: role.roleName,
+        }));
+      console.log(`>>> newRolesData: `, newRolesData);
+      setMainRoles(newRolesData);
+    }
+    setLoading(false);
+  };
   useEffect(() => {
     fetchData(roleType);
+    fetchRoles();
   }, [roleType]);
 
   const reloadPage = () => {
@@ -210,6 +228,8 @@ const RolePermissionMatrix = () => {
         openModalCreate={openModalCreate}
         setOpenModalCreate={setOpenModalCreate}
         reloadPage={reloadPage}
+        mainRoles={mainRoles}
+        setMainRoles={setMainRoles}
       />
     </div>
   );
