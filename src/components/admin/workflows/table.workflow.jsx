@@ -3,9 +3,10 @@ import { ProTable } from "@ant-design/pro-components";
 import { App, Button, Popconfirm, Tag, Typography } from "antd";
 import { useRef, useState } from "react";
 import dayjs from "dayjs";
-import CreateWorkflow from "./create.workflow";
-import DetailWorkflow from "./detail.workflow";
+import CreateWorkflow from "@/components/admin/workflows/create.workflow";
+import DetailWorkflow from "@/components/admin/workflows/detail.workflow";
 import { viewAllWorkflowsAPI } from "@/services/api.service";
+import { convertScopeName } from "@/services/helper";
 
 const TableWorkflow = () => {
   const actionRef = useRef();
@@ -16,12 +17,13 @@ const TableWorkflow = () => {
   });
 
   const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [mainWorkflows, setMainWorkflows] = useState([]);
 
   const [openViewDetail, setOpenViewDetail] = useState(false);
   const [dataViewDetail, setDataViewDetail] = useState(null);
 
   const [isDeleteDivision, setIsDeleteDivision] = useState(false);
-  const { message, notification } = App.useApp();
+  const { message, notification } = App.useApp(); 
 
   const columns = [
     {
@@ -32,8 +34,8 @@ const TableWorkflow = () => {
         placeholder: "Vui lòng nhập tên luồng xử lý",
       },
       formItemProps: {
-        labelCol: { span: 8 },
-        wrapperCol: { span: 18 },
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
       },
       width: "40%",
       render(dom, entity) {
@@ -56,38 +58,27 @@ const TableWorkflow = () => {
       hideInSearch: true,
       width: "15%",
       render(dom, entity) {
-        switch (entity.scope) {
-          case "OutGoing":
-            return "Văn bản đi";
-          case "InComing":
-            return "Văn bản đến";
-          case "Division":
-            return "Nội bộ phòng ban";
-          case "School":
-            return "Nội bộ toàn trường";
-          default:
-            return "-";
-        }
+        return convertScopeName(entity.scope);
       },
     },
-    {
-      title: "Ngày tạo",
-      dataIndex: "createdAt",
-      valueType: "date",
-      // sorter: true,
-      hideInSearch: true,
-      width: "15%",
-      render(dom, entity, index, action, schema) {
-        return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
-      },
-    },
+    // {
+    //   title: "Ngày tạo",
+    //   dataIndex: "createdAt",
+    //   valueType: "date",
+    //   // sorter: true,
+    //   hideInSearch: true,
+    //   width: "15%",
+    //   render(dom, entity, index, action, schema) {
+    //     return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
+    //   },
+    // },
     {
       title: "Trạng thái",
-      dataIndex: "is_deleted",
+      dataIndex: "isDeleted",
       hideInSearch: true,
       width: "15%",
-      render: (is_deleted) =>
-        is_deleted ? (
+      render: (isDeleted) =>
+        isDeleted ? (
           <Tag color="red">Bị khóa</Tag>
         ) : (
           <Tag color="green">Hoạt động</Tag>
@@ -104,7 +95,7 @@ const TableWorkflow = () => {
               placement="leftTop"
               title="Xác nhận khóa luồng xử lý"
               description="Bạn có chắc chắn muốn khóa luồng xử lý này?"
-              onConfirm={() => handleDeleteDocumentType(entity._id)}
+              onConfirm={() => handleDeleteWorkflow(entity.workflowId)}
               okText="Xác nhận"
               cancelText="Hủy"
               okButtonProps={{ loading: isDeleteDivision }}
@@ -126,7 +117,7 @@ const TableWorkflow = () => {
     actionRef.current?.reload();
   };
 
-  const handleDeleteDocumentType = async (_id) => {
+  const handleDeleteWorkflow = async (workflowId) => {
     // setIsDeleteUser(true);
     // const res = await deleteUserAPI(_id);
     // if (res && res.data) {
@@ -176,6 +167,10 @@ const TableWorkflow = () => {
           const res = await viewAllWorkflowsAPI(query);
           if (res.data) {
             setMeta(res.data.meatadataDto);
+            const mainWorkflowsData = res.data.content.filter(
+              (w) => w.createAt === null
+            );
+            setMainWorkflows(mainWorkflowsData);
           }
           return {
             data: res.data?.content,
@@ -215,6 +210,7 @@ const TableWorkflow = () => {
         setOpenModalCreate={setOpenModalCreate}
         refreshTable={refreshTable}
         setDataViewDetail={setDataViewDetail}
+        mainWorkflows={mainWorkflows}
       />
       <DetailWorkflow
         openViewDetail={openViewDetail}

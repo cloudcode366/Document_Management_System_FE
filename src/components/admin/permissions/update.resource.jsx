@@ -1,64 +1,69 @@
-import React, { useState } from "react";
-import { Modal, Table, Checkbox, Descriptions, Button } from "antd";
+import React, { useState, useEffect } from "react";
+import { Modal, Table, Checkbox, Descriptions, Button, message } from "antd";
+import { convertPermissionName, convertRoleName } from "@/services/helper";
+import { updateResourcesAPI } from "@/services/api.service";
 
-const UpdateResource = (props) => {
-  const {
-    openUpdateResource,
-    setOpenUpdateResource,
-    dataUpdateResource,
-    setDataUpdateResource,
-    finalData,
-    setFinalData,
-  } = props;
+const UpdateResource = ({
+  openModalUpdate,
+  setOpenModalUpdate,
+  dataUpdate,
+  setDataUpdate,
+  reloadPage,
+}) => {
   const [loading, setLoading] = useState(false);
+  const [editedResources, setEditedResources] = useState([]);
+  const [originalResources, setOriginalResources] = useState([]);
 
-  // Cập nhật trạng thái của resources khi người dùng chọn checkbox
-  const handleCheckboxChange = (resourceId, checked) => {
-    const updatedResources = dataUpdateResource?.permissions?.resources.map(
-      (res) =>
-        res.resourceId === resourceId
-          ? { ...res, isDeleted: checked ? "false" : "true" }
-          : res
-    );
+  // Clone dữ liệu gốc khi modal mở
+  useEffect(() => {
+    if (openModalUpdate && dataUpdate?.resources) {
+      const original = dataUpdate.resources.map((res) => ({
+        resourceId: res.resourceId,
+        isDeleted: res.isDeleted,
+      }));
+      const cloneForEdit = dataUpdate.resources.map((res) => ({ ...res }));
 
-    setDataUpdateResource((prev) => ({
-      ...prev,
-      permissions: {
-        ...prev.permissions,
-        resources: updatedResources,
-      },
-    }));
-  };
+      setOriginalResources(original);
+      setEditedResources(cloneForEdit);
+    }
+  }, [openModalUpdate, dataUpdate]);
 
-  // Đóng modal
   const handleClose = () => {
-    setOpenUpdateResource(false);
-    setDataUpdateResource(null);
+    setOpenModalUpdate(false);
+    setDataUpdate(null);
+    setEditedResources([]);
+    setOriginalResources([]);
   };
 
-  // Cập nhật dữ liệu vào finalData
-  const handleUpdateResource = () => {
-    if (!dataUpdateResource) return;
-    setLoading(true);
+  const handleUpdate = async () => {
+    if (!dataUpdate?.roleId) return;
 
-    const updatedFinalData = finalData.map((role) => {
-      if (role.roleId === dataUpdateResource.roleId) {
-        return {
-          ...role,
-          permissions: role.permissions.map((perm) =>
-            perm.permissionId === dataUpdateResource.permissions.permissionId
-              ? { ...perm, resources: dataUpdateResource.permissions.resources }
-              : perm
-          ),
-        };
-      }
-      return role;
-    });
+    const changedResourceIds = editedResources
+      .filter((res) => {
+        const original = originalResources.find(
+          (o) => o.resourceId === res.resourceId
+        );
+        return original && original.isDeleted !== res.isDeleted;
+      })
+      .map((res) => res.resourceId);
 
-    setFinalData(updatedFinalData);
-    setLoading(false);
-    console.log(`>>> Check finalData in UpdateResource: `, finalData);
-    handleClose();
+    if (changedResourceIds.length === 0) {
+      message.info("Không có thay đổi để cập nhật.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await updateResourcesAPI(dataUpdate.roleId, changedResourceIds);
+      message.success("Cập nhật thành công!");
+      handleClose();
+      reloadPage();
+    } catch (err) {
+      message.error("Cập nhật thất bại!");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns = [
@@ -71,12 +76,17 @@ const UpdateResource = (props) => {
       title: "Cấp phép",
       dataIndex: "isDeleted",
       key: "isDeleted",
-      render: (isDeleted, record) => (
+      render: (isDeleted, record, index) => (
         <Checkbox
-          checked={isDeleted === "false"}
-          onChange={(e) =>
-            handleCheckboxChange(record.resourceId, e.target.checked)
-          }
+          checked={!record.isDeleted}
+          onChange={(e) => {
+            const updated = [...editedResources];
+            updated[index] = {
+              ...record,
+              isDeleted: !e.target.checked,
+            };
+            setEditedResources(updated);
+          }}
         />
       ),
     },
@@ -84,14 +94,18 @@ const UpdateResource = (props) => {
 
   return (
     <Modal
-      title="Cập nhật tài nguyên"
+      title={
+        <div style={{ borderBottom: "1px solid #80868b", paddingBottom: 8 }}>
+          Cập nhật chức năng
+        </div>
+      }
       width={"80vw"}
-      open={openUpdateResource}
+      open={openModalUpdate}
       onCancel={handleClose}
-      okText={"Cập nhật"}
-      cancelText={"Hủy"}
+      okText="Cập nhật"
+      cancelText="Hủy"
       maskClosable={false}
-      centered={true}
+      centered
       footer={[
         <Button key="cancel" onClick={handleClose}>
           Hủy
@@ -100,9 +114,9 @@ const UpdateResource = (props) => {
           key="update"
           type="primary"
           loading={loading}
-          onClick={handleUpdateResource}
+          onClick={handleUpdate}
         >
-          Xác nhận
+          Cập nhật
         </Button>,
       ]}
       bodyProps={{
@@ -115,15 +129,16 @@ const UpdateResource = (props) => {
     >
       <Descriptions bordered column={2}>
         <Descriptions.Item label="Vai trò" labelStyle={{ fontWeight: "bold" }}>
-          {dataUpdateResource?.roleName}
+          {convertRoleName(dataUpdate?.roleName)}
         </Descriptions.Item>
         <Descriptions.Item label="Quyền" labelStyle={{ fontWeight: "bold" }}>
-          {dataUpdateResource?.permissions?.permissionName}
+          {convertPermissionName(dataUpdate?.permissionName)}
         </Descriptions.Item>
       </Descriptions>
+
       <Table
         columns={columns}
-        dataSource={dataUpdateResource?.permissions?.resources || []}
+        dataSource={editedResources}
         rowKey="resourceId"
         pagination={false}
       />

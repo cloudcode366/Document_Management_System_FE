@@ -140,7 +140,7 @@ const UpdateProfile = ({
               name="fullName"
               rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
             >
-              <Input />
+              <Input readOnly />
             </Form.Item>
           </Col>
           <Col span={12}>

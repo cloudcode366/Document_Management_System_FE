@@ -228,6 +228,36 @@ const getTaskById = async (taskId) => {
 };
 
 
+const viewRoleResourcesAPI = (roleFillter) => {
+  const urlBackend = `/api/RoleResource/view-role-resources?roleFillter=${roleFillter}`;
+  return axios.get(urlBackend);
+};
+
+const updateResourcesAPI = (roleId, resourceIds) => {
+  const urlBackend = `/api/RoleResource/create-role-with-resources`;
+  return axios.post(urlBackend, [{ roleId, resourceIds }]);
+};
+
+const createSubRoleAPI = (roleName) => {
+  const urlBackend = `/api/Role/create-role`;
+  return axios.post(urlBackend, { roleName });
+};
+
+const viewAllFlowsAPI = () => {
+  const urlBackend = `/api/Flow/view-all-flow`;
+  return axios.get(urlBackend);
+};
+
+const createWorkflowAPI = (data) => {
+  const urlBackend = `/api/Workflow/create-workflow`;
+  return axios.post(urlBackend, data);
+};
+
+const viewDocumentTypeNameByWorkflowId = (workflowId) => {
+  const urlBackend = `/api/DocumentType/view-document-type-name-by-workflow-id?workflowId=${workflowId}`;
+  return axios.get(urlBackend);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -252,5 +282,11 @@ export {
   updateDivisionAPI,
   changeStatusDivisionAPI,
   getAllTasks,
-  getTaskById
+  getTaskById,
+  viewRoleResourcesAPI,
+  updateResourcesAPI,
+  createSubRoleAPI,
+  viewAllFlowsAPI,
+  createWorkflowAPI,
+  viewDocumentTypeNameByWorkflowId,
 };

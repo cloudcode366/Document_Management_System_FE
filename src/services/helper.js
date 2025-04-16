@@ -31,6 +31,20 @@ export const convertRoleName = (roleName) => {
   }
 };
 
+export const convertPermissionName = (permissionName) => {
+  switch (permissionName) {
+    case "Create":
+      return "Tạo";
+    case "View":
+      return "Xem";
+    case "Update":
+      return "Cập nhật";
+    case "Delete":
+      return "Xóa";
+    default:
+      return permissionName;
+  }
+};
 
 export const convertScopeName = (scope) => {
   switch (scope) {
