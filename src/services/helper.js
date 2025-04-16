@@ -30,3 +30,49 @@ export const convertRoleName = (roleName) => {
       return roleName;
   }
 };
+
+
+export const convertScopeName = (scope) => {
+  switch (scope) {
+    case "OutGoing":
+      return "Văn bản đi";
+    case "InComing":
+      return "Văn bản đến";
+    case "Division":
+      return "Nội bộ phòng ban";
+    case "School":
+      return "Nội bộ toàn trường";
+    default:
+      return "-";
+  }
+};
+
+export const convertStatus = (status) => {
+  switch (status) {
+    case "Pending":
+      return "Đang chờ xác nhận";
+    case "Revised":
+      return "Cần chỉnh sửa";
+    case "InProgress":
+      return "Đang trong quá trình xử lý";
+    case "Completed":
+      return "Đã hoàn thành";
+    default:
+      return "Không xác định";
+  }
+};
+
+export const getStatusColor = (status) => {
+  switch (status) {
+    case "Pending":
+      return "orange";
+    case "Revised":
+      return "red";
+    case "InProgress":
+      return "blue";
+    case "Completed":
+      return "green";
+    default:
+      return "gray";
+  }
+};
