@@ -198,6 +198,36 @@ const viewAllRoles = () => {
   return axios.get(urlBackend);
 };
 
+
+const getAllTasks = async (userId) => {
+  try {
+    const urlBackend = await axios.get(`/api/Task/view-all-tasks`, {
+      params: {
+        userId: userId,
+        page: 1,
+        limit: 1000,
+      },
+    });
+    return urlBackend.data.content;
+  } catch (error) {
+    console.error("Lỗi khi gọi API getAllTasks:", error);
+    return [];
+  }
+};
+
+
+
+const getTaskById = async (taskId) => {
+  try {
+    const response = await axios.get(`/api/Task/view-task-by-id?id=${taskId}`);
+    return response.data.content;
+  } catch (error) {
+    console.error('Error fetching task:', error);
+    throw error;
+  }
+};
+
+
 const viewRoleResourcesAPI = (roleFillter) => {
   const urlBackend = `/api/RoleResource/view-role-resources?roleFillter=${roleFillter}`;
   return axios.get(urlBackend);
@@ -251,6 +281,8 @@ export {
   createDivisionAPI,
   updateDivisionAPI,
   changeStatusDivisionAPI,
+  getAllTasks,
+  getTaskById
   viewRoleResourcesAPI,
   updateResourcesAPI,
   createSubRoleAPI,

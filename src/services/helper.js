@@ -60,3 +60,33 @@ export const convertScopeName = (scope) => {
       return "-";
   }
 };
+
+export const convertStatus = (status) => {
+  switch (status) {
+    case "Pending":
+      return "Đang chờ xác nhận";
+    case "Revised":
+      return "Cần chỉnh sửa";
+    case "InProgress":
+      return "Đang trong quá trình xử lý";
+    case "Completed":
+      return "Đã hoàn thành";
+    default:
+      return "Không xác định";
+  }
+};
+
+export const getStatusColor = (status) => {
+  switch (status) {
+    case "Pending":
+      return "orange";
+    case "Revised":
+      return "red";
+    case "InProgress":
+      return "blue";
+    case "Completed":
+      return "green";
+    default:
+      return "gray";
+  }
+};
