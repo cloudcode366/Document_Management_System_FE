@@ -1,18 +1,5 @@
 import { createDivisionAPI } from "@/services/api.service";
-import { MinusCircleOutlined } from "@ant-design/icons";
-import {
-  App,
-  Avatar,
-  Button,
-  Col,
-  Form,
-  Input,
-  Modal,
-  Row,
-  Select,
-  Table,
-  Tag,
-} from "antd";
+import { App, Col, Form, Input, Modal, Row } from "antd";
 import { useState } from "react";
 
 const CreateDivision = (props) => {

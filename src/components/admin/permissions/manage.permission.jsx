@@ -1,328 +1,160 @@
-import React, { useState, useEffect } from "react";
-import { Button, Table, Tabs } from "antd";
-import {
-  CheckOutlined,
-  CloseOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
-import UpdateResource from "./update.resource";
+import React, { useEffect, useState, useMemo } from "react";
+import { Tabs, Table, Spin, Tag, Typography, Empty, Button } from "antd";
+import { viewRoleResourcesAPI } from "@/services/api.service";
+import { PlusOutlined } from "@ant-design/icons";
+import UpdateResource from "components/admin/permissions/update.resource";
+import { convertPermissionName, convertRoleName } from "@/services/helper";
 import CreateSubRole from "./create.sub.role";
 
-const { TabPane } = Tabs;
+const { Title } = Typography;
 
-const data = [
-  {
-    roleId: "r1",
-    roleName: "Admin",
-    permissions: [
-      {
-        permissionId: "p1",
-        permissionName: "Create",
-        resources: [
-          {
-            resourceId: "re1",
-            resourceName: "Create user",
-            isDeleted: "false",
-          },
-          {
-            resourceId: "re2",
-            resourceName: "Create division",
-            isDeleted: "false",
-          },
-        ],
-      },
-      {
-        permissionId: "p2",
-        permissionName: "Update",
-        resources: [
-          { resourceId: "re3", resourceName: "Update User", isDeleted: "true" },
-          {
-            resourceId: "re4",
-            resourceName: "Update division",
-            isDeleted: "true",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    roleId: "r2",
-    roleName: "Leader",
-    permissions: [
-      {
-        permissionId: "p5",
-        permissionName: "Create",
-        resources: [
-          {
-            resourceId: "leader1",
-            resourceName: "Create user",
-            isDeleted: "false",
-          },
-          {
-            resourceId: "leader2",
-            resourceName: "Create division",
-            isDeleted: "false",
-          },
-        ],
-      },
-      {
-        permissionId: "p6",
-        permissionName: "Update",
-        resources: [
-          {
-            resourceId: "leader3",
-            resourceName: "Update User",
-            isDeleted: "false",
-          },
-          {
-            resourceId: "leader4",
-            resourceName: "Update division",
-            isDeleted: "false",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    roleId: "r3",
-    roleName: "Chief",
-    permissions: [
-      {
-        permissionId: "cp1",
-        permissionName: "Create",
-        resources: [
-          {
-            resourceId: "cre1",
-            resourceName: "Create user",
-            isDeleted: "true",
-          },
-          {
-            resourceId: "cre2",
-            resourceName: "Create division",
-            isDeleted: "false",
-          },
-        ],
-      },
-      {
-        permissionId: "cp2",
-        permissionName: "Update",
-        resources: [
-          {
-            resourceId: "cre3",
-            resourceName: "Update User",
-            isDeleted: "true",
-          },
-          {
-            resourceId: "cre4",
-            resourceName: "Update division",
-            isDeleted: "true",
-          },
-        ],
-      },
-    ],
-  },
-];
+const transformMatrix = (data) => {
+  if (!Array.isArray(data)) return { matrix: {}, roles: [], permissions: [] };
 
-const subRoleData = [
-  {
-    roleId: "sr1",
-    roleName: "Sub-Admin",
-    permissions: [
-      {
-        permissionId: "sp1",
-        permissionName: "Create",
-        resources: [
-          {
-            resourceId: "sre1",
-            resourceName: "Create user",
-            isDeleted: "true",
-          },
-          {
-            resourceId: "sre2",
-            resourceName: "Create division",
-            isDeleted: "false",
-          },
-        ],
-      },
-      {
-        permissionId: "sp2",
-        permissionName: "Update",
-        resources: [
-          {
-            resourceId: "sre3",
-            resourceName: "Update User",
-            isDeleted: "true",
-          },
-          {
-            resourceId: "sre4",
-            resourceName: "Update division",
-            isDeleted: "true",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    roleId: "sr2",
-    roleName: "Sub Leader",
-    permissions: [
-      {
-        permissionId: "sp5",
-        permissionName: "Create",
-        resources: [
-          {
-            resourceId: "sleader1",
-            resourceName: "Create user",
-            isDeleted: "false",
-          },
-          {
-            resourceId: "sleader2",
-            resourceName: "Create division",
-            isDeleted: "false",
-          },
-        ],
-      },
-      {
-        permissionId: "sp6",
-        permissionName: "Update",
-        resources: [
-          {
-            resourceId: "sleader3",
-            resourceName: "Update User",
-            isDeleted: "false",
-          },
-          {
-            resourceId: "sleader4",
-            resourceName: "Update division",
-            isDeleted: "false",
-          },
-        ],
-      },
-    ],
-  },
-];
+  const permissions = new Set();
+  const matrix = {};
+  const roles = [];
 
-const processPermissions = (roles) => {
-  const formattedPermissions = {};
-  const permNames = new Set();
+  data.forEach((role) => {
+    const roleName = role.roleName;
+    roles.push(roleName);
+    matrix[roleName] = {};
 
-  roles.forEach((role) => {
-    formattedPermissions[role.roleName] = {};
-    role.permissions.forEach((perm) => {
-      permNames.add(perm.permissionName);
-      const hasActiveResource = perm.resources.some(
-        (res) => res.isDeleted === "false"
+    role.permissionDtos.forEach((perm) => {
+      const permission = perm.permissionName;
+      permissions.add(permission);
+
+      const allDeleted =
+        perm.resourceResponses.length > 0 &&
+        perm.resourceResponses.every((res) => res.isDeleted);
+      const atLeastOneActive = perm.resourceResponses.some(
+        (res) => !res.isDeleted
       );
-      formattedPermissions[role.roleName][perm.permissionName] =
-        hasActiveResource;
+
+      matrix[roleName][permission] = allDeleted
+        ? "X"
+        : atLeastOneActive
+        ? "✓"
+        : "";
     });
   });
 
-  return { formattedPermissions, permissionNames: [...permNames] };
+  return {
+    matrix,
+    roles,
+    permissions: Array.from(permissions),
+  };
 };
 
 const RolePermissionMatrix = () => {
-  const [mainPermissions, setMainPermissions] = useState({});
-  const [subPermissions, setSubPermissions] = useState({});
-  const [permissionNames, setPermissionNames] = useState([]);
-  const [openUpdateResource, setOpenUpdateResource] = useState(false);
-  const [dataUpdateResource, setDataUpdateResource] = useState(null);
-  const [finalData, setFinalData] = useState([]);
+  const [roleType, setRoleType] = useState("MAIN");
+  const [loading, setLoading] = useState(false);
+  const [rawData, setRawData] = useState([]);
   const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [openModalUpdate, setOpenModalUpdate] = useState(false);
+  const [dataUpdate, setDataUpdate] = useState(null);
 
-  console.log(`>>> Check finalData: `, finalData);
+  const fetchData = async (type) => {
+    setLoading(true);
+    try {
+      const res = await viewRoleResourcesAPI(type === "MAIN" ? "Main" : "Sub");
+      const extracted = Array.isArray(res.data.content)
+        ? res.data.content
+        : res?.data.content || [];
+      setRawData(extracted);
+      console.log(`>>> Check raw data: `, extracted);
+    } catch (err) {
+      console.error("Failed to fetch role-permission data", err);
+      setRawData([]);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    setFinalData(data);
+    fetchData(roleType);
+  }, [roleType]);
 
-    const { formattedPermissions, permissionNames } = processPermissions(data);
-    setMainPermissions(formattedPermissions);
-    setPermissionNames(permissionNames);
+  const reloadPage = () => {
+    fetchData(roleType);
+  };
 
-    const { formattedPermissions: subFormattedPermissions } =
-      processPermissions(subRoleData);
-    setSubPermissions(subFormattedPermissions);
-  }, [finalData]);
+  const { matrix, roles, permissions } = useMemo(
+    () => transformMatrix(rawData),
+    [rawData]
+  );
 
-  const handleIconClick = (roleName, permissionName) => {
-    // Tìm role tương ứng
-    const roleData = data.find((role) => role.roleName === roleName);
-    if (!roleData || !roleData.permissions) return;
-
-    // Tìm permission tương ứng trong role
-    const permissionData = roleData.permissions.find(
-      (perm) => perm.permissionName === permissionName
-    );
-    if (!permissionData || !permissionData.resources) return;
-
-    // Tạo object với cấu trúc mong muốn
-    const selectedData = {
-      roleId: roleData.roleId,
-      roleName: roleData.roleName,
-      permissions: {
-        permissionId: permissionData.permissionId,
-        permissionName: permissionData.permissionName,
-        resources: permissionData.resources,
+  const columns = useMemo(
+    () => [
+      {
+        title: "Vai trò",
+        dataIndex: "role",
+        fixed: "left",
+        width: 200,
+        render: (text) => <strong>{convertRoleName(text)}</strong>,
       },
-    };
+      ...permissions.map((perm) => ({
+        title: convertPermissionName(perm),
+        dataIndex: perm,
+        align: "center",
+        width: 100,
+        render: (value, record) => {
+          const roleName = record.role;
+          const permissionName = perm;
+          const roleData = rawData.find((r) => r.roleName === roleName);
+          const permissionData = roleData?.permissionDtos?.find(
+            (p) => p.permissionName === permissionName
+          );
 
-    setDataUpdateResource(selectedData);
-    setOpenUpdateResource(true);
-  };
+          return (
+            <div
+              onClick={() => {
+                if (!permissionData) return;
+                setDataUpdate({
+                  roleId: roleData?.roleId,
+                  roleName,
+                  permissionName,
+                  resources: permissionData.resourceResponses || [],
+                });
+                setOpenModalUpdate(true);
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              {value === "✓" ? (
+                <Tag color="green">✓</Tag>
+              ) : value === "X" ? (
+                <Tag color="red">✗</Tag>
+              ) : (
+                <span style={{ color: "#ccc" }}>—</span>
+              )}
+            </div>
+          );
+        },
+      })),
+    ],
+    [permissions]
+  );
 
-  const handleUpdateClick = () => {
-    console.log("Sending updated data to the backend:", finalData);
-  };
-
-  const generateColumns = (permissionNames) => [
-    {
-      title: "Tên vai trò",
-      dataIndex: "role",
-      key: "role",
-    },
-    ...permissionNames.map((perm) => ({
-      title: perm,
-      dataIndex: perm,
-      key: perm,
-      render: (value, record) => (
-        <span
-          onClick={() => handleIconClick(record.role, perm)}
-          style={{ cursor: "pointer" }}
-        >
-          {value ? (
-            <CheckOutlined style={{ color: "green" }} />
-          ) : (
-            <CloseOutlined style={{ color: "red" }} />
-          )}
-        </span>
-      ),
-    })),
-  ];
-
-  const formatTableData = (permissions) =>
-    Object.keys(permissions).map((role) => ({
-      key: role,
-      role,
-      ...permissions[role],
-    }));
+  const dataSource = useMemo(
+    () =>
+      roles.map((role) => {
+        const row = { key: role, role };
+        permissions.forEach((perm) => {
+          row[perm] = matrix?.[role]?.[perm] || "";
+        });
+        return row;
+      }),
+    [roles, permissions, matrix]
+  );
 
   return (
-    <div
-      style={{
-        backgroundColor: "#e8edfa",
-        width: "100%",
-        height: "100vh",
-        padding: "20px 0",
-        marginRight: "0px",
-      }}
-    >
+    <div style={{ height: "100vh" }}>
       <div
         style={{
           backgroundColor: "#ffffff",
           padding: "20px",
           boxShadow: `0px 4px 10px rgba(0, 0, 0, 0.1)`,
           borderRadius: "10px",
+          marginTop: "20px",
         }}
       >
         <div
@@ -334,7 +166,7 @@ const RolePermissionMatrix = () => {
             justifyContent: "space-between",
           }}
         >
-          <h3>Quản lý phân quyền</h3>
+          <Title level={4}>Quản lý phân quyền</Title>
           <Button
             key="buttonAddNewSubRole"
             icon={<PlusOutlined />}
@@ -343,61 +175,41 @@ const RolePermissionMatrix = () => {
             }}
             type="primary"
           >
-            Tạo mới phòng ban
+            Tạo mới vai trò phụ
           </Button>
         </div>
-        <Tabs defaultActiveKey="1">
-          <TabPane tab="Vai trò chính" key="1">
-            <Table
-              columns={generateColumns(permissionNames)}
-              dataSource={formatTableData(mainPermissions)}
-              pagination={false}
-              scroll={{ x: "max-content", y: "max-content" }}
-            />
-          </TabPane>
-          <TabPane tab="Vai trò phụ" key="2">
-            <Table
-              columns={generateColumns(permissionNames)}
-              dataSource={formatTableData(subPermissions)}
-              pagination={false}
-              scroll={{ x: "max-content", y: "max-content" }}
-            />
-          </TabPane>
+
+        <Tabs defaultActiveKey="MAIN" onChange={(key) => setRoleType(key)}>
+          <Tabs.TabPane tab="Vai trò chính" key="MAIN" />
+          <Tabs.TabPane tab="Vai trò phụ" key="SUB" />
         </Tabs>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginTop: "20px",
-          }}
-        >
-          <Button
-            type="primary"
-            onClick={handleUpdateClick}
-            icon={<ReloadOutlined />}
-            style={{
-              background: "#60BB39",
-              color: "white",
-              width: "200px",
-            }}
-          >
-            Cập nhật
-          </Button>
-        </div>
+
+        <Spin spinning={loading}>
+          {dataSource.length === 0 ? (
+            <Empty description="Không có dữ liệu vai trò/quyền" />
+          ) : (
+            <Table
+              columns={columns}
+              dataSource={dataSource}
+              scroll={{ x: "max-content" }}
+              pagination={false}
+              bordered
+              size="middle"
+            />
+          )}
+        </Spin>
       </div>
-
       <UpdateResource
-        openUpdateResource={openUpdateResource}
-        setOpenUpdateResource={setOpenUpdateResource}
-        dataUpdateResource={dataUpdateResource}
-        setDataUpdateResource={setDataUpdateResource}
-        finalData={finalData}
-        setFinalData={setFinalData}
+        openModalUpdate={openModalUpdate}
+        setOpenModalUpdate={setOpenModalUpdate}
+        dataUpdate={dataUpdate}
+        setDataUpdate={setDataUpdate}
+        reloadPage={reloadPage}
       />
-
       <CreateSubRole
         openModalCreate={openModalCreate}
         setOpenModalCreate={setOpenModalCreate}
+        reloadPage={reloadPage}
       />
     </div>
   );

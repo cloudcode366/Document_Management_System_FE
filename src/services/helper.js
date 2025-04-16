@@ -30,3 +30,33 @@ export const convertRoleName = (roleName) => {
       return roleName;
   }
 };
+
+export const convertPermissionName = (permissionName) => {
+  switch (permissionName) {
+    case "Create":
+      return "Tạo";
+    case "View":
+      return "Xem";
+    case "Update":
+      return "Cập nhật";
+    case "Delete":
+      return "Xóa";
+    default:
+      return permissionName;
+  }
+};
+
+export const convertScopeName = (scope) => {
+  switch (scope) {
+    case "OutGoing":
+      return "Văn bản đi";
+    case "InComing":
+      return "Văn bản đến";
+    case "Division":
+      return "Nội bộ phòng ban";
+    case "School":
+      return "Nội bộ toàn trường";
+    default:
+      return "-";
+  }
+};
