@@ -282,7 +282,7 @@ export {
   updateDivisionAPI,
   changeStatusDivisionAPI,
   getAllTasks,
-  getTaskById
+  getTaskById,
   viewRoleResourcesAPI,
   updateResourcesAPI,
   createSubRoleAPI,
