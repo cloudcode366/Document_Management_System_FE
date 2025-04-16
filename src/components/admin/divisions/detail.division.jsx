@@ -65,21 +65,34 @@ const DetailDivision = (props) => {
           onClose={onClose}
           styles={{ body: { padding: 0, overflow: "hidden", height: "100vh" } }}
         >
-          <Descriptions bordered column={2}>
-            <Descriptions.Item
-              label="Tên phòng ban"
-              labelStyle={{ fontWeight: "bold" }}
-            >
+          <Descriptions
+            bordered
+            column={2}
+            style={{
+              backgroundColor: "#ffffff",
+              padding: "12px",
+              borderRadius: 10,
+            }}
+            labelStyle={{
+              fontWeight: "bold",
+              fontSize: 15,
+              backgroundColor: "#F2F2F2",
+              padding: "8px 12px",
+              color: "#1d1d1f",
+            }}
+          >
+            <Descriptions.Item label="Tên phòng ban">
               {dataViewDetail?.divisionName}
             </Descriptions.Item>
-            <Descriptions.Item
-              label="Trạng thái"
-              labelStyle={{ fontWeight: "bold" }}
-            >
+            <Descriptions.Item label="Trạng thái">
               {dataViewDetail?.isDeleted ? (
-                <Tag color="red">Bị khóa</Tag>
+                <Tag color="red" style={{ fontSize: "14px" }}>
+                  Bị khóa
+                </Tag>
               ) : (
-                <Tag color="green">Hoạt động</Tag>
+                <Tag color="green" style={{ fontSize: "14px" }}>
+                  Hoạt động
+                </Tag>
               )}
             </Descriptions.Item>
           </Descriptions>

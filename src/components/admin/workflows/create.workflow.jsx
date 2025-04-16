@@ -53,7 +53,7 @@ const CreateWorkflow = ({
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [documentTypes, setDocumentTypes] = useState([]);
-  const [ , setRoles] = useState([]);
+  const [roleRes, setRoleRes] = useState([]);
   const [flows, setFlows] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [scope, setScope] = useState("");
@@ -80,14 +80,15 @@ const CreateWorkflow = ({
     setLoading(true);
     const res = await viewAllRoles();
     if (res?.data?.statusCode === 200) {
-      const newRolesData = res.data.content
+      const mainRole = res.data.content.filter((r) => r.createdDate === null);
+      const newRolesData = mainRole
         .filter((role) => role.roleName !== "Admin")
         .map((role) => ({
           roleId: role.roleId,
-          roleName: convertRoleName(role.roleName),
+          roleName: role.roleName,
         }));
-
-      setRoles(newRolesData);
+      console.log(`>>> newRolesData: `, newRolesData);
+      setRoleRes(newRolesData);
     }
     setLoading(false);
   };
@@ -231,7 +232,16 @@ const CreateWorkflow = ({
     const roles = workflowDetail.flows.flatMap((flow, idx, arr) =>
       idx === arr.length - 1 ? [flow.roleStart, flow.roleEnd] : [flow.roleStart]
     );
-    const uniqueRoles = [...new Set(roles)];
+
+    let rolesToSelect = [];
+    if (scope === "OutGoing") {
+      rolesToSelect = roleRes.filter(
+        (role) =>
+          role.roleName !== "Leader" &&
+          role.roleName !== "Chief" &&
+          role.roleName !== "Clerical Assistant"
+      );
+    }
 
     return (
       <div
@@ -289,20 +299,22 @@ const CreateWorkflow = ({
                   {convertRoleName(role)}
                 </Tag>
               </Col>
-              {/* Hiển thị nút + hoặc Select cho tất cả các role */}
               <Col>
-                <PlusCircleOutlined
-                  onClick={() => {
-                    // Mở Select tại vị trí này
-                    setAddingIndex(idx); // Ghi lại vị trí để thêm role
-                  }}
-                  style={{
-                    fontSize: "20px",
-                    color: "green",
-                    cursor: "pointer",
-                    marginTop: "10px",
-                  }}
-                />
+                {!(scope === "OutGoing" && idx === roles.length - 1) &&
+                  !(scope === "OutGoing" && idx === roles.length - 2) && (
+                    <PlusCircleOutlined
+                      onClick={() => {
+                        // Mở Select tại vị trí này
+                        setAddingIndex(idx); // Ghi lại vị trí để thêm role
+                      }}
+                      style={{
+                        fontSize: "20px",
+                        color: "green",
+                        cursor: "pointer",
+                        marginTop: "10px",
+                      }}
+                    />
+                  )}
               </Col>
 
               {/* Hiển thị Select nếu đang thêm role tại vị trí này */}
@@ -323,9 +335,12 @@ const CreateWorkflow = ({
                         .includes(input.toLowerCase())
                     }
                   >
-                    {roles.map((roleOption) => (
-                      <Select.Option key={roleOption} value={roleOption}>
-                        {convertRoleName(roleOption)}
+                    {rolesToSelect.map((roleOption) => (
+                      <Select.Option
+                        key={roleOption.roleId}
+                        value={roleOption.roleName}
+                      >
+                        {convertRoleName(roleOption.roleName)}
                       </Select.Option>
                     ))}
                   </Select>
@@ -426,7 +441,7 @@ const CreateWorkflow = ({
   const handleCancel = () => {
     setOpenModalCreate(false);
     setDocumentTypes([]);
-    setRoles([]);
+    setRoleRes([]);
     setFlows([]);
     setCurrentStep(1);
     setScope("");
@@ -513,6 +528,7 @@ const CreateWorkflow = ({
                 { required: true, message: "Vui lòng chọn phạm vi ban hành!" },
               ]}
             >
+              {console.log(`>>> Check mainWorkflows: `, mainWorkflows)}
               <Radio.Group
                 onChange={(e) => {
                   const workflowId = e.target.value;

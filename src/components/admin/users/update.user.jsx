@@ -25,7 +25,7 @@ const UpdateUser = (props) => {
     setDataUpdate,
     dataUpdate,
     divisions,
-    roles,
+    subRoles,
   } = props;
   const [isSubmit, setIsSubmit] = useState(false);
   const { message, notification } = App.useApp();
@@ -101,6 +101,7 @@ const UpdateUser = (props) => {
         dateOfBirth,
         position,
         divisionId,
+        subRoleId,
       } = values;
       await updateUserByAdminAPI(
         dataUpdate.userId,
@@ -112,7 +113,8 @@ const UpdateUser = (props) => {
         dateOfBirth ? dayjs(dateOfBirth).format("YYYY-MM-DD") : null,
         position,
         divisionId,
-        avatarRawUrl
+        avatarRawUrl,
+        subRoleId
       );
 
       message.success(`Cập nhật tài khoản ${dataUpdate.userName} thành công!`);
@@ -137,7 +139,11 @@ const UpdateUser = (props) => {
   return (
     <>
       <Modal
-        title="Cập nhật người dùng"
+        title={
+          <div style={{ borderBottom: "1px solid #80868b", paddingBottom: 8 }}>
+            Cập nhật tài khoản
+          </div>
+        }
         open={openModalUpdate}
         width={"80vw"}
         centered={true}
@@ -157,7 +163,6 @@ const UpdateUser = (props) => {
         confirmLoading={isSubmit}
         maskClosable={false}
       >
-        <Divider />
         <Form
           form={form}
           name="basic"
@@ -292,6 +297,30 @@ const UpdateUser = (props) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
+                label="Vai trò phụ"
+                name="subRoleId"
+                rules={[
+                  { required: true, message: "Vui lòng chọn vai trò phụ!" },
+                ]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Vui lòng chọn vai trò phụ"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {subRoles.map((role) => (
+                    <Select.Option key={role.roleId} value={role.roleId}>
+                      {role.roleName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
                 label="Ảnh đại diện"
                 name="avatar"
                 rules={[
@@ -308,7 +337,11 @@ const UpdateUser = (props) => {
                   beforeUpload={() => false}
                   onChange={handleImageChange}
                 >
-                  <Button icon={<UploadOutlined />} style={{ marginTop: 8 }}>
+                  <Button
+                    icon={<UploadOutlined />}
+                    type="link"
+                    style={{ marginLeft: 8, marginTop: 8 }}
+                  >
                     Chọn ảnh mới
                   </Button>
                 </Upload>
