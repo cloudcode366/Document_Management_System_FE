@@ -1,111 +1,123 @@
-import { InboxOutlined } from "@ant-design/icons";
-import {
-  App,
-  Modal,
-  Table,
-  Upload,
-  Select,
-  Button,
-  Input,
-  Form,
-  InputNumber,
-  DatePicker,
-} from "antd";
-import { useState } from "react";
-import dayjs from "dayjs";
-import ConfirmInfoDraftDocument from "@/components/client/documents/draft.documents/confirm.info.draft.document";
+import { useEffect, useRef, useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import Draggable from "react-draggable";
+import signatureImage from "@/assets/files/signature-removebg-preview.png";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
 
-const { Dragger } = Upload;
-const { Option } = Select;
-
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 const CreateDraftDocument = (props) => {
   const { openModalCreateDraftDocument, setOpenModalCreateDraftDocument } =
     props;
-  const [form] = Form.useForm();
-  const { message } = App.useApp();
-  const [isSubmit, setIsSubmit] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [openModalConfirmInfoDraft, setOpenModalConfirmInfoDraft] =
-    useState(false);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [signaturePosition, setSignaturePosition] = useState(null);
 
-  const propsUpload = {
-    name: "file",
-    multiple: false,
-    maxCount: 1,
-    accept: ".pdf,.doc,.docx",
-    fileList: uploadedFile ? [uploadedFile] : [],
-    customRequest({ file, onSuccess }) {
-      setTimeout(() => {
-        file.status = "done";
-        onSuccess("ok");
-        setUploadedFile(file);
-        message.success(`${file.name} tải lên thành công.`);
-      }, 1000);
-    },
-    async onChange(info) {
-      if (info.file.status === "error") {
-        message.error(`${info.file.name} tải lên thất bại.`);
-      }
-    },
-    async onRemove() {
-      setUploadedFile(null); // Khi xoá file, cập nhật state
-    },
+  const pageRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setPdfFile(file);
+    }
   };
 
-  const handleConfirm = () => {
-    if (!uploadedFile) {
-      message.error("Vui lòng tải lên một file trước khi xác nhận.");
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
+
+  const handleDragStop = (e, data) => {
+    if (pageRef.current) {
+      const rect = pageRef.current.getBoundingClientRect();
+
+      const x = data.x;
+      const y = data.y;
+
+      const xRatio = x / rect.width;
+      const yRatio = y / rect.height;
+
+      setSignaturePosition({
+        page: pageNumber,
+        xRatio,
+        yRatio,
+        widthRatio: signatureWidth / rect.width,
+        heightRatio: signatureHeight / rect.height,
+      });
+    }
+  };
+
+  const signatureWidth = 120;
+  const signatureHeight = 60;
+
+  const handleSubmit = () => {
+    if (!signaturePosition) {
+      alert("Bạn chưa đặt vị trí chữ ký!");
       return;
     }
-    console.log(`Check uploaded file: `, uploadedFile);
-    setOpenModalConfirmInfoDraft(true);
-    setOpenModalCreateDraftDocument(false);
-  };
 
-  const handleCloseCreateDraftDocumentModal = () => {
-    setOpenModalCreateDraftDocument(false);
-    setUploadedFile(null);
+    console.log("Tọa độ chữ ký gửi về backend:", signaturePosition);
+    // TODO: Gửi dữ liệu này về backend qua API
   };
 
   return (
-    <>
-      <Modal
-        title="Tạo bản nháp"
-        width="50vw"
-        centered={true}
-        maskClosable={false}
-        bodyProps={{
-          style: {
-            maxHeight: "70vh", // ✅ Giới hạn chiều cao modal
-            overflowY: "auto", // ✅ Tạo thanh cuộn trong modal
-          },
-        }}
-        open={openModalCreateDraftDocument}
-        onCancel={handleCloseCreateDraftDocumentModal}
-        okText="Xác nhận"
-        onOk={handleConfirm}
-      >
-        <Dragger {...propsUpload}>
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">
-            Nhấp hoặc kéo văn bản vào khu vực này
-          </p>
-          <p className="ant-upload-hint">
-            Chỉ hỗ trợ định dạng .pdf, .docx, .doc &nbsp;
-          </p>
-        </Dragger>
-      </Modal>
-      <ConfirmInfoDraftDocument
-        openModalConfirmInfoDraft={openModalConfirmInfoDraft}
-        setOpenModalConfirmInfoDraft={setOpenModalConfirmInfoDraft}
-        uploadedFile={uploadedFile}
-        handleCloseCreateDraftDocumentModal={
-          handleCloseCreateDraftDocumentModal
-        }
-      />
-    </>
+    <div style={{ padding: 20 }}>
+      <input type="file" accept="application/pdf" onChange={handleFileChange} />
+
+      {pdfFile && (
+        <>
+          <div style={{ margin: "10px 0" }}>
+            <button
+              disabled={pageNumber <= 1}
+              onClick={() => setPageNumber((p) => p - 1)}
+            >
+              Trang trước
+            </button>
+            <span style={{ margin: "0 10px" }}>
+              Trang {pageNumber} / {numPages}
+            </span>
+            <button
+              disabled={pageNumber >= numPages}
+              onClick={() => setPageNumber((p) => p + 1)}
+            >
+              Trang sau
+            </button>
+          </div>
+
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <div ref={pageRef}>
+              <Document
+                file={pdfFile}
+                onLoadSuccess={onDocumentLoadSuccess}
+                loading="Đang tải PDF..."
+              >
+                <Page pageNumber={pageNumber} width={600} />
+              </Document>
+            </div>
+
+            <Draggable onStop={handleDragStop}>
+              <img
+                src={signatureImage}
+                alt="Chữ ký"
+                style={{
+                  width: signatureWidth,
+                  height: signatureHeight,
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  cursor: "move",
+                  zIndex: 1000,
+                }}
+              />
+            </Draggable>
+          </div>
+
+          <div style={{ marginTop: 20 }}>
+            <button onClick={handleSubmit}>Xác nhận vị trí chữ ký</button>
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 

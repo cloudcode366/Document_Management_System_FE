@@ -1,11 +1,14 @@
-import { DeleteTwoTone, PlusOutlined } from "@ant-design/icons";
+import { DeleteTwoTone, PlusOutlined, UnlockOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
-import { App, Button, Popconfirm, Tag, Typography } from "antd";
+import { App, Button, Popconfirm, Tag, Tooltip, Typography } from "antd";
 import { useRef, useState } from "react";
 import dayjs from "dayjs";
 import CreateWorkflow from "@/components/admin/workflows/create.workflow";
 import DetailWorkflow from "@/components/admin/workflows/detail.workflow";
-import { viewAllWorkflowsAPI } from "@/services/api.service";
+import {
+  changeStatusWorkflowAPI,
+  viewAllWorkflowsAPI,
+} from "@/services/api.service";
 import { convertScopeName } from "@/services/helper";
 
 const TableWorkflow = () => {
@@ -22,8 +25,8 @@ const TableWorkflow = () => {
   const [openViewDetail, setOpenViewDetail] = useState(false);
   const [dataViewDetail, setDataViewDetail] = useState(null);
 
-  const [isDeleteDivision, setIsDeleteDivision] = useState(false);
-  const { message, notification } = App.useApp(); 
+  const [isDeleteWorkflow, setIsDeleteWorkflow] = useState(false);
+  const { message, notification } = App.useApp();
 
   const columns = [
     {
@@ -40,15 +43,17 @@ const TableWorkflow = () => {
       width: "40%",
       render(dom, entity) {
         return (
-          <a
-            onClick={() => {
-              setDataViewDetail(entity);
-              setOpenViewDetail(true);
-            }}
-            style={{ cursor: "pointer" }}
-          >
-            {entity.workflowName}
-          </a>
+          <Tooltip title="Xem chi tiết">
+            <a
+              onClick={() => {
+                setDataViewDetail(entity);
+                setOpenViewDetail(true);
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              {entity.workflowName}
+            </a>
+          </Tooltip>
         );
       },
     },
@@ -91,22 +96,60 @@ const TableWorkflow = () => {
       render(dom, entity, index, action, schema) {
         return (
           <>
-            <Popconfirm
-              placement="leftTop"
-              title="Xác nhận khóa luồng xử lý"
-              description="Bạn có chắc chắn muốn khóa luồng xử lý này?"
-              onConfirm={() => handleDeleteWorkflow(entity.workflowId)}
-              okText="Xác nhận"
-              cancelText="Hủy"
-              okButtonProps={{ loading: isDeleteDivision }}
-            >
-              <span style={{ cursor: "pointer", marginLeft: 20 }}>
-                <DeleteTwoTone
-                  twoToneColor="#ff4d4f"
-                  style={{ cursor: "pointer" }}
-                />
-              </span>
-            </Popconfirm>
+            {!entity.isDeleted ? (
+              <Popconfirm
+                placement="leftTop"
+                title="Xác nhận khóa luồng xử lý"
+                description="Bạn có chắc chắn muốn khóa luồng xử lý này?"
+                onConfirm={() =>
+                  handleDeleteWorkflow(
+                    entity.workflowId,
+                    entity.workflowName,
+                    entity.isDeleted
+                  )
+                }
+                okText="Xác nhận"
+                cancelText="Hủy"
+                okButtonProps={{ loading: isDeleteWorkflow }}
+              >
+                <span style={{ cursor: "pointer", marginLeft: 20 }}>
+                  <Tooltip title="Khóa luồng xử lý này">
+                    <DeleteTwoTone
+                      twoToneColor="#ff4d4f"
+                      style={{ cursor: "pointer" }}
+                    />
+                  </Tooltip>
+                </span>
+              </Popconfirm>
+            ) : (
+              <Popconfirm
+                placement="leftTop"
+                title="Xác nhận mở lại luồng xử lý này"
+                description="Bạn có chắc chắn muốn mở lại luồng xử lý này?"
+                onConfirm={() =>
+                  handleDeleteWorkflow(
+                    entity.workflowId,
+                    entity.workflowName,
+                    entity.isDeleted
+                  )
+                }
+                okText="Xác nhận"
+                cancelText="Hủy"
+                okButtonProps={{ loading: isDeleteWorkflow }}
+              >
+                <span style={{ cursor: "pointer", marginLeft: 20 }}>
+                  <Tooltip title="Mở lại luồng xử lý này">
+                    <UnlockOutlined
+                      style={{
+                        color: "green",
+                        fontSize: 18,
+                        cursor: "pointer",
+                      }}
+                    />
+                  </Tooltip>
+                </span>
+              </Popconfirm>
+            )}
           </>
         );
       },
@@ -117,19 +160,23 @@ const TableWorkflow = () => {
     actionRef.current?.reload();
   };
 
-  const handleDeleteWorkflow = async (workflowId) => {
-    // setIsDeleteUser(true);
-    // const res = await deleteUserAPI(_id);
-    // if (res && res.data) {
-    //   message.success(`Xóa user thành công`);
-    //   refreshTable();
-    // } else {
-    //   notification.error({
-    //     message: `Đã có lỗi xảy ra`,
-    //     description: res.message,
-    //   });
-    // }
-    // setIsDeleteUser(false);
+  const handleDeleteWorkflow = async (workflowId, workflowName, isDeleted) => {
+    setIsDeleteWorkflow(true);
+    const res = await changeStatusWorkflowAPI(workflowId);
+    if (res && res.data && res.data.statusCode === 200) {
+      if (isDeleted) {
+        message.success(`Mở khóa ${workflowName} thành công!`);
+      } else {
+        message.success(`Khóa ${workflowName} thành công!`);
+      }
+      refreshTable();
+    } else {
+      notification.error({
+        message: `Đã có lỗi xảy ra!`,
+        description: res.data.content,
+      });
+    }
+    setIsDeleteWorkflow(false);
   };
 
   return (

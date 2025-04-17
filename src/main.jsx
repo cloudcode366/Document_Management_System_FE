@@ -40,6 +40,7 @@ import DetailDocument from "pages/client/documents/detail.document";
 import { AppProvider } from "components/context/app.context";
 import ProtectedRoute from "components/auth";
 import "nprogress/nprogress.css";
+import ListDivisionPage from "pages/client/divisions/list.division";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ListUserPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/division",
+        element: (
+          <ProtectedRoute>
+            <ListDivisionPage />
           </ProtectedRoute>
         ),
       },

@@ -41,7 +41,7 @@ const LayoutAdmin = () => {
 
   const items = [
     {
-      label: <Link to="/admin/user">Quản lý người dùng</Link>,
+      label: <Link to="/admin/user">Quản lý tài khoản</Link>,
       key: "/admin/user",
       icon: <UserOutlined />,
     },

@@ -97,6 +97,20 @@ const createUserByFormAPI = (
   });
 };
 
+const createImportUsersFromExcelAPI = (divisionId, file) => {
+  const URL_BACKEND = `/api/User/create-import-users-from-excel`;
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("divisionId", divisionId);
+  bodyFormData.append("file", file);
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
 const updateUserByAdminAPI = (
   userId,
   fullName,
@@ -256,6 +270,11 @@ const viewDocumentTypeNameByWorkflowId = (workflowId) => {
   return axios.get(urlBackend);
 };
 
+const changeStatusWorkflowAPI = (workflowId) => {
+  const urlBackend = `/api/Workflow/delete-workflow?workflowId=${workflowId}`;
+  return axios.post(urlBackend);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -287,4 +306,6 @@ export {
   viewAllFlowsAPI,
   createWorkflowAPI,
   viewDocumentTypeNameByWorkflowId,
+  createImportUsersFromExcelAPI,
+  changeStatusWorkflowAPI,
 };

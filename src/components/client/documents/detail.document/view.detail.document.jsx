@@ -22,6 +22,8 @@ import {
   PlusCircleOutlined,
   PlusOutlined,
   ArrowLeftOutlined,
+  ExportOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import samplePDF from "assets/files/sample.pdf";
 import { useNavigate } from "react-router-dom";
@@ -260,6 +262,42 @@ const ViewDetailDocument = () => {
                 </List.Item>
               )}
             />
+            <Divider
+              variant="solid"
+              style={{
+                borderColor: "#80868b",
+              }}
+            ></Divider>
+            <Row gutter={[12, 12]}>
+              <Col span={12}>
+                <Button
+                  icon={<EditOutlined style={{ color: "#1890ff" }} />}
+                  block
+                  size="middle"
+                  style={{
+                    height: 40,
+                    fontSize: 16,
+                    background: "#F4F5F6",
+                  }}
+                >
+                  Ký điện tử
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button
+                  icon={<ExportOutlined style={{ color: "#fa8c16" }} />}
+                  block
+                  size="middle"
+                  style={{
+                    height: 40,
+                    fontSize: 16,
+                    background: "#F4F5F6",
+                  }}
+                >
+                  Nộp văn bản
+                </Button>
+              </Col>
+            </Row>
             <div
               style={{
                 position: "absolute",

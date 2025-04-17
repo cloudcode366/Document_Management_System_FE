@@ -71,7 +71,9 @@ const TableUser = () => {
     const res = await viewAllRoles();
     if (res?.data?.statusCode === 200) {
       const newRolesData = res.data.content
-        .filter((role) => role.roleName !== "Admin")
+        .filter(
+          (role) => role.roleName !== "Admin" && role.createdDate === null
+        )
         .map((role) => ({
           roleId: role.roleId,
           roleName: convertRoleName(role.roleName),
@@ -467,7 +469,7 @@ const TableUser = () => {
           },
         }}
         headerTitle={
-          <span style={{ fontWeight: "bold" }}>Quản lý người dùng</span>
+          <span style={{ fontWeight: "bold" }}>Quản lý tài khoản</span>
         }
         toolBarRender={() => [
           <Button
@@ -478,7 +480,7 @@ const TableUser = () => {
               setOpenModalImport(true);
             }}
           >
-            Tạo người dùng theo CSV hoặc XLSX file
+            Tạo người dùng theo XLS hoặc XLSX file
           </Button>,
           <Button
             key="buttonAddNew"
@@ -496,6 +498,7 @@ const TableUser = () => {
         openModalImport={openModalImport}
         setOpenModalImport={setOpenModalImport}
         refreshTable={refreshTable}
+        divisions={divisions}
       />
       <CreateUser
         openModalCreate={openModalCreate}
