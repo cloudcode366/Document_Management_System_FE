@@ -151,6 +151,21 @@ const DetailUser = (props) => {
               }}
             />
           </Descriptions.Item>
+          <Descriptions.Item
+            label="Ảnh chữ ký"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            <Image
+              width={200}
+              height={200}
+              src={dataViewDetail?.signature || undefined}
+              fallback="/default-avatar.png"
+              style={{
+                objectFit: "cover",
+                borderRadius: "30px",
+              }}
+            />
+          </Descriptions.Item>
         </Descriptions>
       </Drawer>
     </>

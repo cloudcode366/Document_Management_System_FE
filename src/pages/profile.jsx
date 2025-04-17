@@ -192,13 +192,20 @@ const ProfilePage = () => {
                 />
               </Form.Item>
             </Col>
-            {/* <Col span={12}>
-              <Form.Item label="Chữ ký số">
+
+            <Col span={12}>
+              <Form.Item label="Ảnh chữ ký">
                 <div className="signature-box">
-                  {user.signature[0]?.signature_image_url ? (
-                    <img
-                      src={user.signature[0].signature_image_url}
-                      alt="Chữ ký"
+                  {profile.signature ? (
+                    <Image
+                      width={200}
+                      height={200}
+                      src={profile?.signature || undefined}
+                      fallback="/default-avatar.png"
+                      style={{
+                        objectFit: "cover",
+                        borderRadius: "30px",
+                      }}
                     />
                   ) : (
                     <span>Chưa có chữ ký</span>
@@ -206,20 +213,6 @@ const ProfilePage = () => {
                 </div>
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item label="Chữ ký nháy">
-                <div className="signature-box">
-                  {user.signature[0]?.signature_image_url ? (
-                    <img
-                      src={user.signature[0].signature_image_url}
-                      alt="Chữ ký"
-                    />
-                  ) : (
-                    <span>Chưa có chữ ký</span>
-                  )}
-                </div>
-              </Form.Item>
-            </Col> */}
           </Row>
         </Form>
       </Card>
