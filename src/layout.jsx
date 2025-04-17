@@ -5,17 +5,21 @@ import {
   QuestionCircleOutlined,
   BellOutlined,
   LogoutOutlined,
+  FileAddOutlined,
+  FileTextOutlined,
+  FileSearchOutlined,
+  FileProtectOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, Dropdown, Avatar, Badge, App } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import "@/styles/layout.admin.scss";
-import { CgFileDocument } from "react-icons/cg";
-import { GiProgression } from "react-icons/gi";
-import { LuBookMinus } from "react-icons/lu";
+import { LuBookMinus, LuWorkflow } from "react-icons/lu";
 import { useCurrentApp } from "components/context/app.context";
-import { BeatLoader } from "react-spinners";
+import { GrDocumentConfig } from "react-icons/gr";
+import { GiOrganigram } from "react-icons/gi";
 
 const { Content, Sider } = Layout;
 
@@ -42,7 +46,7 @@ const LayoutClient = () => {
     {
       label: <span>Danh sách văn bản</span>,
       key: "/",
-      icon: <CgFileDocument />,
+      icon: <FileTextOutlined />,
       children: [
         {
           label: <Link to="/">Tất cả</Link>,
@@ -67,14 +71,9 @@ const LayoutClient = () => {
       ],
     },
     {
-      label: <Link to="/progress">Danh sách văn bản khởi tạo</Link>,
+      label: <Link to="/progress">Danh sách khởi tạo</Link>,
       key: "/progress",
-      icon: <GiProgression />,
-    },
-    {
-      label: <Link to="/document-template">Mẫu văn bản</Link>,
-      key: "/document-template",
-      icon: <GiProgression />,
+      icon: <FileAddOutlined />,
     },
     {
       label: <Link to="/task">Nhiệm vụ</Link>,
@@ -82,8 +81,38 @@ const LayoutClient = () => {
       icon: <LuBookMinus />,
     },
     {
+      label: <Link to="/document-template">Mẫu văn bản</Link>,
+      key: "/document-template",
+      icon: <FileSearchOutlined />,
+    },
+    {
+      label: <Link to="/workflow">Luồng xử lý</Link>,
+      key: "/workflow",
+      icon: <LuWorkflow />,
+    },
+    {
+      label: <Link to="/document-type">Loại văn bản</Link>,
+      key: "/document-type",
+      icon: <GrDocumentConfig />,
+    },
+    {
+      label: <Link to="/archived-document">Kho lưu trữ</Link>,
+      key: "/archived-document",
+      icon: <FileProtectOutlined />,
+    },
+    {
+      label: <Link to="/user">Danh sách thành viên</Link>,
+      key: "/user",
+      icon: <UserOutlined />,
+    },
+    {
+      label: <Link to="/division">Danh sách phòng ban</Link>,
+      key: "/division",
+      icon: <GiOrganigram />,
+    },
+    {
       label: <Link to="/user-guide">Hướng dẫn sử dụng</Link>,
-      key: "/admin/user-guide",
+      key: "/user-guide",
       icon: <QuestionCircleOutlined />,
     },
   ];
@@ -114,6 +143,22 @@ const LayoutClient = () => {
   if (isAuthenticated === false) {
     return <Outlet />;
   }
+
+  const filterMenuItemsByRole = (roleName) => {
+    return items.filter((item) => {
+      if (item.key === "/division") {
+        return roleName === "Leader";
+      }
+
+      if (item.key === "/user") {
+        return roleName !== "Clerical Assistant" && roleName !== "Specialist";
+      }
+
+      return true; // Các item còn lại luôn hiển thị
+    });
+  };
+
+  const filteredItems = filterMenuItemsByRole(user?.mainRole?.roleName);
 
   return (
     <>
@@ -183,7 +228,7 @@ const LayoutClient = () => {
             defaultSelectedKeys={[activeMenu]}
             selectedKeys={[currentKey]}
             mode="inline"
-            items={items}
+            items={filteredItems}
             onClick={(e) => setActiveMenu(e.key)}
             style={{
               backgroundColor: " #0387EF",
@@ -224,13 +269,13 @@ const LayoutClient = () => {
               >
                 <QuestionCircleOutlined
                   style={{ fontSize: "16px", cursor: "pointer" }}
-                  onClick={() => navigate("/admin/user-guide")}
+                  onClick={() => navigate("/user-guide")}
                 />
 
                 <Badge count={2}>
                   <BellOutlined
                     style={{ fontSize: "16px", cursor: "pointer" }}
-                    onClick={() => navigate("/admin")}
+                    onClick={() => navigate("/notification")}
                   />
                 </Badge>
 

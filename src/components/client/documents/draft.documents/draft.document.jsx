@@ -1,230 +1,192 @@
-import React, { useState } from "react";
-import {
-  Card,
-  Descriptions,
-  Typography,
-  Button,
-  Divider,
-  Tooltip,
-  Input,
-  Col,
-  Row,
-  Tag,
-  App,
-  Modal,
-} from "antd";
-import {
-  ArrowRightOutlined,
-  ArrowLeftOutlined,
-  EditOutlined,
-  ExportOutlined,
-} from "@ant-design/icons";
-import samplePDF from "assets/files/sample.pdf";
-import { useNavigate } from "react-router-dom";
-import "./draft.document.scss";
-import DigitalSignature from "@/components/client/documents/digital.signature/digital.signature";
+import { useEffect, useRef, useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import { Rnd } from "react-rnd";
+import { App } from "antd";
 
-const { Title, Paragraph } = Typography;
+import signatureImage from "assets/files/signature-removebg-preview.png";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
 
-const ViewDraftDocument = () => {
-  const { message, notification } = App.useApp();
-  const navigate = useNavigate();
-  const [openDigitalSignatureModal, setOpenDigitalSignatureModal] =
-    useState(false);
-  const [openSubmitConfirmModal, setOpenSubmitConfirmModal] = useState(false);
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-  const handleSubmitDocument = () => {
-    // Gửi dữ liệu lên server ở đây nếu cần
-    message.success("Văn bản đã được nộp thành công!");
-    setOpenSubmitConfirmModal(false);
-    // Điều hướng hoặc cập nhật UI nếu cần
+export default function PdfSigner() {
+  const [pdfFile, setPdfFile] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [signaturePosition, setSignaturePosition] = useState(null);
+  const [pageDimensions, setPageDimensions] = useState({ width: 0, height: 0 });
+  const { message } = App.useApp();
+
+  const pageRef = useRef(null);
+
+  const [signatureBox, setSignatureBox] = useState({
+    x: 100,
+    y: 100,
+    width: 120,
+    height: 60,
+  });
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setPdfFile(file);
+    }
+  };
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
+
+  const handlePageLoad = (page) => {
+    const { width, height } = page.getViewport({ scale: 1 });
+    setPageDimensions({ width, height });
+  };
+
+  const updateSignatureCoordinates = (box) => {
+    if (!pageRef.current) return;
+    const rect = pageRef.current.getBoundingClientRect();
+
+    const lowerLeftX = box.x;
+    const lowerLeftY = rect.height - (box.y + box.height);
+    const upperRightX = box.x + box.width;
+    const upperRightY = rect.height - box.y;
+
+    const position = {
+      page: pageNumber,
+      lowerLeftX,
+      lowerLeftY,
+      upperRightX,
+      upperRightY,
+    };
+
+    setSignaturePosition(position);
+    console.log("Tọa độ chữ ký:", position);
+  };
+
+  const handleSubmit = () => {
+    if (!signaturePosition) {
+      message.warning("Bạn chưa đặt vị trí chữ ký!");
+      return;
+    }
+
+    message.success("Tọa độ chữ ký đã được gửi về backend");
+    // TODO: Gửi dữ liệu signaturePosition về backend
   };
 
   return (
-    <div style={{ height: "100vh" }}>
-      <div
-        style={{
-          display: "flex",
-          gap: 16,
-          padding: 16,
-          minHeight: "90vh",
-          flexDirection: "row",
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Left Panel: PDF Viewer */}
-        <Card
-          style={{
-            flex: 1,
-            minWidth: 300,
-            height: "90vh",
-          }}
-          bodyStyle={{ padding: 0 }}
-        >
-          <iframe
-            title="Document Viewer"
-            src={samplePDF} // thay bằng URL động nếu cần
-            style={{
-              width: "100%",
-              height: "90vh",
-              border: "none",
-            }}
-          />
-        </Card>
+    <div style={{ height: "100vh", overflowY: "auto" }}>
+      <input type="file" accept="application/pdf" onChange={handleFileChange} />
 
-        {/* Right Panel: Detail Info */}
-        <Card
-          className="custom-card"
-          style={{
-            height: "90vh", // Chiều cao tối đa theo màn hình, trừ 32px margin
-            display: "flex",
-            flexDirection: "column",
-            width: 400,
-            minWidth: 300,
-          }}
-          title={
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
+      {pdfFile && (
+        <>
+          <div
+            style={{ marginTop: 20, display: "flex", justifyContent: "center" }}
+          >
+            <button onClick={handleSubmit}>Xác nhận vị trí chữ ký</button>
+          </div>
+
+          <div style={{ margin: "10px 0", textAlign: "center" }}>
+            <button
+              disabled={pageNumber <= 1}
+              onClick={() => setPageNumber((p) => p - 1)}
             >
-              <span>Thông tin văn bản nháp</span>
-            </div>
-          }
-          bordered={true}
-        >
-          <div style={{ flex: 1, overflowY: "auto", paddingRight: 8 }}>
-            <Title level={4}>
-              Văn bản quyết định 53/2025 QĐ-TTg chính sách nội trú học sinh,
-              sinh viên học cao đẳng trung cấp
-            </Title>
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            ></Divider>
-            <Title level={5}>Tổng quan văn bản nháp lần 1</Title>
-            <Descriptions
-              column={1}
-              size="small"
-              labelStyle={{ fontWeight: 500 }}
-              style={{ marginBottom: "10px" }}
+              Trang trước
+            </button>
+            <span style={{ margin: "0 10px" }}>
+              Trang {pageNumber} / {numPages}
+            </span>
+            <button
+              disabled={pageNumber >= numPages}
+              onClick={() => setPageNumber((p) => p + 1)}
             >
-              <Descriptions.Item label="Người tạo">
-                locnht.it@gmail.com
-              </Descriptions.Item>
-              <Descriptions.Item label="Ngày tạo">10/02/2025</Descriptions.Item>
-              <Descriptions.Item label="Ngày hết hạn">
-                10/04/2025
-              </Descriptions.Item>
-              <Descriptions.Item label="Số hiệu văn bản">
-                53/2025/QĐ-TTg
-              </Descriptions.Item>
-              <Descriptions.Item label="Loại văn bản">
-                Quyết định
-              </Descriptions.Item>
-              <Descriptions.Item label="Luồng xử lý">
-                Văn bản đi
-              </Descriptions.Item>
-            </Descriptions>
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            ></Divider>
-            <Title level={5}>Nội dung</Title>
-            <Paragraph style={{ fontSize: 14 }}>
-              Quyết định 53/2015/QĐ-TTg về chính sách nội trú đối với học sinh,
-              sinh viên học cao đẳng, trung cấp công lập quy định đối tượng
-              hưởng chính sách nội trú, mức hỗ trợ và các hỗ trợ khác, nguyên
-              tắc thực hiện, phương thức chi trả, nguồn kinh phí thực hiện chính
-              sách được ban hành ngày 20/10/2015.
-            </Paragraph>
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            ></Divider>
-            <Row gutter={[12, 12]}>
-              <Col span={12}>
-                <Button
-                  icon={<EditOutlined style={{ color: "#1890ff" }} />}
-                  block
-                  size="middle"
-                  style={{
-                    height: 40,
-                    fontSize: 16,
-                    background: "#F4F5F6",
-                  }}
-                  onClick={() => {
-                    setOpenDigitalSignatureModal(true);
-                  }}
-                >
-                  Ký điện tử
-                </Button>
-              </Col>
-              <Col span={12}>
-                <Button
-                  icon={<ExportOutlined style={{ color: "#fa8c16" }} />}
-                  block
-                  size="middle"
-                  style={{
-                    height: 40,
-                    fontSize: 16,
-                    background: "#F4F5F6",
-                  }}
-                  onClick={() => {
-                    setOpenSubmitConfirmModal(true); // MỞ MODAL
-                  }}
-                >
-                  Nộp văn bản
-                </Button>
-              </Col>
-            </Row>
+              Trang sau
+            </button>
           </div>
 
           <div
             style={{
-              position: "absolute",
-              top: 10,
-              right: 16,
+              position: "relative",
+              display: "inline-block",
+              height: "100%",
             }}
           >
-            <Button
-              type="primary"
-              ghost
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate(-1)}
-            >
-              Quay lại
-            </Button>
-          </div>
-        </Card>
-      </div>
-      <DigitalSignature
-        openDigitalSignatureModal={openDigitalSignatureModal}
-        setOpenDigitalSignatureModal={setOpenDigitalSignatureModal}
-      />
+            <div ref={pageRef}>
+              <Document
+                file={pdfFile}
+                onLoadSuccess={onDocumentLoadSuccess}
+                loading="Đang tải PDF..."
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  width={600}
+                  onLoadSuccess={handlePageLoad}
+                />
+              </Document>
+            </div>
 
-      <Modal
-        title="Xác nhận nộp văn bản"
-        open={openSubmitConfirmModal}
-        onOk={handleSubmitDocument}
-        onCancel={() => setOpenSubmitConfirmModal(false)}
-        okText="Xác nhận"
-        cancelText="Hủy"
-        centered
-        maskClosable={false}
-      >
-        <p>Bạn có chắc chắn muốn nộp văn bản này không?</p>
-      </Modal>
+            {pageDimensions.width > 0 && (
+              <Rnd
+                size={{
+                  width: signatureBox.width,
+                  height: signatureBox.height,
+                }}
+                position={{
+                  x: signatureBox.x,
+                  y: signatureBox.y,
+                }}
+                onDragStop={(e, d) => {
+                  const newBox = {
+                    ...signatureBox,
+                    x: d.x,
+                    y: d.y,
+                  };
+                  setSignatureBox(newBox);
+                  updateSignatureCoordinates(newBox);
+                }}
+                onResizeStop={(e, direction, ref, delta, position) => {
+                  const newBox = {
+                    width: ref.offsetWidth,
+                    height: ref.offsetHeight,
+                    x: position.x,
+                    y: position.y,
+                  };
+                  setSignatureBox(newBox);
+                  updateSignatureCoordinates(newBox);
+                }}
+                bounds="parent"
+                enableResizing={{
+                  topLeft: true,
+                  topRight: true,
+                  bottomLeft: true,
+                  bottomRight: true,
+                  top: false,
+                  right: false,
+                  bottom: false,
+                  left: false,
+                }}
+                style={{
+                  border: "2px dashed black",
+                  zIndex: 1000,
+                  position: "absolute",
+                  cursor: "move",
+                  backgroundColor: "rgba(255,255,255,0.6)",
+                }}
+              >
+                <img
+                  src={signatureImage}
+                  alt="Chữ ký"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    pointerEvents: "none",
+                    userSelect: "none",
+                  }}
+                />
+              </Rnd>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
-};
-
-export default ViewDraftDocument;
+}

@@ -1,5 +1,11 @@
+import ListWorkflow from "@/components/client/workflows/list.workflow";
+
 const ListWorkflowPage = () => {
-  return <div>ListWorkflowPage</div>;
+  return (
+    <div>
+      <ListWorkflow />
+    </div>
+  );
 };
 
 export default ListWorkflowPage;

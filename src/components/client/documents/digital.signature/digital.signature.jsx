@@ -2,19 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Modal, Upload, message } from "antd";
 import Draggable from "react-draggable";
 import { InboxOutlined } from "@ant-design/icons";
-import {
-  PdfViewerComponent,
-  Toolbar,
-  Magnification,
-  Navigation,
-  Inject,
-} from "@syncfusion/ej2-react-pdfviewer";
-
-import "@syncfusion/ej2-base/styles/material.css";
-import "@syncfusion/ej2-buttons/styles/material.css";
-import "@syncfusion/ej2-popups/styles/material.css";
-import "@syncfusion/ej2-react-pdfviewer/styles/material.css";
-import { registerLicense } from "@syncfusion/ej2-base";
 import samplePdf from "@/assets/files/sample.pdf";
 import signatureImageFile from "@/assets/files/signature-removebg-preview.png";
 
@@ -83,19 +70,6 @@ const DigitalSignature = (props) => {
       bodyStyle={{ padding: 0 }}
     >
       <div style={{ height: "80vh", position: "relative" }}>
-        <PdfViewerComponent
-          id="pdfViewer"
-          ref={viewerRef}
-          documentPath="https://cdn.syncfusion.com/content/pdf/pdf-succinctly.pdf"
-          serviceUrl="https://ej2services.syncfusion.com/production/web-services/api/pdfviewer"
-          style={{ height: "100%", width: "100%", backgroundColor: "white" }}
-          documentLoad={(e) => {
-            console.log("📄 PDF đã load:", e);
-          }}
-        >
-          <Inject services={[Toolbar, Magnification, Navigation]} />
-        </PdfViewerComponent>
-
         {signatureImage && (
           <Draggable position={position} onDrag={handleDrag}>
             <img

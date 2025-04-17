@@ -17,10 +17,8 @@ import {
   viewWorkflowDetailsWithFlowAndStepAPI,
 } from "@/services/api.service";
 import { convertRoleName, convertScopeName } from "@/services/helper";
-import "./detail.workflow.scss";
-import { BeatLoader } from "react-spinners";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Step } = Steps;
 
 const DetailWorkflow = (props) => {
