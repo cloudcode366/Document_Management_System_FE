@@ -90,3 +90,33 @@ export const getStatusColor = (status) => {
       return "gray";
   }
 };
+
+export const convertProcessingStatus = (status) => {
+  switch (status) {
+    case "Archived":
+      return "Đã lưu";
+    case "InProgress":
+      return "Đang xử lý";
+    case "Completed":
+      return "Đã hoàn thành";
+    case "Rejected":
+      return "Bị từ chối";
+    default:
+      "Không xác định";
+  }
+};
+
+export const convertColorProcessingStatus = (status) => {
+  switch (status) {
+    case "Archived":
+      return "green";
+    case "InProgress":
+      return "blue";
+    case "Completed":
+      return "geekblue";
+    case "Rejected":
+      return "red";
+    default:
+      return "default";
+  }
+};

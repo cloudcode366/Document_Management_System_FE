@@ -1,0 +1,130 @@
+import React, { useEffect, useRef, useState } from "react";
+import * as pdfjsLib from "pdfjs-dist";
+import "pdfjs-dist/web/pdf_viewer.css";
+import "styles/pdf.viewer.scss";
+import { Button } from "antd";
+import {
+  DownloadOutlined,
+  LeftOutlined,
+  RightOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
+} from "@ant-design/icons";
+
+// Cấu hình worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+const PDFViewerWithToken = ({ url, token }) => {
+  const containerRef = useRef(null);
+  const [pdfDoc, setPdfDoc] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [scale, setScale] = useState(1.5); // Mặc định zoom
+  const [numPages, setNumPages] = useState(0);
+
+  // Tải PDF
+  useEffect(() => {
+    const loadPDF = async () => {
+      if (!url || !token) return;
+
+      const loadingTask = pdfjsLib.getDocument({
+        url,
+        httpHeaders: { Authorization: `Bearer ${token}` },
+      });
+
+      const pdf = await loadingTask.promise;
+      setPdfDoc(pdf);
+      setNumPages(pdf.numPages);
+      setCurrentPage(1);
+    };
+
+    loadPDF();
+  }, [url, token]);
+
+  // Render trang hiện tại
+  useEffect(() => {
+    const renderPage = async () => {
+      if (!pdfDoc || !containerRef.current) return;
+
+      containerRef.current.innerHTML = "";
+
+      const page = await pdfDoc.getPage(currentPage);
+      const viewport = page.getViewport({ scale });
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      containerRef.current.appendChild(canvas);
+
+      await page.render({ canvasContext: context, viewport }).promise;
+    };
+
+    renderPage();
+  }, [pdfDoc, currentPage, scale]);
+
+  // Điều khiển
+  const zoomIn = () => setScale((prev) => prev + 0.2);
+  const zoomOut = () => setScale((prev) => Math.max(0.5, prev - 0.2));
+  const goToPrev = () => setCurrentPage((prev) => Math.max(1, prev - 1));
+  const goToNext = () => setCurrentPage((prev) => Math.min(numPages, prev + 1));
+
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "document.pdf");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="pdf-viewer-container">
+      {/* Toolbar */}
+      <div className="pdf-toolbar">
+        <div className="zoom-controls">
+          <Button
+            onClick={zoomOut}
+            className="zoom-button"
+            icon={<ZoomOutOutlined />}
+          ></Button>
+          <span className="zoom-percentage">
+            Zoom: {(scale * 100).toFixed(0)}%
+          </span>
+          <Button
+            onClick={zoomIn}
+            className="zoom-button"
+            icon={<ZoomInOutlined />}
+          ></Button>
+        </div>
+        <div className="page-controls">
+          <Button
+            onClick={goToPrev}
+            disabled={currentPage === 1}
+            className="page-button"
+            icon={<LeftOutlined />}
+          ></Button>
+          <span className="page-number">
+            Trang {currentPage} / {numPages}
+          </span>
+          <Button
+            onClick={goToNext}
+            disabled={currentPage === numPages}
+            className="page-button"
+            icon={<RightOutlined />}
+          ></Button>
+        </div>
+        <Button
+          onClick={handleDownload}
+          className="download-button"
+          icon={<DownloadOutlined />}
+        ></Button>
+      </div>
+
+      {/* PDF Viewer */}
+      <div ref={containerRef} className="pdf-canvas-container" />
+    </div>
+  );
+};
+
+export default PDFViewerWithToken;

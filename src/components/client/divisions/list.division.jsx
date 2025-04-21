@@ -110,13 +110,17 @@ const ListDivisions = () => {
 
           const res = await viewAllDivisionsAPI(query);
           if (res.data) {
-            setMeta(res.data.meatadataDto);
+            setMeta({
+              page: res.data?.meatadataDto.page,
+              limit: res.data?.meatadataDto.limit,
+              total: res.data?.size,
+            });
           }
           return {
             data: res.data?.content,
-            page: 1,
+            page: res.data?.meatadataDto.page,
             success: true,
-            total: res.data?.meatadataDto.total,
+            total: res.data?.size,
           };
         }}
         rowKey="divisionId"

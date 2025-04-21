@@ -20,6 +20,68 @@ import { LuBookMinus, LuWorkflow } from "react-icons/lu";
 import { useCurrentApp } from "components/context/app.context";
 import { GrDocumentConfig } from "react-icons/gr";
 import { GiOrganigram } from "react-icons/gi";
+import { useNotification } from "components/context/notification.context";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
+
+const NotificationDropdown = () => {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { notifications, totalUnread, markAsRead } = useNotification();
+
+  const handleClickNotification = (notification) => {
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+    if (notification.link) {
+      navigate(notification.link);
+    }
+  };
+
+  const notificationItems = notifications?.map((item) => ({
+    key: item.id,
+    label: (
+      <div
+        onClick={() => handleClickNotification(item)}
+        style={{
+          padding: "10px",
+          backgroundColor: item.read ? "#fff" : "#e6f7ff",
+          borderBottom: "1px solid #f0f0f0",
+          whiteSpace: "normal",
+          maxWidth: "300px",
+        }}
+      >
+        <div style={{ fontWeight: item.read ? "normal" : "bold" }}>
+          {item.title || "Không có tiêu đề"}
+        </div>
+        <div style={{ fontSize: "12px", color: "#999" }}>
+          {dayjs(item.createdAt).fromNow()}
+        </div>
+      </div>
+    ),
+  }));
+
+  return (
+    <div
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onClick={() => navigate("/notification")}
+      style={{ cursor: "pointer" }}
+    >
+      <Dropdown
+        open={open}
+        menu={{ items: notificationItems }}
+        placement="bottomRight"
+        overlayClassName="notification-dropdown"
+      >
+        <Badge count={totalUnread} size="small">
+          <BellOutlined style={{ fontSize: "18px" }} />
+        </Badge>
+      </Dropdown>
+    </div>
+  );
+};
 
 const { Content, Sider } = Layout;
 
@@ -33,6 +95,8 @@ const LayoutClient = () => {
 
   const { user, setUser, isAppLoading, isAuthenticated, setIsAuthenticated } =
     useCurrentApp();
+  const { notifications, totalUnread, isLoading, markAsRead } =
+    useNotification();
 
   const handleLogout = () => {
     message.success("Đăng xuất thành công!");
@@ -135,10 +199,6 @@ const LayoutClient = () => {
       icon: <LogoutOutlined style={{ fontSize: "18px", color: "red" }} />,
     },
   ];
-
-  // const urlAvatar = `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${
-  //   user?.avatar
-  // }`;
 
   if (isAuthenticated === false) {
     return <Outlet />;
@@ -272,12 +332,7 @@ const LayoutClient = () => {
                   onClick={() => navigate("/user-guide")}
                 />
 
-                <Badge count={2}>
-                  <BellOutlined
-                    style={{ fontSize: "16px", cursor: "pointer" }}
-                    onClick={() => navigate("/notification")}
-                  />
-                </Badge>
+                <NotificationDropdown />
 
                 <Dropdown
                   menu={{

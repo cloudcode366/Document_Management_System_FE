@@ -25,7 +25,6 @@ export const AppProvider = (props) => {
     const fetchAccount = async () => {
       try {
         const res = await viewProfileUserAPI(userId);
-        console.log("API viewProfileUserAPI", res.data);
 
         if (res.data.statusCode === 200) {
           const data = res.data.content;

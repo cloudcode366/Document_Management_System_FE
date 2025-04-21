@@ -1,18 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
-  Descriptions,
   Typography,
   Button,
   Divider,
   Tooltip,
-  Input,
   Col,
   Row,
   Space,
-  Tag,
   List,
   App,
+  Form,
+  Input,
   Modal,
 } from "antd";
 import {
@@ -24,22 +23,113 @@ import {
   ArrowLeftOutlined,
   ExportOutlined,
   EditOutlined,
+  CloseOutlined,
+  CheckOutlined,
 } from "@ant-design/icons";
 import samplePDF from "assets/files/sample.pdf";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./view.detail.document.scss";
 import CreateDraftDocument from "@/components/client/documents/draft.documents/create.draft.document";
 import SignatureBox from "@/components/client/documents/initial.signature/signature.box";
 import signatureImg from "assets/files/signature-removebg-preview.png";
 import SignatureContainer from "@/components/client/documents/initial.signature/signature.container";
+import { useCurrentApp } from "@/components/context/app.context";
+import { BeatLoader } from "react-spinners";
+import { viewDetailDocumentAPI } from "@/services/api.service";
+import dayjs from "dayjs";
+import { version } from "nprogress";
+import { Document, Page, pdfjs } from "react-pdf";
+import PDFViewerWithToken from "@/components/pdf.viewer";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const { Title, Paragraph } = Typography;
 
 const ViewDetailDocument = () => {
+  const { documentId } = useParams();
+  const { user } = useCurrentApp();
   const { message, notification } = App.useApp();
   const navigate = useNavigate();
   const [openModalCreateDraftDocument, setOpenModalCreateDraftDocument] =
     useState(false);
+  const [openApproveConfirmModal, setOpenApproveConfirmModal] = useState(false);
+  const [openRejectConfirmModal, setOpenRejectConfirmModal] = useState(false);
+  const [rejectForm] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [document, setDocument] = useState(null);
+
+  const fetchInfo = async () => {
+    setLoading(true);
+    const res = await viewDetailDocumentAPI(documentId);
+    if (res?.data?.statusCode === 200) {
+      const data = res.data.content;
+      const digitalSignatures = data.signatures.filter(
+        (signature) => signature.isDigital === true
+      );
+      const initalSignatures = data.signatures.filter(
+        (signature) => signature.isDigital === false
+      );
+      const finalVersion = data.versions.find(
+        (version) => version.isFinal === true
+      );
+      const rejectedVersions = data.versions.filter(
+        (version) => version.isFinal === false
+      );
+      setDocument({
+        ...data,
+        digitalSignatures,
+        initalSignatures,
+        finalVersion,
+        rejectedVersions,
+      });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchInfo();
+  }, []);
+
+  const handleApproveDocument = () => {
+    // Gửi dữ liệu lên server ở đây nếu cần
+    message.success("Văn bản đã được duyệt thành công!");
+    setOpenApproveConfirmModal(false);
+    navigate("/detail-document");
+    // Điều hướng hoặc cập nhật UI nếu cần
+  };
+
+  const handleRejectDocument = async () => {
+    try {
+      const values = await rejectForm.validateFields();
+      console.log("Lý do từ chối:", values.reason); // Thay bằng logic xử lý thật
+      setOpenRejectConfirmModal(false);
+      notification.success({
+        message: "Văn bản đã bị từ chối thành công!",
+        description: `Lý do: ${values.reason}`,
+      });
+      rejectForm.resetFields(); // reset sau khi dùng
+      message.success("Đã từ chối văn bản.");
+    } catch (errorInfo) {
+      // Nếu không nhập lý do thì sẽ báo lỗi
+      console.log("Validation Failed:", errorInfo);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <BeatLoader size={25} color="#364AD6" />
+      </div>
+    );
+  }
 
   return (
     <div style={{ height: "100vh" }}>
@@ -63,15 +153,9 @@ const ViewDetailDocument = () => {
           }}
         >
           <div style={{ height: "100%", overflowY: "auto" }}>
-            <iframe
-              title="Document Viewer"
-              src={samplePDF}
-              style={{
-                width: "100%",
-                height: "75vh",
-                border: "none",
-                boxShadow: "0 10px 8px rgba(0, 0, 0, 0.1)",
-              }}
+            <PDFViewerWithToken
+              url={document?.versions?.[0]?.url}
+              token={localStorage.getItem(`access_token`)}
             />
 
             {/* Signature section */}
@@ -142,8 +226,7 @@ const ViewDetailDocument = () => {
                 paddingTop: "20px",
               }}
             >
-              Văn bản quyết định 53/2025 QĐ-TTg chính sách nội trú học sinh,
-              sinh viên học cao đẳng trung cấp
+              {document?.documentName}
             </Title>
             <Divider
               variant="solid"
@@ -152,33 +235,70 @@ const ViewDetailDocument = () => {
               }}
             ></Divider>
             <Title level={5}>Tổng quan văn bản</Title>
-            <Descriptions
-              column={1}
-              size="small"
-              labelStyle={{ fontWeight: 500 }}
-              style={{ marginBottom: "10px" }}
-            >
-              <Descriptions.Item label="Người nhận">
-                namlee180505@gmail.com
-              </Descriptions.Item>
-              <Descriptions.Item label="Người gửi">
-                locnht.it@gmail.com
-              </Descriptions.Item>
-              <Descriptions.Item label="Ngày tạo">10/02/2025</Descriptions.Item>
-              <Descriptions.Item label="Ngày hết hạn">
-                10/04/2025
-              </Descriptions.Item>
-              <Descriptions.Item label="Số hiệu văn bản">
-                53/2025/QĐ-TTg
-              </Descriptions.Item>
-              <Descriptions.Item label="Loại văn bản">
-                Quyết định
-              </Descriptions.Item>
-              <Descriptions.Item label="Luồng xử lý">
-                Văn bản đi
-              </Descriptions.Item>
-              <Descriptions.Item label="Người ký">Nam Lê</Descriptions.Item>
-            </Descriptions>
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {document?.numberOfDocument}
+              </span>
+            </div>
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {document?.documentTypeName}
+              </span>
+            </div>
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {document?.workflowName}
+              </span>
+            </div>
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Người gửi:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {document?.sender}
+              </span>
+            </div>
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Người tạo:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {document?.createdBy}
+              </span>
+            </div>
+
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {dayjs(document?.dateReceived).format("DD - MM - YYYY HH:mm")}
+              </span>
+            </div>
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {dayjs(document?.dateIssued).format("DD - MM - YYYY HH:mm")}
+              </span>
+            </div>
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {dayjs(document?.dateExpires).format("DD - MM - YYYY HH:mm")}
+              </span>
+            </div>
+
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Ngày hết hạn:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {dayjs(document?.deadline).format("DD - MM - YYYY")}
+              </span>
+            </div>
+
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Người ký:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {document?.digitalSignatures}
+              </span>
+            </div>
+
             <Divider
               variant="solid"
               style={{
@@ -187,11 +307,7 @@ const ViewDetailDocument = () => {
             ></Divider>
             <Title level={5}>Nội dung</Title>
             <Paragraph style={{ fontSize: 14 }}>
-              Quyết định 53/2015/QĐ-TTg về chính sách nội trú đối với học sinh,
-              sinh viên học cao đẳng, trung cấp công lập quy định đối tượng
-              hưởng chính sách nội trú, mức hỗ trợ và các hỗ trợ khác, nguyên
-              tắc thực hiện, phương thức chi trả, nguồn kinh phí thực hiện chính
-              sách được ban hành ngày 20/10/2015.
+              {document?.documentContent}
             </Paragraph>
             <Divider
               variant="solid"
@@ -227,12 +343,7 @@ const ViewDetailDocument = () => {
 
             <List
               itemLayout="horizontal"
-              dataSource={[
-                {
-                  title: "Dự thảo lần 1",
-                  date: "10/04/2025",
-                },
-              ]}
+              dataSource={document?.versions}
               renderItem={(item) => (
                 <List.Item
                   actions={[
@@ -254,10 +365,12 @@ const ViewDetailDocument = () => {
                     }
                     title={
                       <Space>
-                        <Typography.Text>{item.title}</Typography.Text>
+                        <Typography.Text>
+                          Phiên bản thứ {item.versionNumber}
+                        </Typography.Text>
                       </Space>
                     }
-                    description={`Ngày tạo: ${item.date}`}
+                    description={`Ngày tạo: ${item.createdDate}`}
                   />
                 </List.Item>
               )}
@@ -268,7 +381,7 @@ const ViewDetailDocument = () => {
                 borderColor: "#80868b",
               }}
             ></Divider>
-            <Row gutter={[12, 12]}>
+            <Row gutter={[12, 12]} style={{ marginBottom: "10px" }}>
               <Col span={12}>
                 <Button
                   icon={<EditOutlined style={{ color: "#1890ff" }} />}
@@ -277,7 +390,8 @@ const ViewDetailDocument = () => {
                   style={{
                     height: 40,
                     fontSize: 16,
-                    background: "#F4F5F6",
+                    background: "#e6f4ff", // xanh dương nhạt
+                    border: "1px solid #91d5ff", // viền xanh nhạt
                   }}
                 >
                   Ký điện tử
@@ -291,10 +405,50 @@ const ViewDetailDocument = () => {
                   style={{
                     height: 40,
                     fontSize: 16,
-                    background: "#F4F5F6",
+                    background: "#fff7e6", // cam nhạt
+                    border: "1px solid #ffd591", // viền cam nhạt
                   }}
                 >
                   Nộp văn bản
+                </Button>
+              </Col>
+            </Row>
+
+            <Row gutter={[12, 12]} style={{ marginBottom: "10px" }}>
+              <Col span={12}>
+                <Button
+                  icon={<CloseOutlined style={{ color: "#ff4d4f" }} />}
+                  block
+                  size="middle"
+                  style={{
+                    height: 40,
+                    fontSize: 16,
+                    background: "#fff1f0", // đỏ nhạt
+                    border: "1px solid #ffa39e", // viền đỏ nhẹ
+                  }}
+                  onClick={() => {
+                    setOpenRejectConfirmModal(true);
+                  }}
+                >
+                  Từ chối văn bản
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button
+                  icon={<CheckOutlined style={{ color: "#52c41a" }} />}
+                  block
+                  size="middle"
+                  style={{
+                    height: 40,
+                    fontSize: 16,
+                    background: "#f6ffed", // xanh lá nhạt
+                    border: "1px solid #b7eb8f", // viền xanh lá nhạt
+                  }}
+                  onClick={() => {
+                    setOpenApproveConfirmModal(true);
+                  }}
+                >
+                  Duyệt văn bản
                 </Button>
               </Col>
             </Row>
@@ -317,6 +471,47 @@ const ViewDetailDocument = () => {
           </div>
         </Card>
       </div>
+      <Modal
+        title="Xác nhận duyệt văn bản"
+        open={openApproveConfirmModal}
+        onOk={handleApproveDocument}
+        onCancel={() => setOpenApproveConfirmModal(false)}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        centered
+        maskClosable={false}
+      >
+        <p>Bạn có chắc chắn muốn duyệt văn bản này không?</p>
+      </Modal>
+
+      <Modal
+        title="Xác nhận từ chối văn bản"
+        open={openRejectConfirmModal}
+        onOk={handleRejectDocument}
+        onCancel={() => {
+          setOpenRejectConfirmModal(false);
+          rejectForm.resetFields(); // reset nếu người dùng huỷ
+        }}
+        okText="Từ chối"
+        cancelText="Hủy"
+        centered
+        maskClosable={false}
+      >
+        <Form form={rejectForm} layout="vertical">
+          <Form.Item
+            name="reason"
+            label="Lý do từ chối"
+            rules={[
+              { required: true, message: "Vui lòng nhập lý do từ chối!" },
+            ]}
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="Nhập lý do từ chối văn bản..."
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
       <CreateDraftDocument
         openModalCreateDraftDocument={openModalCreateDraftDocument}
         setOpenModalCreateDraftDocument={setOpenModalCreateDraftDocument}

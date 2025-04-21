@@ -258,7 +258,7 @@ const TableUser = () => {
       sorter: true,
       hideInSearch: true,
       render(dom, entity, index, action, schema) {
-        return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
+        return <>{dayjs(entity.createdAt).format("DD - MM - YYYY")}</>;
       },
       width: "10%",
     },
@@ -424,6 +424,7 @@ const TableUser = () => {
         actionRef={actionRef}
         cardBordered
         request={async (params, sort, filter) => {
+          console.log(`>>> Check params users:`, params);
           const filters = Object.fromEntries(
             Object.entries(params).filter(
               ([key, value]) =>
@@ -449,13 +450,17 @@ const TableUser = () => {
           const limit = params?.pageSize ?? 10;
           const res = await viewAllUserAPI(page, limit, filters, sortParams);
           if (res.data) {
-            setMeta(res.data.meatadataDto);
+            setMeta({
+              page: res.data?.meatadataDto.page,
+              limit: res.data?.meatadataDto.limit,
+              total: res.data?.size,
+            });
           }
           return {
             data: res.data?.content,
-            page: 1,
+            page: res.data?.meatadataDto.page,
             success: true,
-            total: res.data?.meatadataDto.total,
+            total: res.data?.size,
           };
         }}
         rowKey="userId"

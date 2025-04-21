@@ -13,6 +13,7 @@
   "dependencies": {
     "@ant-design/icons": "5.3.7",
     "@ant-design/pro-components": "2.8.1",
+    "@microsoft/signalr": "^8.0.7",
     "antd": "5.18.1",
     "axios": "1.7.2",
     "dayjs": "1.11.13",

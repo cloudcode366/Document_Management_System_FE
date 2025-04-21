@@ -52,17 +52,6 @@ const ListWorkflow = () => {
         return convertScopeName(entity.scope);
       },
     },
-    // {
-    //   title: "Ngày tạo",
-    //   dataIndex: "createdAt",
-    //   valueType: "date",
-    //   // sorter: true,
-    //   hideInSearch: true,
-    //   width: "15%",
-    //   render(dom, entity, index, action, schema) {
-    //     return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
-    //   },
-    // },
     {
       title: "Trạng thái",
       dataIndex: "isDeleted",
@@ -112,16 +101,20 @@ const ListWorkflow = () => {
             }
             query += `&page=${params.current}&limit=${params.pageSize}`;
           }
-
           const res = await viewAllWorkflowsAPI(query);
+
           if (res.data) {
-            setMeta(res.data.meatadataDto);
+            setMeta({
+              page: res.data?.meatadataDto.page,
+              limit: res.data?.meatadataDto.limit,
+              total: res.data?.size,
+            });
           }
           return {
             data: res.data?.content,
-            page: 1,
+            page: res.data?.meatadataDto.page,
             success: true,
-            total: res.data?.meatadataDto.total,
+            total: res.data?.size,
           };
         }}
         rowKey="workflowId"

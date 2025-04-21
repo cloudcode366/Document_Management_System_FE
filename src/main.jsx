@@ -41,6 +41,8 @@ import { AppProvider } from "components/context/app.context";
 import ProtectedRoute from "components/auth";
 import "nprogress/nprogress.css";
 import ListDivisionPage from "pages/client/divisions/list.division";
+import { NotificationProvider } from "components/context/notification.context";
+import DetailProgress from "pages/client/progresses/detail.progress";
 
 const router = createBrowserRouter([
   {
@@ -108,7 +110,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/detail-document",
+        path: "/detail-document/:documentId",
         element: (
           <ProtectedRoute>
             <DetailDocument />
@@ -160,6 +162,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ListProgressPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/detail-progress/:documentId",
+        element: (
+          <ProtectedRoute>
+            <DetailProgress />
           </ProtectedRoute>
         ),
       },
@@ -341,9 +351,11 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <App>
       <AppProvider>
-        <ConfigProvider locale={viVN}>
-          <RouterProvider router={router} />
-        </ConfigProvider>
+        <NotificationProvider>
+          <ConfigProvider locale={viVN}>
+            <RouterProvider router={router} />
+          </ConfigProvider>
+        </NotificationProvider>
       </AppProvider>
     </App>
   </StrictMode>

@@ -199,9 +199,9 @@ const viewAllDocumentTypesAPI = (query) => {
   return axios.get(urlBackend);
 };
 
-const createDocumentTypeAPI = (documentTypeName) => {
-  const urlBackend = `/api/DocumentType/create-document-type?documentTypeName=${documentTypeName}`;
-  return axios.post(urlBackend);
+const createDocumentTypeAPI = (documentTypeName, acronym) => {
+  const urlBackend = `/api/DocumentType/create-document-type`;
+  return axios.post(urlBackend, { documentTypeName, acronym});
 };
 
 const changeStatusDocumentTypeAPI = (documentTypeId) => {
@@ -275,6 +275,54 @@ const changeStatusWorkflowAPI = (workflowId) => {
   return axios.post(urlBackend);
 };
 
+const viewNotificationsByUserId = (userId, page, limit) => {
+  const urlBackend = `/api/Notification/view-notifications-by-user-id?userId=${userId}&page=${page}&limit=${limit}`;
+  return axios.get(urlBackend);
+};
+
+const updateMarkNotificationAsRead = (notiticationId) => {
+  const urlBackend = `/api/Notification/update-mark-notification-as-read?notificationId=${notiticationId}`;
+  return axios.post(urlBackend);
+};
+
+const viewDocumentsByTabForUserAPI = (query) => {
+  const urlBackend = `/api/Task/view-documents-by-tab-for-user?${query}`;
+  return axios.get(urlBackend);
+};
+
+const viewDetailDocumentAPI = (documentId) => {
+  const urlBackend = `/api/Document/view-detail-document?documentId=${documentId}`;
+  return axios.get(urlBackend);
+};
+
+const viewWorkflowByScopeAPI = (scope) => {
+  const urlBackend = `/api/Workflow/view-workflow-by-scope?scope=${scope}`;
+  return axios.get(urlBackend);
+};
+
+const createUploadDocumentAPI = (file) => {
+  const URL_BACKEND = `/api/Document/create-upload-document`;
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("file", file);
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
+const createInComingDocumentAPI = (req) => {
+  const urlBackend = `/api/Document/create-incoming-document`;
+  return axios.post(urlBackend, req);
+};
+
+const viewMySelfDocumentAPI = (query) => {
+  const urlBackend = `/api/Document/view-my-self-document?${query}`;
+  return axios.get(urlBackend);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -308,4 +356,12 @@ export {
   viewDocumentTypeNameByWorkflowId,
   createImportUsersFromExcelAPI,
   changeStatusWorkflowAPI,
+  viewNotificationsByUserId,
+  updateMarkNotificationAsRead,
+  viewDocumentsByTabForUserAPI,
+  viewDetailDocumentAPI,
+  viewWorkflowByScopeAPI,
+  createUploadDocumentAPI,
+  createInComingDocumentAPI,
+  viewMySelfDocumentAPI,
 };

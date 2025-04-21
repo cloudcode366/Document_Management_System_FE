@@ -50,7 +50,7 @@ const TableDocumentType = () => {
       title: "Loại văn bản",
       dataIndex: "documentTypeName",
       copyable: true,
-      width: "60%",
+      width: "40%",
       fieldProps: {
         placeholder: "Vui lòng nhập tên loại văn bản",
       },
@@ -58,6 +58,13 @@ const TableDocumentType = () => {
         labelCol: { span: 8 }, // Điều chỉnh label rộng hơn để không bị đè
         wrapperCol: { span: 18 }, // Đảm bảo input không chiếm hết không gian
       },
+    },
+    {
+      title: "Chữ viết tắt",
+      dataIndex: "acronym",
+      copyable: true,
+      width: "20%",
+      hideInSearch: true,
     },
     {
       title: "Trạng thái",
@@ -168,13 +175,17 @@ const TableDocumentType = () => {
 
           const res = await viewAllDocumentTypesAPI(query);
           if (res.data) {
-            setMeta(res.data.meatadataDto);
+            setMeta({
+              page: res.data?.meatadataDto.page,
+              limit: res.data?.meatadataDto.limit,
+              total: res.data?.size,
+            });
           }
           return {
             data: res.data?.content,
-            page: 1,
+            page: res.data?.meatadataDto.page,
             success: true,
-            total: res.data?.meatadataDto.total,
+            total: res.data?.size,
           };
         }}
         rowKey="documentTypeId"

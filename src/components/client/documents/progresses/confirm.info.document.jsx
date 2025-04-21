@@ -10,11 +10,21 @@ import {
   Space,
   Empty,
   Select,
+  Tag,
+  notification,
+  message,
 } from "antd";
 import { FilePdfOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { useState } from "react";
-import InitProgressDocument from "@/components/client/documents/progresses/init.progress.document";
+import { useEffect, useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import PDFViewerWithToken from "@/components/pdf.viewer";
+import { useCurrentApp } from "@/components/context/app.context";
+import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
+import "./confirm.info.document.scss";
+import { createInComingDocumentAPI } from "@/services/api.service";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -34,35 +44,111 @@ const workflowOptions = [
   { id: 4, name: "Văn bản toàn trường" },
 ];
 
-const ConfirmInfoDocument = ({
-  openConfirmModal,
-  setOpenConfirmModal,
-  refreshTable,
-  uploadedFile,
-  handleCloseCreateDocumentModal,
-}) => {
+const ConfirmInfoDocument = (props) => {
+  const {
+    openConfirmModal,
+    setOpenConfirmModal,
+    uploadedFile,
+    resDocument,
+    selectedWorkflow,
+    selectedTemplate,
+    selectedDocumentType,
+    selectedScope,
+    handleCloseCreateDocumentModal,
+  } = props;
   const [form] = Form.useForm();
-  const [openInitProgressDocumentModal, setOpenInitProgressDocumentModal] =
-    useState(false);
-  const [dataInfoDocument, setDataInfoDocument] = useState({});
+  const { user } = useCurrentApp();
+  const [signerList, setSignerList] = useState([]);
+  const [inputVisible, setInputVisible] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [defaultSigner, setDefaultSigner] = useState([]);
+
+  useEffect(() => {
+    if (selectedScope === "InComing") {
+      const defaultSignerList = resDocument?.canChange?.signerName || [];
+      setSignerList(defaultSignerList.map((name) => ({ name, isNew: false })));
+      setDefaultSigner(defaultSignerList);
+      form.setFieldsValue({
+        Name: resDocument?.canChange?.Name,
+        Sender: resDocument?.canChange?.Sender || null,
+        Receiver: user.fullName,
+        DateReceived: resDocument?.canChange?.DateReceived
+          ? dayjs(resDocument?.canChange?.DateReceived)
+          : null,
+        validTo: resDocument?.canChange?.validTo
+          ? dayjs(resDocument?.canChange?.validTo)
+          : null,
+        validFrom: resDocument?.canChange?.validFrom
+          ? dayjs(resDocument?.canChange?.validFrom)
+          : null,
+        Deadline: resDocument?.canChange?.Deadline
+          ? dayjs(resDocument?.canChange?.Deadline)
+          : null,
+        NumberOfDocument: resDocument?.canChange?.NumberOfDocument || null,
+        DocumentContent: resDocument?.canChange?.DocumentContent,
+        DocumentTypeId: selectedDocumentType.documentTypeId,
+        DocumentTypeName: selectedDocumentType.documentTypeName,
+        WorkflowId: selectedWorkflow.workflowId,
+        WorkflowName: selectedWorkflow.workflowName,
+        signerNames: defaultSignerList,
+      });
+    }
+  }, [openConfirmModal, resDocument, form, selectedScope, user]);
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
-    console.log("Dữ liệu submit:", {
-      ...values,
-      file: uploadedFile,
-    });
-    setDataInfoDocument(values);
-    // TODO: Gọi API ở đây nếu cần
-    // refreshTable();
-    setOpenConfirmModal(false);
-    setOpenInitProgressDocumentModal(true);
+    const currentSigners = values.signerNames || [];
+    const NewSignerName = currentSigners.filter(
+      (s) => !defaultSigner.includes(s)
+    );
+
+    const updatedCanChange = {
+      ...resDocument?.canChange,
+      ...values, // Ghi đè các giá trị mới từ form vào canChange
+      NewSignerName: NewSignerName,
+    };
+
+    // Ghi đè vào resDocument.canChange
+    resDocument.canChange = updatedCanChange;
+    console.log(`>>> Check resDocument: `, resDocument);
+
+    const res = await createInComingDocumentAPI(resDocument);
+    if (res && res.data && res.data.statusCode === 200) {
+      message.success(`Khởi tạo văn bản thành công!`);
+      handleCloseConfirmInfoDocumentModal();
+    } else {
+      notification.error({ message: "Đã có lỗi xảy ra, vui lòng thử lại sau" });
+    }
+
+    // TODO: Gọi API nếu cần
+  };
+
+  const handleAddSigner = () => {
+    if (inputValue && !signerList.find((item) => item.name === inputValue)) {
+      const newList = [...signerList, { name: inputValue, isNew: true }];
+      setSignerList(newList);
+      setInputVisible(false);
+      setInputValue("");
+      form.setFieldsValue({ signerNames: newList.map((i) => i.name) });
+    }
+  };
+
+  const handleRemoveSigner = (name) => {
+    const filtered = signerList.filter((item) => item.name !== name);
+    setSignerList(filtered);
+    form.setFieldsValue({ signerNames: filtered.map((i) => i.name) });
   };
 
   const handleCloseConfirmInfoDocumentModal = () => {
-    handleCloseCreateDocumentModal();
+    handleCloseCreateDocumentModal(); // Đảm bảo đóng modal cha (nếu cần)
     setOpenConfirmModal(false);
     form.resetFields();
+
+    // Reset thêm các state nếu cần thiết
+    setSignerList([]); // Reset danh sách người ký
+    setInputVisible(false); // Đóng input thêm người ký
+    setInputValue(""); // Clear input value
+    setDefaultSigner([]); // Nếu có cần reset lại người ký mặc định
   };
 
   return (
@@ -73,10 +159,14 @@ const ConfirmInfoDocument = ({
         footer={null}
         width="90vw"
         centered
-        style={{ top: 20 }}
         maskClosable={false}
         closable={false}
-        bodyStyle={{ padding: 0, height: "80vh" }}
+        bodyProps={{
+          style: {
+            maxHeight: "80vh",
+            overflowY: "auto",
+          },
+        }}
       >
         <div style={{ display: "flex", height: "100%" }}>
           {/* Bên trái: Xem file PDF */}
@@ -97,7 +187,7 @@ const ConfirmInfoDocument = ({
             headStyle={{ flexShrink: 0, padding: "12px 16px" }}
             bodyStyle={{ flex: 1, padding: 0 }}
           >
-            {uploadedFile && (
+            {uploadedFile && selectedScope !== "InComing" && (
               <iframe
                 src={URL.createObjectURL(uploadedFile)}
                 style={{
@@ -106,6 +196,12 @@ const ConfirmInfoDocument = ({
                   border: "none",
                 }}
                 title="File preview"
+              />
+            )}
+            {uploadedFile && selectedScope === "InComing" && (
+              <PDFViewerWithToken
+                url={resDocument?.canChange?.url}
+                token={localStorage.getItem(`access_token`)}
               />
             )}
           </Card>
@@ -126,6 +222,7 @@ const ConfirmInfoDocument = ({
             <Form
               form={form}
               layout="vertical"
+              className="form-large-text"
               initialValues={{ ngayky: null }}
               style={{
                 height: "100%",
@@ -135,7 +232,7 @@ const ConfirmInfoDocument = ({
             >
               <Form.Item
                 label="Tên văn bản"
-                name="name"
+                name="Name"
                 rules={[
                   { required: true, message: "Vui lòng nhập tên văn bản!" },
                 ]}
@@ -145,7 +242,7 @@ const ConfirmInfoDocument = ({
 
               <Form.Item
                 label="Người gửi"
-                name="sender"
+                name="Sender"
                 rules={[
                   { required: true, message: "Vui lòng nhập người gửi!" },
                 ]}
@@ -155,7 +252,7 @@ const ConfirmInfoDocument = ({
 
               <Form.Item
                 label="Người nhận"
-                name="receiver"
+                name="Receiver"
                 rules={[
                   { required: true, message: "Vui lòng nhập người nhận!" },
                 ]}
@@ -165,30 +262,32 @@ const ConfirmInfoDocument = ({
 
               <Form.Item
                 label="Ngày nhận"
-                name="received_date"
+                name="DateReceived"
                 rules={[
                   { required: true, message: "Vui lòng chọn ngày nhận!" },
                 ]}
               >
                 <DatePicker
-                  format="DD/MM/YYYY"
+                  format="DD-MM-YYYY HH:mm"
+                  showTime={{ format: "HH:mm" }}
                   style={{ width: "100%" }}
                   placeholder="Vui lòng chọn ngày nhận"
                   disabledDate={(current) =>
                     current && current > dayjs().endOf("day")
-                  } // Không cho chọn ngày trong tương lai
+                  }
                 />
               </Form.Item>
 
               <Form.Item
-                label="Ban hành từ ngày"
-                name="date_issued"
+                label="Ngày ban hành"
+                name="validTo"
                 rules={[
                   { required: true, message: "Vui lòng chọn ngày ban hành!" },
                 ]}
               >
                 <DatePicker
-                  format="DD/MM/YYYY"
+                  format="DD-MM-YYYY HH:mm"
+                  showTime={{ format: "HH:mm" }}
                   style={{ width: "100%" }}
                   placeholder="Vui lòng chọn ngày ban hành"
                   disabledDate={(current) =>
@@ -199,7 +298,7 @@ const ConfirmInfoDocument = ({
 
               <Form.Item
                 label="Ngày hết hiệu lực"
-                name="expiration_date"
+                name="validFrom"
                 rules={[
                   {
                     required: true,
@@ -208,85 +307,133 @@ const ConfirmInfoDocument = ({
                 ]}
               >
                 <DatePicker
-                  format="DD/MM/YYYY"
+                  format="DD-MM-YYYY HH:mm"
+                  showTime={{ format: "HH:mm" }}
+                  style={{ width: "100%" }}
+                  placeholder="Vui lòng chọn ngày hết hiệu lực"
+                  disabledDate={(current) =>
+                    current && current < dayjs().endOf("day")
+                  }
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Ngày hết hạn"
+                name="Deadline"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn ngày hết hạn xử lý!",
+                  },
+                ]}
+              >
+                <DatePicker
+                  format="DD-MM-YYYY HH:mm"
+                  showTime={{ format: "HH:mm" }}
                   style={{ width: "100%" }}
                   placeholder="Vui lòng chọn ngày hết hạn"
-                  // disabledDate={(current) =>
-                  //   current && current > dayjs().endOf("day")
-                  // } // Không cho chọn ngày trong tương lai
+                  disabledDate={(current) =>
+                    current && current < dayjs().endOf("day")
+                  }
                 />
               </Form.Item>
 
               <Form.Item
                 label="Số hiệu văn bản"
-                name="number_of_document"
+                name="NumberOfDocument"
                 rules={[
                   { required: true, message: "Vui lòng nhập số hiệu văn bản!" },
                 ]}
               >
-                <Input placeholder="Tên số hiệu văn bản" />
+                <Input placeholder="Nhập số hiệu văn bản" readOnly />
               </Form.Item>
 
               <Form.Item
                 label="Loại văn bản"
-                name="document_type_id"
+                name="DocumentTypeId"
+                rules={[
+                  { required: true, message: "Vui lòng chọn loại văn bản!" },
+                ]}
+                hidden
+              >
+                <Input placeholder="Loại văn bản" readOnly />
+              </Form.Item>
+
+              <Form.Item
+                label="Loại văn bản"
+                name="DocumentTypeName"
                 rules={[
                   { required: true, message: "Vui lòng chọn loại văn bản!" },
                 ]}
               >
-                <Select
-                  showSearch
-                  placeholder="Vui lòng chọn loại văn bản"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {docTypeOptions.map((docType) => (
-                    <Select.Option key={docType.id} value={docType.id}>
-                      {docType.name}
-                    </Select.Option>
-                  ))}
-                </Select>
+                <Input placeholder="Loại văn bản" readOnly />
               </Form.Item>
 
               <Form.Item
                 label="Luồng xử lý"
-                name="workflow_id"
+                name="WorkflowId"
+                rules={[
+                  { required: true, message: "Vui lòng chọn luồng xử lý!" },
+                ]}
+                hidden
+              >
+                <Input placeholder="Luồng xử lý" readOnly />
+              </Form.Item>
+
+              <Form.Item
+                label="Loại văn bản"
+                name="WorkflowName"
                 rules={[
                   { required: true, message: "Vui lòng chọn luồng xử lý!" },
                 ]}
               >
-                <Select
-                  showSearch
-                  placeholder="Vui lòng chọn luồng xử lý"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {workflowOptions.map((workflow) => (
-                    <Select.Option key={workflow.id} value={workflow.id}>
-                      {workflow.name}
-                    </Select.Option>
-                  ))}
-                </Select>
+                <Input placeholder="Luồng xử lý" readOnly />
               </Form.Item>
 
-              <Form.Item
-                label="Người ký"
-                name="signed_by"
-                rules={[{ required: true, message: "Vui lòng nhập người ký!" }]}
-              >
-                <Input placeholder="Tên người ký" />
+              <Form.Item label="Người ký" name="signerNames">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                  {signerList.map((item) => (
+                    <Tag
+                      key={item.name}
+                      color="blue"
+                      closable={item.isNew}
+                      onClose={() => handleRemoveSigner(item.name)}
+                      style={{ display: "flex", alignItems: "center" }}
+                    >
+                      {item.name}
+                    </Tag>
+                  ))}
+                  {inputVisible ? (
+                    <Input
+                      size="small"
+                      style={{ width: 160 }}
+                      value={inputValue}
+                      autoFocus
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onBlur={handleAddSigner}
+                      onPressEnter={handleAddSigner}
+                    />
+                  ) : (
+                    <Tag
+                      onClick={() => setInputVisible(true)}
+                      style={{
+                        background: "#fff",
+                        borderStyle: "dashed",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <PlusOutlined /> Thêm
+                    </Tag>
+                  )}
+                </div>
               </Form.Item>
 
               <Form.Item
                 label="Nội dung"
-                name="noidung"
+                name="DocumentContent"
                 rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
               >
-                <TextArea rows={4} placeholder="Nhập nội dung tóm tắt" />
+                <TextArea rows={5} placeholder="Nhập nội dung tóm tắt" />
               </Form.Item>
 
               <div style={{ marginTop: "auto" }}>
@@ -304,16 +451,6 @@ const ConfirmInfoDocument = ({
           </Card>
         </div>
       </Modal>
-      <InitProgressDocument
-        openInitProgressDocumentModal={openInitProgressDocumentModal}
-        setOpenInitProgressDocumentModal={setOpenInitProgressDocumentModal}
-        refreshTable={refreshTable}
-        dataInfoDocument={dataInfoDocument}
-        setDataInfoDocument={setDataInfoDocument}
-        handleCloseConfirmInfoDocumentModal={
-          handleCloseConfirmInfoDocumentModal
-        }
-      />
     </div>
   );
 };
