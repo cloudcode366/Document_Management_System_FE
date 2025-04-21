@@ -33,7 +33,8 @@ const LayoutAdmin = () => {
 
   const handleLogout = () => {
     message.success("Đăng xuất thành công!");
-    localStorage.clear();
+    localStorage.removeItem(`access_token`);
+    localStorage.removeItem(`user_id`);
     setUser(null);
     setIsAuthenticated(false);
     navigate("/login");
@@ -131,31 +132,41 @@ const LayoutAdmin = () => {
               whiteSpace: "nowrap",
             }}
           >
-            <img
-              src="/logo.svg"
-              alt="logo"
+            {/* Bọc logo và tên trong Link để điều hướng đến path "/" */}
+            <Link
+              to="/admin"
               style={{
-                maxHeight: "40px",
-                objectFit: "contain",
+                display: "flex",
+                alignItems: "center",
+                textDecoration: "none",
               }}
-            />
-            {!collapsed && (
-              <div
+            >
+              <img
+                src="/logo.svg"
+                alt="logo"
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: "10px",
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "16px",
+                  maxHeight: "40px",
+                  objectFit: "contain",
                 }}
-              >
-                <span>Hệ Thống</span>
-                <span>Quản Lý Văn Bản</span>
-              </div>
-            )}
+              />
+              {!collapsed && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: "10px",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                  }}
+                >
+                  <span>Hệ Thống</span>
+                  <span>Quản Lý Văn Bản</span>
+                </div>
+              )}
+            </Link>
             <div
               style={{
                 position: "absolute",

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./login.scss";
-import { App, Button, Divider, Form, Input } from "antd";
+import { App, Button, Divider, Form, Input, Checkbox } from "antd";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCurrentApp } from "@/components/context/app.context";
 import { loginAPI } from "@/services/api.service";
+import CryptoJS from "crypto-js";
 
 const LoginPage = () => {
   const [form] = Form.useForm();
@@ -13,20 +14,71 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { setIsAuthenticated, setUser, user } = useCurrentApp();
 
+  const SECRET_KEY = "your-secret-key";
+
+  useEffect(() => {
+    const encryptedUsername = localStorage.getItem("saved_username");
+    const encryptedPassword = localStorage.getItem("saved_password");
+    if (encryptedUsername && encryptedPassword) {
+      try {
+        // Giải mã username và password
+        const decryptedUsername = CryptoJS.AES.decrypt(
+          encryptedUsername,
+          SECRET_KEY
+        ).toString(CryptoJS.enc.Utf8);
+        const decryptedPassword = CryptoJS.AES.decrypt(
+          encryptedPassword,
+          SECRET_KEY
+        ).toString(CryptoJS.enc.Utf8);
+        if (decryptedUsername && decryptedPassword) {
+          form.setFieldsValue({
+            username: decryptedUsername,
+            password: decryptedPassword,
+            remember: true,
+          });
+        }
+      } catch (error) {
+        console.error("Lỗi giải mã thông tin:", error);
+        localStorage.removeItem("saved_username");
+        localStorage.removeItem("saved_password");
+      }
+    }
+  }, [form]);
+
   const onFinish = async (values) => {
+    console.log(">>> Values: ", values);
     setLoading(true);
     const res = await loginAPI(values.username, values.password);
+
     if (res.data.statusCode === 201) {
       message.success(`Đăng nhập thành công!`);
       localStorage.setItem("access_token", res.data.content.token);
       localStorage.setItem("user_id", res.data.content.userDto.userId);
+
+      // Lưu thông tin nếu chọn "Remember Me"
+      if (values.remember) {
+        // Mã hóa username và password trước khi lưu
+        const encryptedUsername = CryptoJS.AES.encrypt(
+          values.username,
+          SECRET_KEY
+        ).toString();
+        const encryptedPassword = CryptoJS.AES.encrypt(
+          values.password,
+          SECRET_KEY
+        ).toString();
+        localStorage.setItem("saved_username", encryptedUsername);
+        localStorage.setItem("saved_password", encryptedPassword);
+      } else {
+        localStorage.removeItem("saved_username");
+        localStorage.removeItem("saved_password");
+      }
+
       const data = res.data.content.userDto;
       const mainRole = data?.roles?.find((r) => r.createdDate === null);
       const subRole = data?.roles?.filter((r) => r.createdDate !== null);
       setUser({ ...data, mainRole, subRole });
       setIsAuthenticated(true);
       navigate(mainRole.roleName === "Admin" ? "/admin" : "/");
-      console.log(`>>> Check data: `, data);
     } else {
       let errorMessage = res?.data?.content;
 
@@ -79,6 +131,7 @@ const LoginPage = () => {
                 name="form-register"
                 onFinish={onFinish}
                 autoComplete="off"
+                initialValues={{ remember: false }}
               >
                 <Form.Item
                   labelCol={{ span: 24 }}
@@ -108,6 +161,14 @@ const LoginPage = () => {
                   className="text text-large"
                 >
                   <Input.Password />
+                </Form.Item>
+
+                <Form.Item
+                  name="remember"
+                  valuePropName="checked"
+                  style={{ marginBottom: 24 }}
+                >
+                  <Checkbox>Remember Me</Checkbox>
                 </Form.Item>
 
                 <Form.Item style={{ textAlign: "center" }}>
