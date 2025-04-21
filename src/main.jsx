@@ -41,6 +41,7 @@ import { AppProvider } from "components/context/app.context";
 import ProtectedRoute from "components/auth";
 import "nprogress/nprogress.css";
 import ListDivisionPage from "pages/client/divisions/list.division";
+import DetailArchivedDocument from "./pages/client/archived.documents/detail.archived.document";
 
 const router = createBrowserRouter([
   {
@@ -136,6 +137,15 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ListArchivedDocumentPage />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: "/detail-archived-document",
+        element: (
+          <ProtectedRoute>
+            <DetailArchivedDocument />
           </ProtectedRoute>
         ),
       },

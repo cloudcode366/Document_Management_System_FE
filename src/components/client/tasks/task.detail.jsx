@@ -372,54 +372,9 @@ const TaskDetail = () => {
                         zIndex: 10,
                       }}
                     />
-                    {/* {[
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                      "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-                    ].map((src, index) => (
-                      <img
-                        key={index}
-                        src={src}
-                        alt={`avatar-${index}`}
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          border: "2px solid white",
-                          marginLeft: index === 0 ? 0 : -10,
-                          zIndex: 10 - index,
-                        }}
-                      />
-                    ))} */}
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div
-              style={{
-                border: "2px dashed #ddd",
-                borderRadius: "12px",
-                padding: "24px",
-                textAlign: "center",
-                color: "#999",
-                fontSize: "14px",
-              }}
-            >
-              <p style={{ marginBottom: "8px" }}>Kéo và thả văn bản của bạn</p>
-              <p
-                style={{
-                  color: "#1a73e8",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  margin: 0,
-                }}
-              >
-                Chọn từ máy
-              </p>
             </div>
 
             <div

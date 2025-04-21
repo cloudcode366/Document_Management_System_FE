@@ -275,6 +275,23 @@ const changeStatusWorkflowAPI = (workflowId) => {
   return axios.post(urlBackend);
 };
 
+// export const getAllArchivedDocuments = async () => {
+//   try {
+//     const response = await axios.get(
+//       "http://nghetrenghetre.xyz:5290/api/ArchiveDocument/view-all-documents?page=1&pageSize=10000"
+//     );
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching archived documents:", error);
+//     return { content: [] };
+//   }
+// };
+
+const getAllArchivedDocuments = (query) => {
+  const urlBackend = `/api/ArchiveDocument/view-all-documents?${query}`;
+  return axios.get(urlBackend);
+}
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -308,4 +325,5 @@ export {
   viewDocumentTypeNameByWorkflowId,
   createImportUsersFromExcelAPI,
   changeStatusWorkflowAPI,
+  getAllArchivedDocuments
 };

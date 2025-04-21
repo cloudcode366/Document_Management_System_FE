@@ -96,7 +96,7 @@ const LayoutClient = () => {
       icon: <GrDocumentConfig />,
     },
     {
-      label: <Link to="/archived-document">Kho lưu trữ</Link>,
+      label: <Link to="/archived-document">Văn bản lưu trữ</Link>,
       key: "/archived-document",
       icon: <FileProtectOutlined />,
     },
