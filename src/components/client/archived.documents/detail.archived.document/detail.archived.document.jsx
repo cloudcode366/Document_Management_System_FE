@@ -73,26 +73,6 @@ const ViewDetailArchivedDocument = () => {
     content: "",
   });
 
-  // const handleSendEmail = () => {
-  //   // Logic gửi email (gọi API hoặc xử lý tại đây)
-  //   if (!emailForm.to || !emailForm.subject || !emailForm.content) {
-  //     message.warning("Vui lòng điền đầy đủ thông tin!");
-  //     return;
-  //   }
-
-  //   // Giả lập gửi email thành công
-  //   message.success("Email đã được gửi thành công!");
-  //   setOpenEmailModal(false);
-  //   setEmailForm({
-  //     from: "",
-  //     to: "",
-  //     cc: "",
-  //     bcc: "",
-  //     subject: "",
-  //     content: "",
-  //   }); // Reset form sau khi gửi
-  // };
-
   const handleSendEmail = () => {
     if (emailForm.to.length === 0 || !emailForm.subject || !emailForm.content) {
       message.warning(

@@ -36,7 +36,9 @@ const LayoutClient = () => {
 
   const handleLogout = () => {
     message.success("Đăng xuất thành công!");
-    localStorage.clear();
+    localStorage.removeItem(`access_token`);
+    localStorage.removeItem(`user_id`);
+
     setUser(null);
     setIsAuthenticated(false);
     navigate("/login");
@@ -166,7 +168,7 @@ const LayoutClient = () => {
         style={{ minHeight: "100vh", backgroundColor: "#e8edfa" }}
         className="layout-admin"
       >
-        <Sider
+        {/* <Sider
           style={{ backgroundColor: "#0387EF", color: "#ffffff" }}
           collapsible
           collapsed={collapsed}
@@ -237,7 +239,91 @@ const LayoutClient = () => {
             }}
             className="custom-menu"
           />
+        </Sider> */}
+
+        <Sider
+          style={{ backgroundColor: "#0387EF", color: "#ffffff" }}
+          collapsible
+          collapsed={collapsed}
+          onCollapse={(value) => setCollapsed(value)}
+          trigger={null}
+          width={270}
+          collapsedWidth={80}
+        >
+          <div
+            style={{
+              height: "100px",
+              position: "relative",
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+              marginBottom: "10px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {/* Bọc logo và tên trong Link để điều hướng đến path "/" */}
+            <Link
+              to="/"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                textDecoration: "none",
+              }}
+            >
+              <img
+                src="/logo.svg"
+                alt="logo"
+                style={{
+                  maxHeight: "40px",
+                  objectFit: "contain",
+                }}
+              />
+              {!collapsed && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: "10px",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                  }}
+                >
+                  <span>Hệ Thống</span>
+                  <span>Quản Lý Văn Bản</span>
+                </div>
+              )}
+            </Link>
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                width: "100%",
+                height: "1px",
+                backgroundColor: "#ffffff",
+              }}
+            ></div>
+          </div>
+          <Menu
+            defaultSelectedKeys={[activeMenu]}
+            selectedKeys={[currentKey]}
+            mode="inline"
+            items={filteredItems}
+            onClick={(e) => setActiveMenu(e.key)}
+            style={{
+              backgroundColor: " #0387EF",
+              color: "white",
+              fontWeight: "bold",
+            }}
+            className="custom-menu"
+          />
         </Sider>
+
         <Layout>
           <div style={{ backgroundColor: "#e8edfa" }}>
             <div
