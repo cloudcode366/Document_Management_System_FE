@@ -59,20 +59,6 @@ const TableDivision = () => {
         );
       },
     },
-    // {
-    //   title: "Lãnh đạo",
-    //   dataIndex: "list_users",
-    //   hideInSearch: true,
-    //   width: "40%",
-    //   render: (list_users) => {
-    //     const leaders = list_users
-    //       .filter((user) => user.role === "DIVISION_HEAD")
-    //       .map((user) => user.fullName)
-    //       .join(", ");
-
-    //     return leaders || "Chưa có lãnh đạo";
-    //   },
-    // },
     {
       title: "Trạng thái",
       dataIndex: "isDeleted",
@@ -224,13 +210,17 @@ const TableDivision = () => {
 
           const res = await viewAllDivisionsAPI(query);
           if (res.data) {
-            setMeta(res.data.meatadataDto);
+            setMeta({
+              page: res.data?.meatadataDto.page,
+              limit: res.data?.meatadataDto.limit,
+              total: res.data?.size,
+            });
           }
           return {
             data: res.data?.content,
-            page: 1,
+            page: res.data?.meatadataDto.page,
             success: true,
-            total: res.data?.meatadataDto.total,
+            total: res.data?.size,
           };
         }}
         rowKey="divisionId"

@@ -1,8 +1,9 @@
 import { getTaskById, viewProfileUserAPI } from "@/services/api.service";
 import { convertScopeName } from "@/services/helper";
+import { Image, Tooltip } from "antd";
 import React, { useEffect, useState } from "react";
 import { MdOutlineMoreVert } from "react-icons/md";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const TaskDetail = () => {
   const { taskId } = useParams();
@@ -10,6 +11,7 @@ const TaskDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -36,49 +38,6 @@ const TaskDetail = () => {
 
   if (loading) return <p>Đang tải dữ liệu...</p>;
   if (error) return <p>Lỗi: {error}</p>;
-
-  // Sample task data
-  const task = {
-    documentType: "Quyết định",
-    workflow: "Văn bản ra",
-    flow: "Luồng 1",
-    creationDate: "13:30 15/02/2025 - 15:30 16/02/2025",
-    description:
-      "Follow the video tutorial above. Understand how to use each tool in the Figma application. Also learn how to make a good and correct design. Starting from the spacing, typography, content, and many other design hierarchies. Then try to make yourself with your imagination and inspiration.",
-    assignees: [
-      {
-        name: "Maria Morgan",
-        role: "Trưởng phòng - CNTT",
-        avatar:
-          "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-      },
-      {
-        name: "Piter Walberg",
-        role: "Trưởng phòng - CTSV",
-        avatar:
-          "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-      },
-      {
-        name: "Jessica Gold",
-        role: "Trưởng phòng - Đào tạo",
-        avatar:
-          "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-      },
-    ],
-    creator: {
-      name: "Nam Le",
-      email: "namlee180502@gmail.com",
-      avatar:
-        "https://lh3.googleusercontent.com/a/ACg8ocI6cVpQdHFNblzJUq_5RBKcYxIbXDeGwP4ETCbiJLDslfMDek8J=s288-c-no",
-    },
-    file: {
-      name: "Google-certificate.pdf",
-      size: "1 KB",
-      status: "Thành công",
-    },
-  };
-
-  console.log(`>>> Check profile: `, profile);
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -145,6 +104,9 @@ const TaskDetail = () => {
                   justifyContent: "center",
                   cursor: "pointer",
                 }}
+                onClick={() =>
+                  navigate(`/detail-document/${taskData.documentId}`)
+                }
               >
                 <span style={{ color: "white", fontSize: "20px" }}>🔍</span>
               </button>
@@ -199,8 +161,11 @@ const TaskDetail = () => {
                   cursor: "pointer",
                   fontSize: "14px",
                 }}
+                onClick={() =>
+                  navigate(`/detail-document/${taskData.documentId}`)
+                }
               >
-                Mở văn bản
+                Xử lý văn bản
               </button>
             </div>
 
@@ -245,7 +210,7 @@ const TaskDetail = () => {
                   borderBottom: "1px dashed #ddd",
                 }}
               >
-                <img
+                <Image
                   src={profile.avatar}
                   alt={profile.fullName}
                   style={{
@@ -359,19 +324,20 @@ const TaskDetail = () => {
                 >
                   <span style={{ color: "#5f6368" }}>Người tham gia</span>
                   <div style={{ display: "flex" }}>
-                    <img
-                      src={profile.avatar}
-                      alt={profile.fullName}
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        border: "2px solid white",
-                        marginLeft: 0 ? 0 : -10,
-                        zIndex: 10,
-                      }}
-                    />
+                    <Tooltip title={profile.fullName}>
+                      <Image
+                        src={profile.avatar}
+                        alt={profile.fullName}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          border: "2px solid white",
+                          zIndex: 10,
+                        }}
+                      />
+                    </Tooltip>
                   </div>
                 </div>
               </div>
@@ -392,20 +358,36 @@ const TaskDetail = () => {
                 alt="pdf"
                 style={{ width: "36px", height: "36px" }}
               />
-              <div style={{ flex: 1 }}>
+              <div
+                style={{
+                  flex: 1,
+                  maxWidth: "60%",
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                }}
+              >
                 <p
                   style={{
                     fontSize: "14px",
                     fontWeight: 500,
                     margin: "0 0 4px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    cursor: "pointer",
                   }}
+                  title={taskData.documentName} // để hiển thị full tên khi hover
+                  onClick={() =>
+                    navigate(`/detail-document/${taskData.documentId}`)
+                  }
                 >
-                  Google-certificate.pdf
+                  {taskData.documentName}
                 </p>
                 <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
                   94 KB
                 </p>
               </div>
+
               <span
                 style={{ fontSize: "12px", color: "#34a853", fontWeight: 500 }}
               >

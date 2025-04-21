@@ -1,155 +1,206 @@
 import { ProTable } from "@ant-design/pro-components";
-import { Tabs, Tag, Button, Badge } from "antd";
-import {
-  DownloadOutlined,
-  EditOutlined,
-  PaperClipOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import React, { useRef, useState } from "react";
+import { Tabs, Tooltip, Tag } from "antd";
+import { PaperClipOutlined } from "@ant-design/icons";
+import React, { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { dateRangeValidate } from "@/services/helper";
-import "./table.division.scoped.document.scss";
-import CreateDocument from "@/components/client/documents/progresses/create.document";
+import { useNavigate } from "react-router-dom";
+import { useCurrentApp } from "@/components/context/app.context";
+import { viewDocumentsByTabForUserAPI } from "@/services/api.service";
+import { convertScopeName } from "@/services/helper";
+import DrawerDivisionDocument from "./drawer.division.document";
 
 const { TabPane } = Tabs;
 
-const dataSource = [
-  {
-    key: "1",
-    name: "Thông báo kế hoạch hoạt động tháng 4",
-    reviewer: "Lê Phan Hoài Nam",
-    date: "2025-04-11T07:11:00.943Z",
-    status: "Đang xử lý",
-    type: "Thông báo",
-    tag: "văn bản phòng ban",
-    hasAttachment: true,
-  },
-  {
-    key: "2",
-    name: "Thông báo lịch họp phòng ban tháng 4",
-    reviewer: "Ngô Huỳnh Tấn Lộc",
-    date: "2025-03-30T07:11:00.943Z",
-    status: "Đã hoàn thành",
-    type: "Thông báo",
-    tag: "văn bản phòng ban",
-    hasAttachment: false,
-  },
-  {
-    key: "3",
-    name: "Thông báo phân công nhiệm vụ công tác",
-    reviewer: "Ngô Huỳnh Tấn Lộc",
-    date: "2025-02-15T07:11:00.943Z",
-    status: "Đã lưu",
-    type: "Thông báo",
-    tag: "văn bản phòng ban",
-    hasAttachment: true,
-  },
-  {
-    key: "4",
-    name: "Báo cáo thành tích thi đua phòng ban quý I",
-    reviewer: "Lê Phan Hoài Nam",
-    date: "2025-04-11T07:11:00.943Z",
-    status: "Đang xử lý",
-    type: "Báo cáo",
-    tag: "văn bản phòng ban",
-    hasAttachment: true,
-  },
-];
-
-const statusColor = {
-  "Đang xử lý": "#CECECE",
-  "Đã hoàn thành": "#2BDBBB",
-  "Đã lưu": "#82E06E",
-};
-
 const tagColor = {
-  "văn bản đến": "#FC8330",
-  "văn bản đi": "#18B0FF",
-  "văn bản phòng ban": "#9254DE",
-  "văn bản toàn trường": "#F759AB",
-  "hoàn thành": "#2BDBBB",
+  "Văn bản đến": "#FC8330",
+  "Văn bản đi": "#18B0FF",
+  "Nội bộ phòng ban": "#9254DE",
+  "Nội bộ toàn trường": "#F759AB",
 };
-
-const columns = [
-  {
-    title: "Tên văn bản",
-    dataIndex: "name",
-    width: "35%",
-    copyable: true,
-    fieldProps: {
-      placeholder: "Vui lòng nhập tên đăng nhập",
-    },
-    formItemProps: {
-      labelCol: { span: 8 },
-      wrapperCol: { span: 18 },
-    },
-    render: (_, row) => (
-      <>
-        {row.hasAttachment && (
-          <PaperClipOutlined style={{ marginRight: 6, color: "#fa8c16" }} />
-        )}
-        {row.name} <br />
-        <Tag color={tagColor[row.tag]}>{row.tag}</Tag>
-      </>
-    ),
-  },
-  {
-    title: "Người duyệt",
-    dataIndex: "reviewer",
-    width: "20%",
-    hideInSearch: true,
-  },
-  {
-    title: "Ngày tạo",
-    dataIndex: "date",
-    width: "10%",
-    hideInSearch: true,
-    render(dom, entity, index, action, schema) {
-      return <>{dayjs(entity.date).format("DD-MM-YYYY")}</>;
-    },
-  },
-  {
-    title: "Trạng thái",
-    dataIndex: "status",
-    width: "15%",
-    hideInSearch: true,
-    render: (_, row) => (
-      <Badge
-        color={statusColor[row.status]}
-        text={row.status}
-        className="custom-dot"
-      />
-    ),
-  },
-  {
-    title: "Loại văn bản",
-    dataIndex: "type",
-    width: "10%",
-    hideInSearch: true,
-  },
-  {
-    title: "Hành động",
-    width: "10%",
-    valueType: "option",
-    render: () => [
-      //   <DownloadOutlined key="download" style={{ color: "green" }} />,
-      <EditOutlined key="edit" style={{ marginLeft: 12, color: "#f57800" }} />,
-    ],
-  },
-];
 
 const TableDivisionScopedDocument = () => {
-  const [activeKey, setActiveKey] = useState("all");
+  const [activeKey, setActiveKey] = useState("All");
+  const { user } = useCurrentApp();
   const actionRef = useRef();
   const [meta, setMeta] = useState({
-    current: 1,
-    pageSize: 10,
-    pages: 0,
-    total: 0,
+    limit: 10,
+    total: 1,
+    page: 1,
   });
 
-  const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [openViewDetail, setOpenViewDetail] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const navigate = useNavigate();
+  let clickTimer = null;
+
+  const getColumns = () => {
+    if (activeKey === "Rejected") {
+      return [
+        {
+          title: "Tên văn bản",
+          dataIndex: "documentName",
+          width: "30%",
+          copyable: true,
+          ellipsis: {
+            showTitle: false,
+          },
+          render: (_, row) => (
+            <div>
+              <Tooltip title={row.documentName}>
+                <div
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: "80%",
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  {row.hasAttachment && (
+                    <PaperClipOutlined
+                      style={{ marginRight: 6, color: "#fa8c16" }}
+                    />
+                  )}
+                  {row.documentName}
+                </div>
+              </Tooltip>
+              <br />
+              <Tag color={tagColor[convertScopeName(row.scope)]}>
+                {convertScopeName(row.scope)}
+              </Tag>
+            </div>
+          ),
+          fieldProps: {
+            placeholder: "Vui lòng nhập tên",
+          },
+          formItemProps: {
+            labelCol: { span: 8 },
+            wrapperCol: { span: 20 },
+          },
+        },
+
+        {
+          title: "Luồng xử lý",
+          dataIndex: "workflowName",
+          width: "20%",
+          hideInSearch: true,
+        },
+        {
+          title: "Loại văn bản",
+          dataIndex: "documentType",
+          width: "15%",
+          hideInSearch: true,
+        },
+        {
+          title: "Phiên bản",
+          dataIndex: "versionNumber",
+          width: "10%",
+          hideInSearch: true,
+        },
+        {
+          title: "Ngày từ chối",
+          dataIndex: "dateReject",
+          width: "15%",
+          render: (text) => dayjs(text).format("DD-MM-YYYY HH:mm"),
+          hideInSearch: true,
+        },
+        {
+          title: "Người từ chối",
+          dataIndex: "userReject",
+          width: "10%",
+          hideInSearch: true,
+        },
+      ];
+    } else {
+      return [
+        {
+          title: "Tên văn bản",
+          dataIndex: ["documentDto", "documentName"],
+          width: "40%",
+          copyable: true,
+          ellipsis: {
+            showTitle: false,
+          },
+          render: (_, row) => (
+            <div>
+              <Tooltip title={row.documentDto?.documentName}>
+                <div
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: "80%",
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  {row.hasAttachment && (
+                    <PaperClipOutlined
+                      style={{ marginRight: 6, color: "#fa8c16" }}
+                    />
+                  )}
+                  {row.documentDto?.documentName}
+                </div>
+              </Tooltip>
+              <br />
+              <Tag color={tagColor[convertScopeName(row.scope)]}>
+                {convertScopeName(row.scope)}
+              </Tag>
+            </div>
+          ),
+          fieldProps: {
+            placeholder: "Vui lòng nhập tên",
+          },
+          formItemProps: {
+            labelCol: { span: 8 },
+            wrapperCol: { span: 20 },
+          },
+        },
+        {
+          title: "Luồng xử lý",
+          dataIndex: "workflowName",
+          width: "15%",
+          render: (_, row) => row?.workflowName || "-",
+          hideInSearch: true,
+        },
+
+        {
+          title: "Loại văn bản",
+          dataIndex: ["documentDto", "documentType", "documentTypeName"],
+          width: "15%",
+          render: (_, row) =>
+            row?.documentDto?.documentType?.documentTypeName || "-",
+          hideInSearch: true,
+        },
+        {
+          title: "Người tạo",
+          dataIndex: "fullName",
+          width: "15%",
+          hideInSearch: true,
+        },
+        {
+          title: "Ngày tạo",
+          dataIndex: ["documentDto", "createdDate"],
+          width: "15%",
+          hideInSearch: true,
+          render: (_, row) => {
+            const createdDate = row?.documentDto?.createdDate;
+            return createdDate
+              ? dayjs(createdDate).format("DD-MM-YYYY HH:mm")
+              : "-";
+          },
+        },
+      ];
+    }
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      actionRef.current?.reload();
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [activeKey]);
 
   const refreshTable = () => {
     actionRef.current?.reload();
@@ -171,16 +222,16 @@ const TableDivisionScopedDocument = () => {
         }}
       >
         <Tabs activeKey={activeKey} onChange={setActiveKey}>
-          <TabPane tab="TẤT CẢ" key="all" />
-          {/* <TabPane tab="ĐẾN LƯỢT DUYỆT" key="review" />
-          <TabPane tab="ĐANG CHỜ DUYỆT" key="waiting" />
-          <TabPane tab="ĐÃ CHẤP NHẬN" key="accepted" />
-          <TabPane tab="ĐÃ TỪ CHỐI" key="rejected" />
-          <TabPane tab="QUÁ HẠN" key="overdue" /> */}
+          <TabPane tab="TẤT CẢ" key="All" />
+          <TabPane tab="ĐẾN LƯỢT DUYỆT" key="PendingApproval" />
+          <TabPane tab="ĐANG CHỜ DUYỆT" key="Waiting" />
+          <TabPane tab="ĐÃ CHẤP NHẬN" key="Accepted" />
+          <TabPane tab="ĐÃ TỪ CHỐI" key="Rejected" />
+          <TabPane tab="QUÁ HẠN" key="Overdue" />
         </Tabs>
 
         <ProTable
-          columns={columns}
+          columns={getColumns()}
           actionRef={actionRef}
           style={{
             width: "100%",
@@ -188,61 +239,74 @@ const TableDivisionScopedDocument = () => {
             display: "flex",
             flexDirection: "column",
           }}
-          scroll={{ y: "calc(100vh - 420px)" }}
+          scroll={{ y: "calc(100vh - 400px)" }}
           cardBordered
-          dataSource={dataSource.filter((doc) => {
-            if (activeKey === "all") return true;
-            if (activeKey === "review") return doc.status === "Đang xử lý";
-            if (activeKey === "waiting") return doc.status === "Đã lưu";
-            if (activeKey === "accepted") return doc.status === "Đã được duyệt";
-            if (activeKey === "rejected") return doc.status === "Bị từ chối";
-            if (activeKey === "overdue") return doc.status === "Đã quá hạn";
-            return false;
-          })}
-          request={async (params, sort, filter) => {
-            console.log(params, sort, filter);
-
+          request={async (params) => {
+            console.log(`>>> Check params: `, params);
             let query = "";
-            if (params) {
-              query += `current=${params.current}&pageSize=${params.pageSize}`;
-              if (params.email) {
-                query += `&email=/${params.email}/i`;
+            if (activeKey === "Rejected") {
+              if (params) {
+                if (params.documentName) {
+                  query += `docName=${params.documentName}&`;
+                }
+                query += `scope=Division&userId=${user.userId}&tab=${activeKey}&page=${params.current}&limit=${params.pageSize}`;
               }
-              if (params.fullName) {
-                query += `&fullName=/${params.fullName}/i`;
-              }
-
-              const createdDateRange = dateRangeValidate(params.createdAtRange);
-              if (createdDateRange) {
-                query += `&createdAt>=${createdDateRange[0]}&createdAt<=${createdDateRange[1]}`;
+            } else {
+              if (params) {
+                if (params.documentDto?.documentName) {
+                  query += `docName=${params.documentDto.documentName}&`;
+                }
+                query += `scope=Division&userId=${user.userId}&tab=${activeKey}&page=${params.current}&limit=${params.pageSize}`;
               }
             }
 
-            // default
+            const res = await viewDocumentsByTabForUserAPI(query);
+            const { content = [], meatadataDto, size } = res.data || {};
 
-            if (sort && sort.createdAt) {
-              query += `&sort=${
-                sort.createdAt === "ascend" ? "createdAt" : "-createdAt"
-              }`;
-            } else query += `&sort=-createdAt`;
+            let flattenedData = content;
+
+            if (activeKey === "Rejected") {
+              flattenedData = content.flatMap((doc) =>
+                doc.versionOfDocResponses.map((version) => ({
+                  documentId: doc.documentId,
+                  documentName: doc.documentName,
+                  documentType: doc.documentType,
+                  workflowName: doc.workflowName,
+                  versionNumber: version.versionNumber,
+                  dateReject: version.dateReject,
+                  userReject: version.userReject,
+                  scope: doc.scope,
+                }))
+              );
+            }
+
+            if (res.data) {
+              setMeta({
+                page: res.data?.meatadataDto.page,
+                limit: res.data?.meatadataDto.limit,
+                total: res.data?.size,
+              });
+            }
             return {
-              data: dataSource,
-              page: 1,
+              data: flattenedData,
+              page: res.data?.meatadataDto.page,
               success: true,
-              total: 10,
+              total: res.data?.size,
             };
           }}
-          rowKey="key"
+          rowKey={
+            activeKey === "Rejected"
+              ? "documentId"
+              : ["documentDto", "documentName"]
+          }
           pagination={{
-            current: meta.current,
-            pageSize: meta.pageSize,
+            current: meta.page,
+            pageSize: meta.limit,
             showSizeChanger: true,
             total: meta.total,
             showTotal: (total, range) => {
               return (
-                <div>
-                  {range[0]} - {range[1]} trên {total} dòng
-                </div>
+                <div>{/* {range[0]} - {range[1]} trên {total} dòng */}</div>
               );
             },
           }}
@@ -251,23 +315,29 @@ const TableDivisionScopedDocument = () => {
               Danh sách văn bản nội bộ phòng ban
             </span>
           }
-          toolBarRender={() => [
-            <Button
-              key="buttonAddNew"
-              icon={<PlusOutlined />}
-              onClick={() => {
-                setOpenModalCreate(true);
-              }}
-              type="primary"
-            >
-              Tạo mới văn bản
-            </Button>,
-          ]}
+          onRow={(record) => ({
+            title: "Bấm một lần để xem nhanh, hai lần để mở chi tiết",
+            onClick: () => {
+              // Đợi để phân biệt single và double click
+              clickTimer = setTimeout(() => {
+                setSelectedRecord(record);
+                setOpenViewDetail(true);
+              }, 250); // Delay ngắn, vừa đủ để phân biệt double click
+            },
+            onDoubleClick: () => {
+              clearTimeout(clickTimer); // Hủy click nếu là double click
+              activeKey === "Rejected"
+                ? navigate(`/detail-document/${record.documentId}`)
+                : navigate(`/detail-document/${record.documentDto.documentId}`);
+            },
+          })}
         />
-        <CreateDocument
-          openModalCreate={openModalCreate}
-          setOpenModalCreate={setOpenModalCreate}
-          refreshTable={refreshTable}
+        <DrawerDivisionDocument
+          openViewDetail={openViewDetail}
+          setOpenViewDetail={setOpenViewDetail}
+          selectedRecord={selectedRecord}
+          setSelectedRecord={setSelectedRecord}
+          activeKey={activeKey}
         />
       </div>
     </div>

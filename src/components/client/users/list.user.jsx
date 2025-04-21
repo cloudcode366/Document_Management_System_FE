@@ -300,13 +300,17 @@ const ListUser = () => {
             const limit = params?.pageSize ?? 10;
             const res = await viewAllUserAPI(page, limit, filters, sortParams);
             if (res.data) {
-              setMeta(res.data.meatadataDto);
+              setMeta({
+                page: res.data?.meatadataDto.page,
+                limit: res.data?.meatadataDto.limit,
+                total: res.data?.size,
+              });
             }
             return {
               data: res.data?.content,
-              page: 1,
+              page: res.data?.meatadataDto.page,
               success: true,
-              total: res.data?.meatadataDto.total,
+              total: res.data?.size,
             };
           } else {
             const baseFilters = Object.fromEntries(
@@ -339,13 +343,17 @@ const ListUser = () => {
             const limit = params?.pageSize ?? 10;
             const res = await viewAllUserAPI(page, limit, filters, sortParams);
             if (res.data) {
-              setMeta(res.data.meatadataDto);
+              setMeta({
+                page: res.data?.meatadataDto.page,
+                limit: res.data?.meatadataDto.limit,
+                total: res.data?.size,
+              });
             }
             return {
               data: res.data?.content,
-              page: 1,
+              page: res.data?.meatadataDto.page,
               success: true,
-              total: res.data?.meatadataDto.total,
+              total: res.data?.size,
             };
           }
         }}

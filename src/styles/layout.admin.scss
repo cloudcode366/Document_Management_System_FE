@@ -31,3 +31,9 @@
   color: white !important;
   font-weight: bold !important;
 }
+
+.notification-dropdown .ant-dropdown-menu {
+  max-height: 400px;
+  overflow-y: auto;
+  width: 320px;
+}

@@ -9,9 +9,9 @@ const CreateDocumentType = (props) => {
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
-    const { documentTypeName } = values;
+    const { documentTypeName, acronym } = values;
     setIsSubmit(true);
-    const res = await createDocumentTypeAPI(documentTypeName);
+    const res = await createDocumentTypeAPI(documentTypeName, acronym);
     if (res && res.data && res.data.statusCode === 201) {
       message.success(`Tạo mới loại văn bản thành công`);
       form.resetFields();
@@ -78,6 +78,22 @@ const CreateDocumentType = (props) => {
                   {
                     required: true,
                     message: "Vui lòng nhập tên loại văn bản!",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24}>
+              <Form.Item
+                label="Chữ viết tắt (ký hiệu loại văn bản xuất hiện trên số hiệu văn bản)"
+                name="acronym"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập chữ viết tắt!",
                   },
                 ]}
               >
