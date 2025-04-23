@@ -337,8 +337,6 @@ const viewDetailArchivedDocumentAPI = (documentId) => {
   return axios.get(urlBackend);
 };
 
-};
-
 const viewProcessDocumentDetailAPI = (documentId) => {
   const urlBackend = `/api/Document/view-process-document-detail?documentId=${documentId}`;
   return axios.get(urlBackend);
