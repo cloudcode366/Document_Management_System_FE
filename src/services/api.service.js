@@ -330,6 +330,13 @@ const viewMySelfDocumentAPI = (query) => {
 const getAllArchivedDocuments = (query) => {
   const urlBackend = `/api/ArchiveDocument/view-all-documents?${query}`;
   return axios.get(urlBackend);
+
+}
+const viewDetailArchivedDocumentAPI = (documentId) => {
+  const urlBackend = `/api/ArchiveDocument/view-archive-document-detail?documentId=${documentId}`;
+  return axios.get(urlBackend);
+};
+
 };
 
 const viewProcessDocumentDetailAPI = (documentId) => {
@@ -393,6 +400,7 @@ const viewAllTemplatesAPI = (query) => {
   const urlBackend = `/api/ArchiveDocument/view-all-templates?${query}`;
   return axios.get(urlBackend);
 };
+
 
 export {
   loginAPI,
