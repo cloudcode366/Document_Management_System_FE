@@ -1,7 +1,11 @@
-import ViewDetailDocument from "@/components/client/documents/detail.document/view.detail.document";
+import ViewDetailProgress from "@/components/client/progress.list/detail.progress";
 
 const DetailProgress = () => {
-  return <div>DetailProgress</div>;
+  return (
+    <div>
+      <ViewDetailProgress />
+    </div>
+  );
 };
 
 export default DetailProgress;

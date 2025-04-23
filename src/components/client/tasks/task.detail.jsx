@@ -277,6 +277,12 @@ const TaskDetail = () => {
                   {taskData.taskDto.taskType}
                 </span>
               </div>
+              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                <span style={{ color: "#5f6368" }}>Người giao nhiệm vụ:</span>
+                <span style={{ float: "right", fontWeight: 500 }}>
+                  {taskData.userNameCreateTask}
+                </span>
+              </div>
             </div>
 
             <div>
@@ -384,7 +390,7 @@ const TaskDetail = () => {
                   {taskData.documentName}
                 </p>
                 <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
-                  94 KB
+                  {taskData.fileSize}
                 </p>
               </div>
 

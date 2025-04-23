@@ -120,3 +120,29 @@ export const convertColorProcessingStatus = (status) => {
       return "default";
   }
 };
+
+export const convertArchivedStatus = (status) => {
+  switch (status) {
+    case "Archived":
+      return "Đã lưu";
+    case "Sent":
+      return "Đã gửi";
+    case "Withdrawn":
+      return "Bị thu hồi";
+    default:
+      status;
+  }
+};
+
+export const convertColorArchivedStatus = (status) => {
+  switch (status) {
+    case "Archived":
+      return "#82E06E";
+    case "Sent":
+      return "#2BDBBB";
+    case "Withdrawn":
+      return "#FF6B6B";
+    default:
+      return "default";
+  }
+};

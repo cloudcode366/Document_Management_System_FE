@@ -49,7 +49,7 @@ const TableUser = () => {
 
   const fetchDivisions = async () => {
     setLoading(true);
-    const res = await viewAllDivisionsAPI("page=1&limit=1000");
+    const res = await viewAllDivisionsAPI("page=1&limit=100000");
     if (res?.data?.statusCode === 200) {
       const data = res.data.content;
       const newDivisionsData = data.map((division) => ({
@@ -485,7 +485,7 @@ const TableUser = () => {
               setOpenModalImport(true);
             }}
           >
-            Tạo người dùng theo XLS hoặc XLSX file
+            Tạo người dùng theo CSV, XLS hoặc XLSX file
           </Button>,
           <Button
             key="buttonAddNew"

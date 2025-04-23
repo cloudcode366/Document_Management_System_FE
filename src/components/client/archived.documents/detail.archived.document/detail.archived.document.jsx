@@ -1,28 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
-  Descriptions,
   Typography,
   Button,
   Divider,
-  Tooltip,
   Input,
   Col,
   Row,
-  Space,
-  Tag,
-  List,
   Select,
   App,
   Modal,
+  Tag,
 } from "antd";
 import {
-  FileTextOutlined,
-  EyeOutlined,
-  DeleteOutlined,
-  PlusCircleOutlined,
-  PlusOutlined,
-  CloseOutlined,
   PaperClipOutlined,
   ArrowLeftOutlined,
   SendOutlined,
@@ -30,29 +20,31 @@ import {
   LinkOutlined,
   FontSizeOutlined,
   PictureOutlined,
-  ExportOutlined,
   ShareAltOutlined,
-  EditOutlined,
   MailOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
 import samplePDF from "assets/files/sample.pdf";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./view.detail.document.scss";
-import CreateDraftDocument from "@/components/client/documents/draft.documents/create.draft.document";
 import SignatureBox from "@/components/client/documents/initial.signature/signature.box";
 import signatureImg from "assets/files/signature-removebg-preview.png";
 import SignatureContainer from "@/components/client/documents/initial.signature/signature.container";
 import { PiHandWithdraw } from "react-icons/pi";
+import { BeatLoader } from "react-spinners";
+import { viewArchivedDocumentDetailAPI } from "@/services/api.service";
+import dayjs from "dayjs";
+import PDFViewerWithToken from "@/components/pdf.viewer";
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
 
 const ViewDetailArchivedDocument = () => {
   const { message, notification } = App.useApp();
+  const { documentId } = useParams();
   const navigate = useNavigate();
-  const [openModalCreateDraftDocument, setOpenModalCreateDraftDocument] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [document, setDocument] = useState(null);
 
   const [openEmailModal, setOpenEmailModal] = useState(false);
 
@@ -125,6 +117,38 @@ const ViewDetailArchivedDocument = () => {
     { id: 4, name: "Tạ Gia Nhật Minh", email: "minh.tgn@gmail.com" },
   ];
 
+  const fetchInfo = async () => {
+    setLoading(true);
+    const res = await viewArchivedDocumentDetailAPI(documentId);
+    if (res?.data?.statusCode === 200) {
+      const data = res.data.content;
+      const digitalSignatures = data.signatures.filter(
+        (signature) => signature.isDigital === true
+      );
+      const initalSignatures = data.signatures.filter(
+        (signature) => signature.isDigital === false
+      );
+      const finalVersion = data.versions.find(
+        (version) => version.isFinal === true
+      );
+      const rejectedVersions = data.versions.filter(
+        (version) => version.isFinal === false
+      );
+      setDocument({
+        ...data,
+        digitalSignatures,
+        initalSignatures,
+        finalVersion,
+        rejectedVersions,
+      });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchInfo();
+  }, []);
+
   // Xử lý khi nhấn nút "Xác nhận"
   const handleShare = () => {
     if (selectedUsers.length === 0) {
@@ -140,6 +164,22 @@ const ViewDetailArchivedDocument = () => {
     setOpenShareModal(false);
     setSelectedUsers([]);
   };
+
+  if (loading) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <BeatLoader size={25} color="#364AD6" />
+      </div>
+    );
+  }
 
   return (
     <div style={{ height: "100vh" }}>
@@ -163,15 +203,9 @@ const ViewDetailArchivedDocument = () => {
           }}
         >
           <div style={{ height: "100%", overflowY: "auto" }}>
-            <iframe
-              title="Document Viewer"
-              src={samplePDF}
-              style={{
-                width: "100%",
-                height: "75vh",
-                border: "none",
-                boxShadow: "0 10px 8px rgba(0, 0, 0, 0.1)",
-              }}
+            <PDFViewerWithToken
+              url={document?.versions?.[0]?.url}
+              token={localStorage.getItem(`access_token`)}
             />
 
             {/* Signature section */}
@@ -242,8 +276,7 @@ const ViewDetailArchivedDocument = () => {
                 paddingTop: "20px",
               }}
             >
-              Văn bản quyết định 53/2025 QĐ-TTg chính sách nội trú học sinh,
-              sinh viên học cao đẳng trung cấp
+              {document?.documentName}
             </Title>
             <Divider
               variant="solid"
@@ -260,56 +293,75 @@ const ViewDetailArchivedDocument = () => {
               </h2>
 
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Người nhận:</span>
+                <span style={{ color: "#5f6368" }}>Người tạo:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  namlee180505@gmail.com
+                  {document?.createdBy}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Người gửi:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  locnht.it@gmail.com
+                  {document?.sender}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Ngày tạo:</span>
+                <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  10/02/2025
+                  {dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Ngày tạo:</span>
+                <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  10/02/2025
+                  {dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
                 </span>
               </div>
+              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
+                <span style={{ float: "right", fontWeight: 500 }}>
+                  {dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
+                </span>
+              </div>
+
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Ngày hết hạn:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  10/04/2025
+                  {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  53/2025/QĐ-TTg
+                  {document?.numberOfDocument}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  Quyết định
+                  {document?.documentTypeName}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  Văn bản đi
+                  {document?.scope}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Người ký:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>Nam Lê</span>
+                <span style={{ float: "right", fontWeight: 500 }}>
+                  {document?.digitalSignatures?.map((item) => (
+                    <Tag
+                      key={item.name}
+                      color="blue"
+                      // closable={item.isNew}
+                      // onClose={() => handleRemoveSigner(item.name)}
+                      // style={{ display: "flex", alignItems: "center" }}
+                    >
+                      {item.name}
+                    </Tag>
+                  ))}
+                </span>
               </div>
             </div>
             <Divider
@@ -320,11 +372,7 @@ const ViewDetailArchivedDocument = () => {
             ></Divider>
             <Title level={5}>Nội dung</Title>
             <Paragraph style={{ fontSize: 14 }}>
-              Quyết định 53/2015/QĐ-TTg về chính sách nội trú đối với học sinh,
-              sinh viên học cao đẳng, trung cấp công lập quy định đối tượng
-              hưởng chính sách nội trú, mức hỗ trợ và các hỗ trợ khác, nguyên
-              tắc thực hiện, phương thức chi trả, nguồn kinh phí thực hiện chính
-              sách được ban hành ngày 20/10/2015.
+              {document?.documentContent}
             </Paragraph>
 
             <Row gutter={[12, 12, 24]}>
@@ -420,7 +468,7 @@ const ViewDetailArchivedDocument = () => {
 
       {/* Modal open email */}
       <Modal
-        visible={openEmailModal}
+        open={openEmailModal}
         onCancel={() => {
           setOpenEmailModal(false);
           setEmailForm({
@@ -482,14 +530,18 @@ const ViewDetailArchivedDocument = () => {
             }
           >
             {users.map((user) => (
-              <Option key={user.email} value={user.email} label={user.email}>
+              <Select.Option
+                key={user.email}
+                value={user.email}
+                label={user.email}
+              >
                 <div>
                   <strong>{user.name}</strong>
                   <div style={{ color: "#5f6368", fontSize: 12 }}>
                     {user.email}
                   </div>
                 </div>
-              </Option>
+              </Select.Option>
             ))}
           </Select>
         </div>
@@ -513,14 +565,18 @@ const ViewDetailArchivedDocument = () => {
             }
           >
             {users.map((user) => (
-              <Option key={user.email} value={user.email} label={user.email}>
+              <Select.Option
+                key={user.email}
+                value={user.email}
+                label={user.email}
+              >
                 <div>
                   <strong>{user.name}</strong>
                   <div style={{ color: "#5f6368", fontSize: 12 }}>
                     {user.email}
                   </div>
                 </div>
-              </Option>
+              </Select.Option>
             ))}
           </Select>
         </div>
@@ -544,14 +600,18 @@ const ViewDetailArchivedDocument = () => {
             }
           >
             {users.map((user) => (
-              <Option key={user.email} value={user.email} label={user.email}>
+              <Select.Option
+                key={user.email}
+                value={user.email}
+                label={user.email}
+              >
                 <div>
                   <strong>{user.name}</strong>
                   <div style={{ color: "#5f6368", fontSize: 12 }}>
                     {user.email}
                   </div>
                 </div>
-              </Option>
+              </Select.Option>
             ))}
           </Select>
         </div>
@@ -625,7 +685,7 @@ const ViewDetailArchivedDocument = () => {
       {/* Modal grant view permission */}
       <Modal
         title="Cấp quyền xem"
-        visible={openShareModal}
+        open={openShareModal}
         onOk={handleShare} // Xử lý khi nhấn "Xác nhận"
         onCancel={() => {
           setOpenShareModal(false);
@@ -655,14 +715,14 @@ const ViewDetailArchivedDocument = () => {
             optionLabelProp="label"
           >
             {users.map((user) => (
-              <Option key={user.id} value={user.id} label={user.name}>
+              <Select.Option key={user.id} value={user.id} label={user.name}>
                 <div>
                   <strong>{user.name}</strong>
                   <div style={{ color: "#5f6368", fontSize: 12 }}>
                     {user.email}
                   </div>
                 </div>
-              </Option>
+              </Select.Option>
             ))}
           </Select>
         </div>

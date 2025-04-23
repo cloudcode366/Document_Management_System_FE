@@ -1,0 +1,23 @@
+/* Thêm vào file CSS hoặc styled-components */
+.resizable-box {
+  position: absolute;
+  border: 2px solid #ff4d4f;
+  border-radius: 5px;
+  cursor: move;
+  z-index: 1000;
+}
+
+.resizer {
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  background: #ff4d4f;
+  border-radius: 50%;
+  z-index: 1001;
+}
+
+.resizer.bottom-right {
+  right: -5px;
+  bottom: -5px;
+  cursor: se-resize;
+}
