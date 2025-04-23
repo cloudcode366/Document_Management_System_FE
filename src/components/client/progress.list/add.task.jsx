@@ -7,8 +7,8 @@ const { Option } = Select;
 
 const AddTask = (props) => {
   const {
-    openAddTaskModal,
-    setOpenAddTaskModal,
+    openModalCreate,
+    setOpenModalCreate,
     listTask,
     setListTask,
     stepId,
@@ -40,18 +40,18 @@ const AddTask = (props) => {
         return updated;
       });
       setHasChanges(true);
-      setOpenAddTaskModal(false);
+      setOpenModalCreate(false);
       form.resetFields();
     });
   };
 
   const handleCancel = () => {
-    setOpenAddTaskModal(false);
+    setOpenModalCreate(false);
   };
 
   return (
     <Modal
-      open={openAddTaskModal}
+      open={openModalCreate}
       onCancel={handleCancel}
       footer={null}
       centered

@@ -168,7 +168,7 @@ const LoginPage = () => {
                   valuePropName="checked"
                   style={{ marginBottom: 24 }}
                 >
-                  <Checkbox>Remember Me</Checkbox>
+                  <Checkbox>Ghi nhớ tài khoản</Checkbox>
                 </Form.Item>
 
                 <Form.Item style={{ textAlign: "center" }}>

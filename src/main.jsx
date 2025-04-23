@@ -34,7 +34,6 @@ import ManageInitialSignature from "pages/admin/initial.signatures/manage.initia
 import ListAllDocumentPage from "pages/client/documents/all.documents/list.all.documents";
 import LayoutClient from "@/layout";
 import DraftDocument from "pages/client/documents/draft.document";
-import ApproveDocument from "components/client/documents/approve.document/approve.document";
 import TaskDetailPage from "pages/client/tasks/task.detail";
 import DetailDocument from "pages/client/documents/detail.document";
 import { AppProvider } from "components/context/app.context";
@@ -119,14 +118,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/approve-document",
-        element: (
-          <ProtectedRoute>
-            <ApproveDocument />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: "/draft-document",
         element: (
           <ProtectedRoute>
@@ -144,7 +135,7 @@ const router = createBrowserRouter([
       },
 
       {
-        path: "/detail-archived-document",
+        path: "/detail-archived-document/:documentId",
         element: (
           <ProtectedRoute>
             <DetailArchivedDocument />

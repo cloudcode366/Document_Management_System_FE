@@ -1,40 +1,80 @@
 import { ProTable } from "@ant-design/pro-components";
-import { Tabs, Tag, Button, Badge, Tooltip } from "antd";
-import {
-  DownloadOutlined,
-  EditOutlined,
-  PaperClipOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import React, { useEffect, useRef, useState } from "react";
+import { Badge, Tag, Tooltip } from "antd";
+import { PaperClipOutlined } from "@ant-design/icons";
+import React, { useRef, useState } from "react";
 import dayjs from "dayjs";
-import { dateRangeValidate } from "@/services/helper";
-import "./table.all.document.scss";
+import "./table.archived.document.scss";
 import { useNavigate } from "react-router-dom";
-import { useCurrentApp } from "@/components/context/app.context";
 import { getAllArchivedDocuments } from "@/services/api.service";
+import {
+  convertArchivedStatus,
+  convertColorArchivedStatus,
+  convertScopeName,
+} from "@/services/helper";
+import DrawerArchivedDocument from "./drawer.archived.document";
 
-const { TabPane } = Tabs;
+const tagColor = {
+  "Văn bản đến": "#FC8330",
+  "Văn bản đi": "#18B0FF",
+  "Nội bộ phòng ban": "#9254DE",
+  "Nội bộ toàn trường": "#F759AB",
+};
+
+const statusColor = {
+  Sent: "#2BDBBB", // xanh ngọc
+  Archived: "#82E06E", // xanh lá
+  Withdrawn: "#FF6B6B", // đỏ
+};
 
 const TableAllArchivedDocument = () => {
-  const [activeKey, setActiveKey] = useState("All");
-  const { user } = useCurrentApp();
   const actionRef = useRef();
   const [meta, setMeta] = useState({
     limit: 10,
     total: 1,
     page: 1,
   });
+  const [openViewDetail, setOpenViewDetail] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  let clickTimer = null;
 
-  const [openModalCreate, setOpenModalCreate] = useState(false);
   const navigate = useNavigate();
 
   const columns = [
     {
       title: "Tên văn bản",
-      dataIndex: "name",
-      width: "40%",
+      dataIndex: "Name",
+      width: "30%",
       copyable: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (_, row) => (
+        <div>
+          <Tooltip title={row.Name}>
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "80%",
+                display: "inline-block",
+                verticalAlign: "middle",
+              }}
+            >
+              {row.hasAttachment && (
+                <PaperClipOutlined
+                  style={{ marginRight: 6, color: "#fa8c16" }}
+                />
+              )}
+              {row.Name}
+            </div>
+          </Tooltip>
+          <br />
+          <Tag color={tagColor[convertScopeName(row.Scope)]}>
+            {convertScopeName(row.Scope)}
+          </Tag>
+        </div>
+      ),
       fieldProps: {
         placeholder: "Vui lòng nhập tên",
       },
@@ -42,56 +82,40 @@ const TableAllArchivedDocument = () => {
         labelCol: { span: 8 },
         wrapperCol: { span: 20 },
       },
+    },
+    {
+      title: "Loại văn bản",
+      dataIndex: "Type",
+      width: "15%",
+      hideInSearch: true,
+    },
+    {
+      title: "Người lưu",
+      dataIndex: "CreateBy",
+      width: "15%",
+      hideInSearch: true,
+    },
+    {
+      title: "Ngày lưu",
+      dataIndex: "CreatedDate",
+      width: "15%",
+      hideInSearch: true,
       render: (_, row) => {
-        const hasAttachment = row?.attachmentDocuments?.length > 0;
-        return (
-          <>
-            {hasAttachment && (
-              <PaperClipOutlined style={{ marginRight: 6, color: "#fa8c16" }} />
-            )}
-            <Tooltip title="Xem chi tiết">
-              <a
-                // onClick={() =>
-                //   navigate(
-                //     `/detail-document/${row.documentId}`
-                //   )
-                // }
-                style={{ cursor: "pointer" }}
-              >
-                {row.name}
-              </a>
-            </Tooltip>
-          </>
-        );
+        return dayjs(row.CreatedDate).format("DD-MM-YYYY HH:mm");
       },
     },
     {
       title: "Trạng thái",
-      dataIndex: "status",
+      dataIndex: "Status",
       width: "15%",
+      render: (_, row) => (
+        <Badge
+          color={statusColor[row.Status]}
+          text={convertArchivedStatus(row.Status)}
+          className="custom-dot"
+        />
+      ),
       hideInSearch: true,
-    },
-
-    {
-      title: "Loại văn bản",
-      dataIndex: "type",
-      width: "15%",
-      hideInSearch: true,
-    },
-    {
-      title: "Người ký",
-      dataIndex: "signBy",
-      width: "15%",
-      hideInSearch: true,
-    },
-    {
-      title: "Ngày tạo",
-      dataIndex: "createDate",
-      width: "15%",
-      hideInSearch: true,
-      render: (_, row) => {
-        return dayjs(row.createDate).format("DD - MM - YYYY HH:mm");
-      },
     },
   ];
 
@@ -123,19 +147,28 @@ const TableAllArchivedDocument = () => {
           cardBordered
           request={async (params) => {
             let query = "";
-
+            if (params) {
+              if (params.Name) {
+                query += `docName=${params.Name}&`;
+              }
+              query += `page=${params.current}&pageSize=${params.pageSize}`;
+            }
             const res = await getAllArchivedDocuments(query);
             if (res.data) {
-              setMeta(res.data.meatadataDto);
+              setMeta({
+                page: res.data?.meatadataDto.page,
+                limit: res.data?.meatadataDto.limit,
+                total: res.data?.size,
+              });
             }
             return {
               data: res.data?.content,
-              page: 1,
+              page: res.data?.meatadataDto.page,
               success: true,
-              total: res.data?.meatadataDto.total,
+              total: res.data?.size,
             };
           }}
-          rowKey={"documentId"}
+          rowKey={"Id"}
           pagination={{
             current: meta.page,
             pageSize: meta.limit,
@@ -152,6 +185,27 @@ const TableAllArchivedDocument = () => {
               Danh sách văn bản lưu trữ
             </span>
           }
+          onRow={(record) => ({
+            title: "Bấm một lần để xem nhanh, hai lần để mở chi tiết",
+            onClick: () => {
+              // Đợi để phân biệt single và double click
+              clickTimer = setTimeout(() => {
+                setSelectedRecord(record);
+                setOpenViewDetail(true);
+              }, 250); // Delay ngắn, vừa đủ để phân biệt double click
+            },
+            onDoubleClick: () => {
+              clearTimeout(clickTimer); // Hủy click nếu là double click
+
+              navigate(`/detail-archived-document/${record.Id}`);
+            },
+          })}
+        />
+        <DrawerArchivedDocument
+          openViewDetail={openViewDetail}
+          setOpenViewDetail={setOpenViewDetail}
+          selectedRecord={selectedRecord}
+          setSelectedRecord={setSelectedRecord}
         />
       </div>
     </div>

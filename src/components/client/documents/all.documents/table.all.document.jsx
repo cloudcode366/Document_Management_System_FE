@@ -244,7 +244,6 @@ const TableAllDocument = () => {
           scroll={{ y: "calc(100vh - 400px)" }}
           cardBordered
           request={async (params) => {
-            console.log(`>>> Check params: `, params);
             let query = "";
             if (activeKey === "Rejected") {
               if (params) {

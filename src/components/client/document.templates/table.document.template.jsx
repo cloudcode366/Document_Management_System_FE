@@ -7,62 +7,51 @@ import {
 } from "@ant-design/icons";
 import { ProTable, TableDropdown } from "@ant-design/pro-components";
 import { App, Avatar, Button, Modal, Popconfirm, Space, Tag } from "antd";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import templatePDF from "assets/files/template.pdf";
+import CreateDocumentTemplate from "./create.document.template";
+import { BeatLoader } from "react-spinners";
+import {
+  viewAllDocumentTypesAPI,
+  viewAllTemplatesAPI,
+} from "@/services/api.service";
 
-const data = [
-  {
-    id: "template1",
-    name: "Mẫu quyết định khen thưởng",
-    document_type: "Quyết định",
-    workflow: "Văn bản toàn trường",
-    created_at: "2025-03-13T07:11:00.943Z",
-    created_by: "Lê Phan Hoài Nam",
-  },
-  {
-    id: "template2",
-    name: "Mẫu công văn thông báo lịch họp",
-    document_type: "Thông báo",
-    workflow: "Văn bản đi",
-    created_at: "2025-03-14T07:11:00.943Z",
-    created_by: "Ngô Huỳnh Tấn Lộc",
-  },
-  {
-    id: "template3",
-    name: "Mẫu biên bản họp phòng ban",
-    document_type: "Biên bản",
-    workflow: "Văn bản phòng ban",
-    created_at: "2025-02-10T07:11:00.943Z",
-    created_by: "Hà Công Hiếu",
-  },
-  {
-    id: "template4",
-    name: "Mẫu quy chế nội bộ",
-    document_type: "Quy chế",
-    workflow: "Văn bản toàn trường",
-    created_at: "2025-04-01T07:11:00.943Z",
-    created_by: "Tạ Gia Nhật Minh",
-  },
-  {
-    id: "template5",
-    name: "Mẫu chỉ thị từ Ban Giám hiệu",
-    document_type: "Chỉ thị",
-    workflow: "Văn bản đi",
-    created_at: "2025-03-03T07:11:00.943Z",
-    created_by: "Lê Phan Hoài Nam",
-  },
-];
 const TableDocumentTemplate = () => {
   const actionRef = useRef();
   const [meta, setMeta] = useState({
-    current: 1,
-    pageSize: 20,
-    pages: 0,
-    total: 0,
+    limit: 10,
+    total: 1,
+    page: 1,
   });
   const [openPreview, setOpenPreview] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [documentTypes, setDocumentTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isDeleteUser, setIsDeleteUser] = useState(false);
+  const { message } = App.useApp();
+
+  const fetchDocumentType = async () => {
+    setLoading(true);
+    const res = await viewAllDocumentTypesAPI("page=1&limit=100000");
+    if (res?.data?.statusCode === 200) {
+      const data = res.data.content;
+      const active = data.filter(
+        (documentType) => documentType.isDeleted === false
+      );
+      const newDocumentTypeData = active.map((documentType) => ({
+        documentTypeId: documentType.documentTypeId,
+        documentTypeName: documentType.documentTypeName,
+      }));
+      setDocumentTypes(newDocumentTypeData);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchDocumentType();
+  }, []);
 
   const columns = [
     {
@@ -89,119 +78,91 @@ const TableDocumentTemplate = () => {
           </a>
         );
       },
-      width: "30%",
+      width: "40%",
     },
     {
       title: "Loại văn bản",
-      dataIndex: "document_type",
+      dataIndex: "type",
       valueType: "select",
-      request: async () => {
-        // Call API getllRole()
-        return [
-          {
-            label: "Quyết định",
-            value: "qđ",
-          },
-          { label: "Chỉ thị", value: "ct" },
-          { label: "Quy chế", value: "qc" },
-          { label: "Quy định", value: "qd" },
-          { label: "Thông báo", value: "tb" },
-          { label: "Báo cáo", value: "bc" },
-        ];
-      },
-      fieldProps: {
-        placeholder: "Vui lòng chọn loại văn bản",
-        showSearch: true,
-      },
-      formItemProps: {
-        labelCol: { span: 8 }, // Điều chỉnh label rộng hơn để không bị đè
-        wrapperCol: { span: 18 }, // Đảm bảo input không chiếm hết không gian
-      },
-      width: "15%",
-    },
-
-    {
-      title: "Luồng xử lý",
-      dataIndex: "workflow",
-      valueType: "select",
-      request: async () => {
-        // Call API getllRole()
-        return [
-          { label: "Văn bản đến", value: "incoming" },
-          { label: "Văn bản đi", value: "outgoing" },
-          { label: "Văn bản phòng ban", value: "division" },
-          { label: "Văn bản toàn trường", value: "school" },
-        ];
-      },
-      fieldProps: {
-        placeholder: "Vui lòng chọn luồng xử lý",
-        showSearch: true,
-      },
-      formItemProps: {
-        labelCol: { span: 8 }, // Điều chỉnh label rộng hơn để không bị đè
-        wrapperCol: { span: 18 }, // Đảm bảo input không chiếm hết không gian
-      },
+      hideInSearch: true,
       width: "15%",
     },
 
     {
       title: "Ngày tạo",
-      dataIndex: "createdAt",
+      dataIndex: "createDate",
       valueType: "date",
       sorter: true,
       hideInSearch: true,
       render(dom, entity, index, action, schema) {
-        return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
+        return <>{dayjs(entity.createDate).format("DD-MM-YYYY HH:mm")}</>;
       },
       width: "15%",
     },
 
     {
       title: "Người tạo",
-      dataIndex: "created_by",
+      dataIndex: "createBy",
       hideInSearch: true,
+      width: "15%",
     },
 
-    // {
-    //   title: "Hành động",
-    //   hideInSearch: true,
-    //   width: "10%",
-    //   render(dom, entity, index, action, schema) {
-    //     return (
-    //       <>
-    //         <EditTwoTone
-    //           twoToneColor="#f57800"
-    //           style={{ cursor: "pointer", marginRight: 15 }}
-    //           onClick={() => {
-    //             setDataUpdate(entity);
-    //             setOpenModalUpdate(true);
-    //           }}
-    //         />
-    //         <Popconfirm
-    //           placement="leftTop"
-    //           title="Xác nhận khóa người dùng"
-    //           description="Bạn có chắc chắn muốn khóa người dùng này?"
-    //           onConfirm={() => handleDeleteUser(entity._id)}
-    //           okText="Xác nhận"
-    //           cancelText="Hủy"
-    //           okButtonProps={{ loading: isDeleteUser }}
-    //         >
-    //           <span style={{ cursor: "pointer", marginLeft: 20 }}>
-    //             <DeleteTwoTone
-    //               twoToneColor="#ff4d4f"
-    //               style={{ cursor: "pointer" }}
-    //             />
-    //           </span>
-    //         </Popconfirm>
-    //       </>
-    //     );
-    //   },
-    // },
+    {
+      title: "Thao tác",
+      hideInSearch: true,
+      width: "15%",
+      render(dom, entity, index, action, schema) {
+        return (
+          <>
+            <EditTwoTone
+              twoToneColor="#f57800"
+              style={{ cursor: "pointer", marginRight: 15 }}
+              onClick={() => {
+                // setDataUpdate(entity);
+                // setOpenModalUpdate(true);
+              }}
+            />
+            <Popconfirm
+              placement="leftTop"
+              title="Xác nhận khóa người dùng"
+              description="Bạn có chắc chắn muốn khóa người dùng này?"
+              // onConfirm={() => handleDeleteUser(entity._id)}
+              okText="Xác nhận"
+              cancelText="Hủy"
+              okButtonProps={{ loading: isDeleteUser }}
+            >
+              <span style={{ cursor: "pointer", marginLeft: 20 }}>
+                <DeleteTwoTone
+                  twoToneColor="#ff4d4f"
+                  style={{ cursor: "pointer" }}
+                />
+              </span>
+            </Popconfirm>
+          </>
+        );
+      },
+    },
   ];
 
   const refreshTable = () => {
     actionRef.current?.reload();
   };
+
+  if (loading) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <BeatLoader size={25} color="#364AD6" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -231,46 +192,34 @@ const TableDocumentTemplate = () => {
 
           let query = "";
           if (params) {
-            query += `current=${params.current}&pageSize=${params.pageSize}`;
-            if (params.email) {
-              query += `&email=/${params.email}/i`;
+            if (params.Name) {
+              query += `docName=${params.Name}&`;
             }
-            if (params.fullName) {
-              query += `&fullName=/${params.fullName}/i`;
-            }
-
-            const createdDateRange = dateRangeValidate(params.createdAtRange);
-            if (createdDateRange) {
-              query += `&createdAt>=${createdDateRange[0]}&createdAt<=${createdDateRange[1]}`;
-            }
+            query += `page=${params.current}&pageSize=${params.pageSize}`;
           }
-
-          // default
-
-          if (sort && sort.createdAt) {
-            query += `&sort=${
-              sort.createdAt === "ascend" ? "createdAt" : "-createdAt"
-            }`;
-          } else query += `&sort=-createdAt`;
+          const res = await viewAllTemplatesAPI(query);
+          if (res.data) {
+            setMeta({
+              page: res.data?.meatadataDto.page,
+              limit: res.data?.meatadataDto.limit,
+              total: res.data?.size,
+            });
+          }
           return {
-            data: data,
-            page: 1,
+            data: res.data?.content,
+            page: res.data?.meatadataDto.page,
             success: true,
-            total: 10,
+            total: res.data?.size,
           };
         }}
-        rowKey="_id"
+        rowKey="id"
         pagination={{
           current: meta.current,
           pageSize: meta.pageSize,
           showSizeChanger: true,
           total: meta.total,
           showTotal: (total, range) => {
-            return (
-              <div>
-                {range[0]} - {range[1]} trên {total} dòng
-              </div>
-            );
+            return <div>{/* {range[0]} - {range[1]} trên {total} dòng */}</div>;
           },
         }}
         headerTitle={
@@ -281,7 +230,7 @@ const TableDocumentTemplate = () => {
             key="buttonAddNew"
             icon={<PlusOutlined />}
             onClick={() => {
-              //   setOpenModalCreate(true);
+              setOpenModalCreate(true);
             }}
             type="primary"
           >
@@ -295,8 +244,9 @@ const TableDocumentTemplate = () => {
         footer={null}
         title={selectedTemplate?.name}
         width="80%"
+        centered
         style={{ top: 20 }}
-        bodyStyle={{ height: "80vh", padding: 0 }}
+        styles={{ body: { height: "80vh", padding: 0 } }}
         destroyOnClose
       >
         {selectedTemplate && (
@@ -309,6 +259,12 @@ const TableDocumentTemplate = () => {
           />
         )}
       </Modal>
+      <CreateDocumentTemplate
+        openModalCreate={openModalCreate}
+        setOpenModalCreate={setOpenModalCreate}
+        refreshTable={refreshTable}
+        documentTypes={documentTypes}
+      />
     </div>
   );
 };

@@ -97,18 +97,9 @@ const createUserByFormAPI = (
   });
 };
 
-const createImportUsersFromExcelAPI = (divisionId, file) => {
-  const URL_BACKEND = `/api/User/create-import-users-from-excel`;
-  let config = {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  };
-
-  const bodyFormData = new FormData();
-  bodyFormData.append("divisionId", divisionId);
-  bodyFormData.append("file", file);
-  return axios.post(URL_BACKEND, bodyFormData, config);
+const createImportUsersFromExcelAPI = (divisionId, payload) => {
+  const URL_BACKEND = `/api/User/create-import-users-from-excel?divisionId=${divisionId}`;
+  return axios.post(URL_BACKEND, payload);
 };
 
 const updateUserByAdminAPI = (
@@ -201,7 +192,7 @@ const viewAllDocumentTypesAPI = (query) => {
 
 const createDocumentTypeAPI = (documentTypeName, acronym) => {
   const urlBackend = `/api/DocumentType/create-document-type`;
-  return axios.post(urlBackend, { documentTypeName, acronym});
+  return axios.post(urlBackend, { documentTypeName, acronym });
 };
 
 const changeStatusDocumentTypeAPI = (documentTypeId) => {
@@ -313,6 +304,19 @@ const createUploadDocumentAPI = (file) => {
   return axios.post(URL_BACKEND, bodyFormData, config);
 };
 
+const viewUsersFromExcelAPI = (file) => {
+  const URL_BACKEND = `/api/User/view-users-from-excel`;
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("file", file);
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
 const createInComingDocumentAPI = (req) => {
   const urlBackend = `/api/Document/create-incoming-document`;
   return axios.post(urlBackend, req);
@@ -323,22 +327,72 @@ const viewMySelfDocumentAPI = (query) => {
   return axios.get(urlBackend);
 };
 
-// export const getAllArchivedDocuments = async () => {
-//   try {
-//     const response = await axios.get(
-//       "http://nghetrenghetre.xyz:5290/api/ArchiveDocument/view-all-documents?page=1&pageSize=10000"
-//     );
-//     return response.data;
-//   } catch (error) {
-//     console.error("Error fetching archived documents:", error);
-//     return { content: [] };
-//   }
-// };
-
 const getAllArchivedDocuments = (query) => {
   const urlBackend = `/api/ArchiveDocument/view-all-documents?${query}`;
   return axios.get(urlBackend);
-}
+};
+
+const viewProcessDocumentDetailAPI = (documentId) => {
+  const urlBackend = `/api/Document/view-process-document-detail?documentId=${documentId}`;
+  return axios.get(urlBackend);
+};
+
+const viewArchivedDocumentDetailAPI = (documentId) => {
+  const urlBackend = `/api/ArchiveDocument/view-archive-document-detail?documentId=${documentId}`;
+  return axios.get(urlBackend);
+};
+
+const createConvertDocToPdfAPI = (file) => {
+  const URL_BACKEND = `/api/Document/create-convert-doc-to-pdf`;
+
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    responseType: "blob",
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("file", file);
+
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
+const createTemplateAPI = (
+  templateName,
+  documentTypeId,
+  llx,
+  lly,
+  urx,
+  ury,
+  page,
+  template
+) => {
+  const URL_BACKEND = `/api/ArchiveDocument/create-template`;
+
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("TemplateName", templateName);
+  bodyFormData.append("DocumentTypeId", documentTypeId);
+  bodyFormData.append("Llx", llx);
+  bodyFormData.append("Lly", lly);
+  bodyFormData.append("Urx", urx);
+  bodyFormData.append("Ury", ury);
+  bodyFormData.append("Page", page);
+  bodyFormData.append("Template", template);
+
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
+const viewAllTemplatesAPI = (query) => {
+  const urlBackend = `/api/ArchiveDocument/view-all-templates?${query}`;
+  return axios.get(urlBackend);
+};
 
 export {
   loginAPI,
@@ -381,5 +435,11 @@ export {
   createUploadDocumentAPI,
   createInComingDocumentAPI,
   viewMySelfDocumentAPI,
-  getAllArchivedDocuments
+  getAllArchivedDocuments,
+  viewProcessDocumentDetailAPI,
+  viewArchivedDocumentDetailAPI,
+  viewUsersFromExcelAPI,
+  createConvertDocToPdfAPI,
+  createTemplateAPI,
+  viewAllTemplatesAPI,
 };
