@@ -375,13 +375,7 @@ const UpdateUser = (props) => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                label="Ảnh chữ ký"
-                name="signature"
-                rules={[
-                  { required: true, message: "Vui lòng chọn ảnh chữ ký!" },
-                ]}
-              >
+              <Form.Item label="Ảnh chữ ký" name="signature">
                 <Image
                   width={150}
                   src={signatureImageUrl}

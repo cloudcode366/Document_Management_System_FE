@@ -17,14 +17,13 @@ import {
 import {
   FileTextOutlined,
   EyeOutlined,
-  DeleteOutlined,
-  PlusCircleOutlined,
   PlusOutlined,
   ArrowLeftOutlined,
   ExportOutlined,
   EditOutlined,
   CloseOutlined,
   CheckOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
 import samplePDF from "assets/files/sample.pdf";
 import { useNavigate, useParams } from "react-router-dom";
@@ -54,6 +53,8 @@ const ViewDetailDocument = () => {
     useState(false);
   const [openApproveConfirmModal, setOpenApproveConfirmModal] = useState(false);
   const [openRejectConfirmModal, setOpenRejectConfirmModal] = useState(false);
+  const [openArchivedConfirmModal, setOpenArchivedConfirmModal] =
+    useState(false);
   const [rejectForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState(null);
@@ -94,7 +95,14 @@ const ViewDetailDocument = () => {
     // Gửi dữ liệu lên server ở đây nếu cần
     message.success("Văn bản đã được duyệt thành công!");
     setOpenApproveConfirmModal(false);
-    navigate("/detail-document");
+    navigate(`/detail-document/${documentId}`);
+    // Điều hướng hoặc cập nhật UI nếu cần
+  };
+  const handleArchiveDocument = () => {
+    // Gửi dữ liệu lên server ở đây nếu cần
+    message.success("Văn bản đã được lưu trữ thành công!");
+    setOpenArchivedConfirmModal(false);
+    navigate(`/detail-document/${documentId}`);
     // Điều hướng hoặc cập nhật UI nếu cần
   };
 
@@ -269,26 +277,26 @@ const ViewDetailDocument = () => {
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.dateReceived).format("DD - MM - YYYY HH:mm")}
+                {dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.dateIssued).format("DD - MM - YYYY HH:mm")}
+                {dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.dateExpires).format("DD - MM - YYYY HH:mm")}
+                {dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
 
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày hết hạn:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.deadline).format("DD - MM - YYYY")}
+                {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
 
@@ -452,6 +460,27 @@ const ViewDetailDocument = () => {
                 </Button>
               </Col>
             </Row>
+            <Row gutter={[12, 12]} style={{ marginBottom: "10px" }}>
+              <Col span={12}>
+                <Button
+                  icon={<SaveOutlined style={{ color: "#2f54eb" }} />} // icon màu geekblue
+                  block
+                  size="middle"
+                  style={{
+                    height: 40,
+                    fontSize: 16,
+                    background: "#f0f5ff", // nền geekblue nhạt
+                    border: "1px solid #adc6ff", // viền geekblue nhạt
+                    color: "#2f54eb", // màu chữ chính
+                  }}
+                  onClick={() => {
+                    setOpenArchivedConfirmModal(true);
+                  }}
+                >
+                  Lưu trữ văn bản
+                </Button>
+              </Col>
+            </Row>
             <div
               style={{
                 position: "absolute",
@@ -482,6 +511,19 @@ const ViewDetailDocument = () => {
         maskClosable={false}
       >
         <p>Bạn có chắc chắn muốn duyệt văn bản này không?</p>
+      </Modal>
+
+      <Modal
+        title="Xác nhận lưu trữ văn bản"
+        open={openArchivedConfirmModal}
+        onOk={handleArchiveDocument}
+        onCancel={() => setOpenArchivedConfirmModal(false)}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        centered
+        maskClosable={false}
+      >
+        <p>Bạn có chắc chắn muốn lưu trữ văn bản này không?</p>
       </Modal>
 
       <Modal

@@ -1,505 +1,561 @@
-import React, { useEffect, useState } from "react";
-import {
-  Modal,
-  Row,
-  Col,
-  Divider,
-  Tag,
-  Space,
-  Form,
-  DatePicker,
-  Input,
-  Radio,
-  Button,
-  Card,
-  App,
-} from "antd";
+import { viewProcessDocumentDetailAPI } from "@/services/api.service";
+import { convertRoleName, convertScopeName } from "@/services/helper";
 import {
   ArrowRightOutlined,
+  ClockCircleOutlined,
   CloseCircleOutlined,
+  LeftOutlined,
   PlusCircleOutlined,
+  RightOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import DetailTask from "@/components/client/documents/progresses/detail.task";
 import dayjs from "dayjs";
+import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
+import {
+  App,
+  Button,
+  Card,
+  Col,
+  Image,
+  Input,
+  Progress,
+  Row,
+  Space,
+  Steps,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Dropdown, Menu } from "antd";
 import AddTask from "./add.task";
 
-const DetailProgress = (props) => {
-  const {
-    openDetailProgressModal,
-    setOpenDetailProgressModal,
-    dataViewDetail,
-    setDataViewDetail,
-    refreshTable,
-  } = props;
-  const [workflowName, setWorkflowName] = useState("");
-  const [workflowRoles, setWorkflowRoles] = useState([]);
-  const [workflowDetails, setWorkflowDetails] = useState([]);
-  const [mode, setMode] = useState("nhiemvu");
-  //   const [deadlineTime, setDeadlineTime] = useState(null);
-  //   const [reviewTaskTime, setReviewTaskTime] = useState(null);
-  const [listTask, setListTask] = useState([]);
-  const [openAddTaskModal, setOpenAddTaskModal] = useState(false);
-  const [currentStepId, setCurrentStepId] = useState(null);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [openTaskDetailModal, setOpenTaskDetailModal] = useState(false);
-  const { message, notification } = App.useApp();
-  const [hasChanges, setHasChanges] = useState(false);
+const { Text, Title } = Typography;
+const { Step } = Steps;
+
+const getTaskColor = (status) => {
+  switch (status) {
+    case "Completed":
+      return "#52c41a";
+    case "Rejected":
+      return "#ff4d4f";
+    case "Waiting":
+      return "#d9d9d9";
+    case "InProgress":
+    default:
+      return "#1890ff";
+  }
+};
+
+const ViewDetailProgress = () => {
+  const { documentId } = useParams();
+  const [processDetail, setProcessDetail] = useState(null);
+  const navigate = useNavigate();
+  const [openModalCreate, setOpenModalCreate] = useState(false);
+  const { message, notification, modal } = App.useApp();
+
+  const fetchProgress = async () => {
+    const res = await viewProcessDocumentDetailAPI(documentId);
+    if (res?.data?.statusCode === 200) {
+      setProcessDetail(res.data.content);
+    }
+  };
 
   useEffect(() => {
-    setWorkflowName("Văn bản phòng ban");
-    setWorkflowRoles(["Chuyên viên", "Lãnh đạo phòng ban"]);
-    setWorkflowDetails([
-      {
-        from: "Chuyên viên",
-        to: "Lãnh đạo phòng ban",
-        actions: [
-          {
-            content: "Khởi tạo và chuyển tiếp văn bản",
-            role: "Chuyên viên",
-            step_id: 1,
-          },
-          {
-            content: "Duyệt văn bản",
-            role: "Lãnh đạo phòng ban",
-            step_id: 2,
-          },
-        ],
-      },
-    ]);
-    setListTask({
-      1: [
-        {
-          title: "Soạn dự thảo văn bản",
-          thanhvien: "Nguyễn Văn A",
-          start_date: "08/04/2025 08:00",
-          end_date: "09/04/2025 17:00",
-          status: "Đã hoàn thành",
-        },
-        {
-          title: "Rà soát nội dung văn bản",
-          thanhvien: "Trần Thị B",
-          start_date: "07/04/2025 08:00",
-          end_date: "08/04/2025 17:00",
-          status: "Đã quá hạn",
-        },
-      ],
-      2: [
-        {
-          title: "Duyệt nội dung văn bản",
-          thanhvien: "Phạm Văn C",
-          start_date: "08/04/2025 08:00",
-          end_date: "09/04/2025 17:00",
-          status: "Đang thực hiện",
-        },
-      ],
-    });
+    fetchProgress();
   }, []);
 
-  //   const handleDeadlineTimeChange = (time) => {
-  //     setDeadlineTime(time);
-  //     console.log("Thời gian deadline:", time?.format("HH:mm"));
-  //   };
+  const renderWorkflowRoles = () => {
+    if (!processDetail?.workflowRequest?.flows?.length) return null;
 
-  //   const handleReviewTaskTimeChange = (time) => {
-  //     setReviewTaskTime(time);
-  //     console.log("Thời gian đã chọn:", time?.format("HH:mm"));
-  //   };
+    const roles = processDetail?.workflowRequest?.flows.flatMap(
+      (flow, idx, arr) =>
+        idx === arr.length - 1
+          ? [flow.roleStart, flow.roleEnd]
+          : [flow.roleStart]
+    );
+    const uniqueRoles = [...new Set(roles)];
 
-  const handleCancel = () => {
-    setOpenDetailProgressModal(false);
-    // setDataViewDetail(null);
-    // setWorkflowName("");
-    // setWorkflowRoles([]);
-    // setWorkflowDetails([]);
-    // setDeadlineTime(null);
-    // setReviewTaskTime(null);
-    setMode("nhiemvu");
-    // setListTask([]);
-    setHasChanges(false);
-  };
-
-  const handleSubmit = () => {
-    console.log(`>>> List task: `, listTask);
-    const result = {
-      tasks: listTask,
-    };
-    console.log("Cập nhật task trong progress detail:", result);
-    notification.success({
-      message: "Cập nhật nhiệm vụ thành công",
-    });
-    handleCancel();
-  };
-
-  return (
-    <div>
-      <Modal
-        open={openDetailProgressModal}
-        title={
-          <span style={{ fontSize: "20px", fontWeight: "bold" }}>
-            Thông tin chi tiết luồng xử lý văn bản
-          </span>
-        }
-        onOk={handleSubmit}
-        onCancel={handleCancel}
-        maskClosable={false}
-        centered
-        width="80vw"
-        okText={"Hoàn thành"}
-        bodyProps={{
-          style: {
-            maxHeight: "70vh",
-            overflowY: "auto",
-            overflowX: "hidden",
-          },
-        }}
-        okButtonProps={{
-          style: {
-            display: hasChanges ? undefined : "none",
-          },
-        }}
-        cancelButtonProps={{
-          style: {
-            display: "none",
-          },
+    return (
+      <div
+        style={{
+          margin: "24px 10px",
+          padding: "16px 24px",
+          backgroundColor: "#ffffff",
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Row gutter={40}>
-          <Col span={12}>
-            <strong style={{ fontSize: "16px" }}>Tên văn bản:</strong>{" "}
-            <span style={{ fontSize: "16px" }}>{dataViewDetail?.name}</span>
-          </Col>
-          <Col span={12}>
-            <strong style={{ fontSize: "16px" }}>Luồng xử lý:</strong>{" "}
-            <span style={{ fontSize: "16px" }}>{workflowName}</span>
-          </Col>
-        </Row>
-        <Row gutter={16} style={{ marginTop: "5px" }}>
-          <Col span={12}>
-            <Form.Item
-              label={
-                <span style={{ fontSize: "16px", fontWeight: "bold" }}>
-                  Ngày khởi tạo văn bản
-                </span>
-              }
-            >
-              <DatePicker
-                showTime
-                format="DD/MM/YYYY HH:mm"
-                style={{ width: "100%" }}
-                placeholder="Chọn ngày và giờ"
-                value={
-                  dataViewDetail?.created_date
-                    ? dayjs(dataViewDetail.created_date)
-                    : null
-                }
-                readOnly
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label={
-                <span style={{ fontSize: "16px", fontWeight: "bold" }}>
-                  Thời hạn xử lý văn bản
-                </span>
-              }
-            >
-              <DatePicker
-                showTime
-                format="DD/MM/YYYY HH:mm"
-                style={{ width: "100%" }}
-                placeholder="Chọn ngày và giờ"
-                value={
-                  dataViewDetail?.end_date
-                    ? dayjs(dataViewDetail.end_date)
-                    : null
-                }
-                readOnly
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Divider
-          orientation="left"
-          variant="solid"
+        <Text
+          strong
           style={{
-            borderColor: "#80868b",
+            fontSize: 16,
+            color: "#1d1d1f",
+            marginBottom: "10px",
           }}
         >
-          Quy trình xử lý
-        </Divider>
-        <Row gutter={8} align="middle" style={{ marginBottom: 12 }}>
-          {workflowRoles.map((role, index) => (
-            <React.Fragment key={index}>
-              {/* Hiển thị ô role */}
+          Sơ đồ quy trình:
+        </Text>
+        <Row gutter={12} align="middle" justify="start">
+          {uniqueRoles.map((role, idx) => (
+            <React.Fragment key={idx}>
               <Col>
-                <Form.Item style={{ marginBottom: "12px" }}>
-                  <Tag style={{ marginBottom: "8px", fontSize: "16px" }}>
-                    {role}
-                  </Tag>
-                </Form.Item>
+                <Tag
+                  icon={<UserOutlined />}
+                  color="processing"
+                  style={{
+                    fontSize: 14,
+                    padding: "4px 12px",
+                    borderRadius: 16,
+                    marginTop: "10px",
+                  }}
+                >
+                  {convertRoleName(role)}
+                </Tag>
               </Col>
-              {/* Hiển thị dấu mũi tên giữa các ô role */}
-              {index < workflowRoles.length - 1 && (
+              {idx < uniqueRoles.length - 1 && (
                 <Col>
                   <ArrowRightOutlined
-                    style={{
-                      fontSize: "20px",
-                      padding: "0 10px",
-                      marginBottom: "20px",
-                    }}
+                    style={{ fontSize: 18, color: "#999", marginTop: "10px" }}
                   />
                 </Col>
               )}
             </React.Fragment>
           ))}
         </Row>
-        <Divider
-          orientation="left"
-          variant="solid"
+      </div>
+    );
+  };
+
+  const renderWorkflowDetails = () => {
+    if (!processDetail?.workflowRequest?.flows?.length) return null;
+
+    return processDetail?.workflowRequest?.flows.map((flow, idx) => (
+      <div
+        key={idx}
+        style={{
+          margin: "0 10px 20px 10px",
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+          backgroundColor: "#ffffff",
+          overflow: "hidden",
+          border: "1px solid #f0f0f0",
+        }}
+      >
+        <div
           style={{
-            borderColor: "#80868b",
+            backgroundColor: "#F2F2F2",
+            padding: "12px 16px",
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
           }}
         >
-          Thông tin quy trình
-        </Divider>
-        <Row gutter={40}>
-          <Col span={12}>
-            <Form.Item
-              label={
-                <span style={{ fontSize: "16px", fontWeight: "bold" }}>
-                  Phương thức xử lý văn bản
-                </span>
-              }
-              required
-            >
-              <Radio.Group
-                onChange={(e) => setMode(e.target.value)}
-                value={dataViewDetail?.phuongThucXuLy}
-                disabled
-              >
-                <Radio value="nhiemvu">
-                  <span style={{ fontSize: "14px" }}>
-                    Theo nhiệm vụ mặc định
-                  </span>
-                </Radio>
-                <Radio value="thoigian">
-                  <span style={{ fontSize: "14px" }}>
-                    Thời gian xem xét nhiệm vụ
-                  </span>
-                </Radio>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
+          <Text
+            strong
+            style={{
+              fontSize: 16,
+              color: "#1d1d1f",
+            }}
+          >
+            Luồng {idx + 1}: {convertRoleName(flow.roleStart)} ➝{" "}
+            {convertRoleName(flow.roleEnd)}
+          </Text>
+        </div>
 
-          {dataViewDetail?.phuongThucXuLy === "thoigian" && (
-            <Col span={12}>
-              <Form.Item
-                label="Chọn thời gian"
-                required
-                tooltip="Chọn thời gian hệ thống sẽ tự động xử lý"
-                style={{ marginTop: "35px" }}
-              >
-                <DatePicker
-                  showTime
-                  format="DD/MM/YYYY HH:mm"
-                  style={{ width: "100%" }}
-                  placeholder="Chọn ngày và giờ"
-                  value={dataViewDetail?.reviewTaskTime}
-                  //   onChange={handleReviewTaskTimeChange}
-                  readOnly
-                />
-              </Form.Item>
-            </Col>
-          )}
-        </Row>
-        {workflowDetails?.map((detail, idx) => (
-          <div key={`${detail.from}-${detail.to}`}>
-            <h4 style={{ fontSize: "16px" }}>
-              Luồng {idx + 1}:{" "}
-              <span style={{ fontSize: "16px" }}>{detail.from}</span> ➝{" "}
-              <span style={{ fontSize: "16px" }}>{detail.to}</span>
-            </h4>
-            {detail.actions.map((action, actionIdx) => (
-              <div key={actionIdx} style={{ marginBottom: "16px" }}>
-                <Row
-                  gutter={16}
-                  key={actionIdx}
-                  align="middle"
-                  style={{ marginTop: "10px" }}
-                >
-                  <Col span={10}>
-                    <strong style={{ fontSize: "16px" }}>
-                      Bước {actionIdx + 1}:
-                    </strong>{" "}
-                    <span style={{ fontSize: "16px" }}>{action.content}</span>
-                  </Col>
-                  <Col span={10}>
-                    <strong style={{ fontSize: "16px" }}>
-                      Vai trò thực hiện:
-                    </strong>{" "}
-                    <span style={{ fontSize: "16px" }}>{action.role}</span>
-                  </Col>
-                  <Col span={4}>
-                    <Button
-                      type="primary"
-                      icon={<PlusCircleOutlined />}
+        <div style={{ padding: "16px" }}>
+          <Steps direction="vertical" current={flow.steps.length} size="small">
+            {flow.steps.map((step, i) => (
+              <Step
+                key={i}
+                title={<span style={{ fontSize: "16px" }}>{step.action}</span>}
+                description={
+                  <>
+                    <div
                       style={{
-                        backgroundColor: "#FC8330",
-                        borderColor: "#FC8330",
-                      }}
-                      onClick={() => {
-                        setCurrentStepId(action.step_id);
-                        setOpenAddTaskModal(true);
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
                       }}
                     >
-                      Tạo nhiệm vụ
-                    </Button>
-                  </Col>
-                </Row>
-                {listTask[action.step_id]?.length > 0 && (
-                  <Row
-                    gutter={[16, 16]}
-                    style={{ marginTop: 12, marginLeft: 8 }}
-                  >
-                    {listTask[action.step_id].map((task, taskIdx) => (
-                      <Col key={taskIdx}>
-                        <Card
-                          bordered={false}
-                          hoverable
-                          onClick={() => {
-                            setSelectedTask(task);
-                            setOpenTaskDetailModal(true);
-                          }}
+                      <div>
+                        <span style={{ fontSize: "16px" }}>Vai trò:{"  "}</span>
+                        <Tag color="geekblue">
+                          <span style={{ fontSize: "16px" }}>
+                            {convertRoleName(step.role.roleName)}
+                          </span>
+                        </Tag>
+                      </div>
+
+                      <Button
+                        type="primary"
+                        icon={<PlusCircleOutlined />}
+                        onClick={() => {
+                          // setCurrentStepId(step.step_id);
+                          setOpenModalCreate(true);
+                        }}
+                        style={{ top: -20, backgroundColor: "#FC8330" }}
+                      >
+                        Tạo nhiệm vụ
+                      </Button>
+                    </div>
+                    {step.taskDtos.length > 0 && (
+                      <div style={{ position: "relative", marginTop: 12 }}>
+                        <Button
+                          icon={<LeftOutlined />}
                           style={{
-                            width: 300,
-                            height: 250,
-                            borderRadius: 12,
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                            backgroundColor:
-                              task.status === "Đã hoàn thành"
-                                ? "#e6fffb"
-                                : task.status === "Đã quá hạn"
-                                ? "#fff1f0"
-                                : "#fafafa",
-                            padding: 16,
+                            position: "absolute",
+                            left: 0,
+                            top: "40%",
+                            zIndex: 2,
+                            background: "#fff",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                            borderRadius: "50%",
+                          }}
+                          onClick={() => {
+                            document
+                              .querySelector(".task-scroll-container")
+                              ?.scrollBy({ left: -300, behavior: "smooth" });
+                          }}
+                        />
+                        <Button
+                          icon={<RightOutlined />}
+                          style={{
+                            position: "absolute",
+                            right: 0,
+                            top: "40%",
+                            zIndex: 2,
+                            background: "#fff",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                            borderRadius: "50%",
+                          }}
+                          onClick={() => {
+                            document
+                              .querySelector(".task-scroll-container")
+                              ?.scrollBy({ left: 300, behavior: "smooth" });
+                          }}
+                        />
+                        <div
+                          className="task-scroll-container"
+                          style={{
                             display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "space-between",
-                            marginBottom: "10px",
-                            position: "relative",
+                            overflowX: "auto",
+                            paddingBottom: 8,
+                            gap: 16,
+                            scrollBehavior: "smooth",
+                            paddingLeft: "40px",
+                            paddingRight: "40px",
                           }}
                         >
-                          {["Đã hoàn thành", "Đã quá hạn"].includes(
-                            task.status
-                          ) ? (
-                            <Tag
-                              color={
-                                task.status === "Đã hoàn thành"
-                                  ? "#52c41a"
-                                  : "#ff4d4f"
-                              }
-                              style={{
-                                position: "absolute",
-                                top: 8,
-                                right: 8,
-                                zIndex: 10,
-                                fontWeight: 500,
-                              }}
-                            >
-                              {task.status}
-                            </Tag>
-                          ) : (
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                Modal.confirm({
-                                  title:
-                                    "Bạn có chắc chắn muốn xoá nhiệm vụ này?",
-                                  content: "Hành động này không thể hoàn tác.",
-                                  okText: "Xác nhận",
-                                  cancelText: "Hủy",
-                                  onOk: () => {
-                                    const updatedTasks = listTask[
-                                      action.step_id
-                                    ].filter((_, idx) => idx !== taskIdx);
-                                    setListTask((prev) => ({
-                                      ...prev,
-                                      [action.step_id]: updatedTasks,
-                                    }));
-                                    setHasChanges(true);
-                                  },
-                                });
-                              }}
-                              style={{
-                                position: "absolute",
-                                top: 8,
-                                right: 8,
-                                cursor: "pointer",
-                                zIndex: 10,
-                                padding: 4,
-                                background: "#fff",
-                                borderRadius: "50%",
-                                boxShadow: "0 0 4px rgba(0,0,0,0.2)",
-                              }}
-                            >
-                              <CloseCircleOutlined size={14} color="#ff4d4f" />
-                            </div>
+                          {step.taskDtos.map((task, idx) =>
+                            renderTaskCard(task, step, idx)
                           )}
-
-                          <div
-                            style={{
-                              fontSize: "16px",
-                              fontWeight: 600,
-                              color: "#1677ff",
-                            }}
-                          >
-                            {task.title}
-                          </div>
-
-                          <div style={{ flex: 1, marginTop: 8 }}>
-                            <p
-                              style={{
-                                marginBottom: 6,
-                              }}
-                            >
-                              🧑‍💼 <strong>Người thực hiện:</strong>{" "}
-                              {task.thanhvien}
-                            </p>
-                            <p style={{ marginBottom: 6 }}>
-                              🕒 <strong>Bắt đầu:</strong> {task.start_date}
-                            </p>
-                            <p>
-                              📅 <strong>Kết thúc:</strong> {task.end_date}
-                            </p>
-                          </div>
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                )}
-              </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                }
+                icon={
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      textAlign: "center",
+                      lineHeight: "24px",
+                      borderRadius: "50%",
+                      backgroundColor: "#1890ff",
+                      color: "white",
+                      fontSize: "14px",
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+                }
+              />
             ))}
-            <Divider />
+          </Steps>
+        </div>
+      </div>
+    ));
+  };
+
+  const renderTaskCard = (task, step, index) => (
+    <Card
+      key={index}
+      onClick={() => {
+        // setSelectedTask(task);
+        // setOpenTaskDetailModal(true);
+      }}
+      hoverable
+      style={{
+        width: 300,
+        borderRadius: 12,
+        border: "1px solid transparent", // 👈 ẩn viền ban đầu
+        boxShadow: "0 0 20px 4px rgba(0,0,0,0.1)", // đổ bóng đều
+        backgroundColor: "#fff",
+        position: "relative",
+        padding: "16px",
+        height: 300,
+        transition: "all 0.3s ease-in-out", // hiệu ứng mượt cho cả border và shadow
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "0 0 28px 6px rgba(0,0,0,0.15)";
+        e.currentTarget.style.border = "1px solid #1890ff"; // 👈 hiện viền khi hover
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = "0 0 20px 4px rgba(0,0,0,0.1)";
+        e.currentTarget.style.border = "1px solid transparent"; // 👈 ẩn lại viền
+      }}
+    >
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          modal.confirm({
+            title: "Bạn có chắc muốn xoá nhiệm vụ này?",
+            onOk: () => {
+              // const updated = listTask[stepId]?.filter((_, i) => i !== index);
+              // setListTask((prev) => ({ ...prev, [stepId]: updated }));
+              message.success(`Xóa nhiệm vụ thành công`);
+            },
+          });
+        }}
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          background: "#fff",
+          borderRadius: "50%",
+          boxShadow: "0 0 4px rgba(0,0,0,0.2)",
+          padding: 4,
+          zIndex: 10,
+          cursor: "pointer",
+        }}
+      >
+        <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
+      </div>
+      <Space direction="vertical" style={{ width: "100%" }}>
+        {/* Simulate the blurred "Thông tin chi tiết" section */}
+        <div
+          style={{
+            width: "100%",
+            height: "60px", // Adjust height to match the blurred area in the image
+            background: "rgba(200, 200, 200, 0.3)", // Light gray background to mimic blur
+            filter: "blur(4px)", // CSS blur effect
+            borderRadius: "4px",
+            margin: "8px 0",
+          }}
+        >
+          {/* Optional: Add placeholder text or shapes to mimic content underneath */}
+          <div
+            style={{
+              width: "80%",
+              height: "10px",
+              background: "rgba(150, 150, 150, 0.5)",
+              margin: "8px auto",
+            }}
+          />
+          <div
+            style={{
+              width: "60%",
+              height: "10px",
+              background: "rgba(150, 150, 150, 0.5)",
+              margin: "8px auto",
+            }}
+          />
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Title
+            level={5}
+            style={{ margin: 0, fontWeight: "bold", color: "#333" }}
+          >
+            {task.title}
+          </Title>
+          <Dropdown
+            trigger={["click"]}
+            overlay={
+              <Menu
+                onClick={({ key }) => {
+                  if (key === "edit") {
+                    // Thực hiện mở modal chỉnh sửa
+                    console.log("Chỉnh sửa:", task);
+                    // setSelectedTask(task);
+                    // setOpenEditTaskModal(true);
+                  } else if (key === "view") {
+                    navigate(`/task-detail/${task.taskId}`);
+                  }
+                }}
+                items={[
+                  {
+                    key: "edit",
+                    label: "Chỉnh sửa",
+                  },
+                  {
+                    key: "view",
+                    label: "Xem chi tiết",
+                  },
+                ]}
+              />
+            }
+          >
+            <HiOutlineDotsCircleHorizontal
+              style={{ fontSize: 20, cursor: "pointer" }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </Dropdown>
+        </div>
+
+        <Text style={{ color: "#666", fontSize: 14, marginTop: 0 }}>
+          {convertRoleName(step.role.roleName)} . Bước {step.stepNumber}
+        </Text>
+
+        <div style={{ marginTop: 8 }}>
+          <Text style={{ fontWeight: "bold", color: "#333" }}>
+            {task.taskStatus}
+          </Text>
+          <div style={{ display: "flex", alignItems: "center", marginTop: 4 }}>
+            <Progress
+              percent={task.taskStatus === "Completed" ? 100 : 0}
+              showInfo={false}
+              strokeColor={getTaskColor(task.taskStatus)}
+              trailColor="#e6f7ff"
+              style={{ flex: 1 }}
+            />
+            <Text
+              style={{
+                marginLeft: 8,
+                fontWeight: "bold",
+                color: getTaskColor(task.taskStatus),
+              }}
+            >
+              {task.taskStatus === "Completed" ? 100 : 0}%
+            </Text>
           </div>
-        ))}
-      </Modal>
-      <AddTask
-        openAddTaskModal={openAddTaskModal}
-        setOpenAddTaskModal={setOpenAddTaskModal}
-        listTask={listTask}
-        setListTask={setListTask}
-        stepId={currentStepId}
-        setHasChanges={setHasChanges}
-      />
-      <DetailTask
-        openTaskDetailModal={openTaskDetailModal}
-        setOpenTaskDetailModal={setOpenTaskDetailModal}
-        selectedTask={selectedTask}
-        setSelectedTask={setSelectedTask}
-      />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 8,
+          }}
+        >
+          <Text style={{ color: "#666", fontSize: 14 }}>
+            <ClockCircleOutlined style={{ marginRight: 4 }} />
+            {dayjs(task?.createdDate).format("DD-MM-YYYY HH:mm")}
+          </Text>
+          <Tooltip title={task?.user?.fullName}>
+            <Image
+              width={24}
+              height={24}
+              src={task?.user?.avatar}
+              style={{ borderRadius: "50%", objectFit: "cover" }}
+            />
+          </Tooltip>
+        </div>
+      </Space>
+    </Card>
+  );
+
+  const labelStyle = {
+    fontSize: 16,
+    fontWeight: 600,
+    display: "flex",
+    alignItems: "center",
+    height: 40,
+  };
+
+  const inputStyle = {
+    fontSize: 16,
+    height: 40,
+  };
+
+  return (
+    <div style={{ height: "100vh" }}>
+      <div
+        style={{
+          backgroundColor: "#ffffff",
+          padding: "20px",
+          boxShadow: `0px 4px 10px rgba(0, 0, 0, 0.1)`,
+          borderRadius: "10px",
+          marginTop: "20px",
+          height: "calc(100vh - 40px)",
+          overflowY: "auto",
+        }}
+      >
+        <h2>Thông tin quá trình xử lý văn bản</h2>
+        <div style={{ margin: "20px 10px 0 10px" }}>
+          <Row gutter={[16, 16]} align="middle">
+            <Col span={4}>
+              <div style={labelStyle}>Tên văn bản:</div>
+            </Col>
+            <Col span={7} style={{ marginRight: 80 }}>
+              <Input
+                style={inputStyle}
+                allowClear
+                value={processDetail?.documentName}
+                readOnly
+              />
+            </Col>
+
+            <Col span={4}>
+              <div style={labelStyle}>Loại văn bản:</div>
+            </Col>
+            <Col span={7}>
+              <Input
+                style={inputStyle}
+                allowClear
+                value={processDetail?.documentTypeName}
+                readOnly
+              />
+            </Col>
+          </Row>
+
+          <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
+            <Col span={4}>
+              <div style={labelStyle}>Tên luồng xử lý:</div>
+            </Col>
+            <Col span={7} style={{ marginRight: 80 }}>
+              <Input
+                style={inputStyle}
+                allowClear
+                value={processDetail?.workflowRequest?.workflowName}
+                readOnly
+              />
+            </Col>
+
+            <Col span={4}>
+              <div style={labelStyle}>Phạm vi ban hành:</div>
+            </Col>
+            <Col span={7}>
+              <Input
+                style={inputStyle}
+                allowClear
+                value={convertScopeName(processDetail?.workflowRequest?.scope)}
+                readOnly
+              />
+            </Col>
+          </Row>
+        </div>
+
+        {renderWorkflowRoles()}
+
+        {renderWorkflowDetails()}
+
+        <AddTask
+          openModalCreate={openModalCreate}
+          setOpenModalCreate={setOpenModalCreate}
+        />
+      </div>
     </div>
   );
 };
 
-export default DetailProgress;
+export default ViewDetailProgress;
