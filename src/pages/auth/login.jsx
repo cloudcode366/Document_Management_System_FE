@@ -46,7 +46,6 @@ const LoginPage = () => {
   }, [form]);
 
   const onFinish = async (values) => {
-    console.log(">>> Values: ", values);
     setLoading(true);
     const res = await loginAPI(values.username, values.password);
 

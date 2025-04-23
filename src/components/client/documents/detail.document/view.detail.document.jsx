@@ -512,10 +512,6 @@ const ViewDetailDocument = () => {
           </Form.Item>
         </Form>
       </Modal>
-      <CreateDraftDocument
-        openModalCreateDraftDocument={openModalCreateDraftDocument}
-        setOpenModalCreateDraftDocument={setOpenModalCreateDraftDocument}
-      />
     </div>
   );
 };

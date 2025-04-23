@@ -1,7 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./login.scss";
 import { App, Button, Divider, Form, Input, Steps } from "antd";
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   createForgotPasswordAPI,
@@ -18,6 +17,10 @@ const ForgotPasswordPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [email, setEmail] = useState(null);
   const [countdown, setCountdown] = useState(180);
+  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
+
+  // Tạo ref cho 6 ô input để điều khiển focus
+  const inputRefs = useRef([]);
 
   // Đếm ngược gửi lại OTP
   useEffect(() => {
@@ -27,6 +30,35 @@ const ForgotPasswordPage = () => {
     }
     return () => clearTimeout(timer);
   }, [countdown]);
+
+  // Xử lý khi người dùng nhập OTP
+  const handleOtpChange = (index, value) => {
+    if (/^[0-9]?$/.test(value)) {
+      // Chỉ cho phép nhập số, tối đa 1 ký tự
+      const newOtpValues = [...otpValues];
+      newOtpValues[index] = value;
+      setOtpValues(newOtpValues);
+
+      // Tự động chuyển focus sang ô tiếp theo nếu nhập số
+      if (value && index < 5) {
+        inputRefs.current[index + 1].focus();
+      }
+    }
+  };
+
+  // Xử lý khi người dùng xóa hoặc nhấn phím điều hướng
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
+      // Nếu xóa và ô hiện tại trống, chuyển focus về ô trước đó
+      inputRefs.current[index - 1].focus();
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      // Chuyển focus về ô trước đó
+      inputRefs.current[index - 1].focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      // Chuyển focus sang ô tiếp theo
+      inputRefs.current[index + 1].focus();
+    }
+  };
 
   const handleSendOtp = async (values) => {
     try {
@@ -53,9 +85,10 @@ const ForgotPasswordPage = () => {
   };
 
   const verifyOtp = async () => {
-    const otpCode = form.getFieldValue("otp");
-    if (!otpCode) {
-      message.warning("Vui lòng nhập mã OTP!");
+    // Ghép 6 số OTP thành một chuỗi
+    const otpCode = otpValues.join("");
+    if (otpCode.length !== 6) {
+      message.warning("Vui lòng nhập đủ 6 số OTP!");
       return;
     }
 
@@ -79,7 +112,7 @@ const ForgotPasswordPage = () => {
   };
 
   const changePassword = async (values) => {
-    const otpCode = form.getFieldValue("otp");
+    const otpCode = otpValues.join(""); // Lấy OTP từ state
     if (!otpCode) {
       message.warning("Thiếu mã OTP để đổi mật khẩu!");
       return;
@@ -115,6 +148,7 @@ const ForgotPasswordPage = () => {
     setEmail(null);
     setCurrentStep(1);
     setCountdown(0);
+    setOtpValues(["", "", "", "", "", ""]); // Reset OTP
   };
 
   return (
@@ -182,15 +216,36 @@ const ForgotPasswordPage = () => {
                 {/* BƯỚC 2: OTP */}
                 {currentStep === 2 && (
                   <>
-                    <Form.Item
-                      label="Mã OTP"
-                      name="otp"
-                      rules={[
-                        { required: true, message: "Vui lòng nhập mã OTP!" },
-                      ]}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "10px",
+                        marginBottom: "20px",
+                      }}
                     >
-                      <Input />
-                    </Form.Item>
+                      {otpValues.map((value, index) => (
+                        <Input
+                          key={index}
+                          ref={(el) => (inputRefs.current[index] = el)}
+                          value={value}
+                          onChange={(e) =>
+                            handleOtpChange(index, e.target.value)
+                          }
+                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            fontSize: "20px",
+                            textAlign: "center",
+                            borderRadius: "4px",
+                          }}
+                          maxLength={1}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                        />
+                      ))}
+                    </div>
 
                     <Form.Item style={{ textAlign: "center" }}>
                       <Button
