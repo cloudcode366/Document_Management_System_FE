@@ -29,7 +29,7 @@ export const AppProvider = (props) => {
         if (res.data.statusCode === 200) {
           const data = res.data.content;
           const mainRole = data?.roles?.find((r) => r.createdDate === null);
-          const subRole = data?.roles?.filter((r) => r.createdDate !== null);
+          const subRole = data?.roles?.find((r) => r.createdDate !== null);
           setUser({ ...data, mainRole, subRole });
           setIsAuthenticated(true);
         } else {

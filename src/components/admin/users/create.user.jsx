@@ -14,6 +14,7 @@ const CreateUser = (props) => {
   const [isSubmit, setIsSubmit] = useState(false);
   const { message, notification } = App.useApp();
   const [form] = Form.useForm();
+  const divisionList = divisions.filter((division) => !division.isDeleted);
 
   const onFinish = async (values) => {
     const {
@@ -194,15 +195,26 @@ const CreateUser = (props) => {
                 name="dateOfBirth"
                 rules={[
                   { required: true, message: "Vui lòng chọn ngày sinh!" },
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      const age = dayjs().diff(value, "year");
+                      return age >= 18
+                        ? Promise.resolve()
+                        : Promise.reject(
+                            new Error("Người dùng phải ít nhất 18 tuổi!")
+                          );
+                    },
+                  },
                 ]}
               >
                 <DatePicker
-                  format="DD - MM - YYYY"
+                  format="DD-MM-YYYY"
                   style={{ width: "100%" }}
                   placeholder="Vui lòng chọn ngày sinh"
                   disabledDate={(current) =>
                     current && current > dayjs().endOf("day")
-                  } // Không cho chọn ngày trong tương lai
+                  }
                 />
               </Form.Item>
             </Col>
@@ -224,7 +236,7 @@ const CreateUser = (props) => {
                     option.children.toLowerCase().includes(input.toLowerCase())
                   }
                 >
-                  {divisions.map((division) => (
+                  {divisionList.map((division) => (
                     <Select.Option
                       key={division.divisionId}
                       value={division.divisionId}

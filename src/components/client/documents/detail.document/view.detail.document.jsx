@@ -24,6 +24,8 @@ import {
   CloseOutlined,
   CheckOutlined,
   SaveOutlined,
+  SolutionOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import samplePDF from "assets/files/sample.pdf";
 import { useNavigate, useParams } from "react-router-dom";
@@ -44,6 +46,41 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 const { Title, Paragraph } = Typography;
 
+const ActionButtonsGroup = ({ buttons }) => {
+  const rows = [];
+  for (let i = 0; i < buttons.length; i += 2) {
+    const isLastSingle = i === buttons.length - 1;
+    rows.push(
+      <Row key={i} justify={isLastSingle ? "center" : "start"}>
+        <Col
+          span={12}
+          style={{
+            marginBottom: "10px",
+            marginLeft: "12px",
+            maxWidth: "calc(50% - 12px)",
+          }}
+        >
+          {buttons[i]}
+        </Col>
+        {!isLastSingle && (
+          <Col
+            span={12}
+            style={{
+              marginBottom: "10px",
+              marginLeft: "12px",
+              maxWidth: "calc(50% - 12px)",
+            }}
+          >
+            {buttons[i + 1]}
+          </Col>
+        )}
+      </Row>
+    );
+  }
+
+  return <>{rows}</>;
+};
+
 const ViewDetailDocument = () => {
   const { documentId } = useParams();
   const { user } = useCurrentApp();
@@ -58,6 +95,7 @@ const ViewDetailDocument = () => {
   const [rejectForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState(null);
+  const buttons = [];
 
   const fetchInfo = async () => {
     setLoading(true);
@@ -76,12 +114,14 @@ const ViewDetailDocument = () => {
       const rejectedVersions = data.versions.filter(
         (version) => version.isFinal === false
       );
+      const taskType = data.tasks[0]?.taskType;
       setDocument({
         ...data,
         digitalSignatures,
         initalSignatures,
         finalVersion,
         rejectedVersions,
+        taskType,
       });
     }
     setLoading(false);
@@ -136,6 +176,247 @@ const ViewDetailDocument = () => {
       >
         <BeatLoader size={25} color="#364AD6" />
       </div>
+    );
+  }
+  if (document?.taskType === "Upload") {
+    buttons.push(
+      <Button
+        icon={<FileTextOutlined style={{ color: "#08979c" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#e6fffb",
+          border: "1px solid #87e8de",
+          color: "#08979c",
+          fontWeight: 600,
+          transition: "all 0.3s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#b5f5ec";
+          e.currentTarget.style.border = "1px solid #5cdbd3";
+          e.currentTarget.style.color = "#006d75";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#e6fffb";
+          e.currentTarget.style.border = "1px solid #87e8de";
+          e.currentTarget.style.color = "#08979c";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => console.log("Tải văn bản")}
+      >
+        Tải văn bản lên
+      </Button>
+    );
+  }
+
+  if (document?.taskType === "Sign") {
+    buttons.push(
+      <Button
+        icon={<EditOutlined style={{ color: "#1890ff" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#e6f4ff",
+          border: "1px solid #91d5ff",
+          fontWeight: 600,
+          transition: "all 0.3s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#d1e9ff";
+          e.currentTarget.style.border = "1px solid #69c0ff";
+          e.currentTarget.style.color = "#096dd9";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#e6f4ff";
+          e.currentTarget.style.border = "1px solid #91d5ff";
+          e.currentTarget.style.color = "#1890ff";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => console.log("Ký")}
+      >
+        Ký điện tử
+      </Button>
+    );
+  }
+
+  if (document?.taskType === "Submit") {
+    buttons.push(
+      <Button
+        icon={<ExportOutlined style={{ color: "#fa8c16" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#fff7e6",
+          border: "1px solid #ffd591",
+          fontWeight: 600,
+          transition: "all 0.3s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#ffe7ba";
+          e.currentTarget.style.border = "1px solid #ffc069";
+          e.currentTarget.style.color = "#d46b08";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#fff7e6";
+          e.currentTarget.style.border = "1px solid #ffd591";
+          e.currentTarget.style.color = "#fa8c16";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => console.log("Nộp văn bản")}
+      >
+        Nộp văn bản
+      </Button>
+    );
+  }
+
+  if (document?.taskType === "Browse") {
+    buttons.push(
+      <Button
+        icon={<CloseOutlined style={{ color: "#ff4d4f" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#fff1f0",
+          border: "1px solid #ffa39e",
+          transition: "all 0.3s ease",
+          fontWeight: 600,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#ffccc7";
+          e.currentTarget.style.border = "1px solid #ff7875";
+          e.currentTarget.style.color = "#f5222d";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#fff1f0";
+          e.currentTarget.style.border = "1px solid #ffa39e";
+          e.currentTarget.style.color = "#ff4d4f";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => {
+          setOpenRejectConfirmModal(true);
+        }}
+      >
+        Từ chối văn bản
+      </Button>
+    );
+  }
+
+  if (document?.taskType === "Browse") {
+    buttons.push(
+      <Button
+        icon={<CheckOutlined style={{ color: "#52c41a" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#f6ffed",
+          border: "1px solid #b7eb8f",
+          transition: "all 0.3s ease",
+          fontWeight: 600,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#b7eb8f";
+          e.currentTarget.style.border = "1px solid #95de64";
+          e.currentTarget.style.color = "#389e0d";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#f6ffed";
+          e.currentTarget.style.border = "1px solid #b7eb8f";
+          e.currentTarget.style.color = "#52c41a";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => {
+          setOpenApproveConfirmModal(true);
+        }}
+      >
+        Duyệt văn bản
+      </Button>
+    );
+  }
+
+  if (document?.taskType === "Create") {
+    buttons.push(
+      <Button
+        icon={<SolutionOutlined />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#fff7e6",
+          border: "1px solid #ffd591",
+          color: "#fa8c16",
+          fontWeight: 600,
+          transition: "all 0.3s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#ffe7ba";
+          e.currentTarget.style.border = "1px solid #ffc069";
+          e.currentTarget.style.color = "#d46b08";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#fff7e6";
+          e.currentTarget.style.border = "1px solid #ffd591";
+          e.currentTarget.style.color = "#fa8c16";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => {
+          navigate(`/init-progress/${documentId}`);
+        }}
+      >
+        Khởi tạo nhiệm vụ
+      </Button>
+    );
+  }
+
+  if (document) {
+    buttons.push(
+      <Button
+        icon={<SaveOutlined style={{ color: "#2f54eb" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#f0f5ff",
+          border: "1px solid #adc6ff",
+          color: "#2f54eb",
+          fontWeight: 600,
+          transition: "all 0.3s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#e6f4ff";
+          e.currentTarget.style.border = "1px solid #91d5ff";
+          e.currentTarget.style.color = "#1d39c4";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#f0f5ff";
+          e.currentTarget.style.border = "1px solid #adc6ff";
+          e.currentTarget.style.color = "#2f54eb";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => {
+          setOpenArchivedConfirmModal(true);
+        }}
+      >
+        Lưu trữ văn bản
+      </Button>
     );
   }
 
@@ -273,7 +554,6 @@ const ViewDetailDocument = () => {
                 {document?.createdBy}
               </span>
             </div>
-
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
@@ -292,21 +572,30 @@ const ViewDetailDocument = () => {
                 {dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
-
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày hết hạn:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
                 {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
-
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Người ký:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.digitalSignatures}
-              </span>
-            </div>
+              {/* Người ký + tên đầu tiên */}
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#5f6368" }}>Người ký:</span>
+                <span style={{ fontWeight: 500, marginBottom: 4 }}>
+                  {document?.digitalSignatures?.[0]?.signerName}
+                </span>
+              </div>
 
+              {/* Các tên còn lại */}
+              <div style={{ textAlign: "right", fontWeight: 500 }}>
+                {document?.digitalSignatures?.slice(1).map((sig, index) => (
+                  <div key={index} style={{ marginBottom: 4 }}>
+                    {sig.signerName}
+                  </div>
+                ))}
+              </div>
+            </div>
             <Divider
               variant="solid"
               style={{
@@ -323,31 +612,10 @@ const ViewDetailDocument = () => {
                 borderColor: "#80868b",
               }}
             ></Divider>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
-                Danh sách các phiên bản
-              </Typography.Text>
-              <Button
-                type="primary"
-                size="middle"
-                style={{
-                  padding: "10px 12px",
-                }}
-                key="buttonAddNew"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  setOpenModalCreateDraftDocument(true);
-                }}
-              >
-                Tạo bản nháp
-              </Button>
-            </div>
+
+            <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
+              Danh sách các phiên bản
+            </Typography.Text>
 
             <List
               itemLayout="horizontal"
@@ -389,98 +657,9 @@ const ViewDetailDocument = () => {
                 borderColor: "#80868b",
               }}
             ></Divider>
-            <Row gutter={[12, 12]} style={{ marginBottom: "10px" }}>
-              <Col span={12}>
-                <Button
-                  icon={<EditOutlined style={{ color: "#1890ff" }} />}
-                  block
-                  size="middle"
-                  style={{
-                    height: 40,
-                    fontSize: 16,
-                    background: "#e6f4ff", // xanh dương nhạt
-                    border: "1px solid #91d5ff", // viền xanh nhạt
-                  }}
-                >
-                  Ký điện tử
-                </Button>
-              </Col>
-              <Col span={12}>
-                <Button
-                  icon={<ExportOutlined style={{ color: "#fa8c16" }} />}
-                  block
-                  size="middle"
-                  style={{
-                    height: 40,
-                    fontSize: 16,
-                    background: "#fff7e6", // cam nhạt
-                    border: "1px solid #ffd591", // viền cam nhạt
-                  }}
-                >
-                  Nộp văn bản
-                </Button>
-              </Col>
-            </Row>
 
-            <Row gutter={[12, 12]} style={{ marginBottom: "10px" }}>
-              <Col span={12}>
-                <Button
-                  icon={<CloseOutlined style={{ color: "#ff4d4f" }} />}
-                  block
-                  size="middle"
-                  style={{
-                    height: 40,
-                    fontSize: 16,
-                    background: "#fff1f0", // đỏ nhạt
-                    border: "1px solid #ffa39e", // viền đỏ nhẹ
-                  }}
-                  onClick={() => {
-                    setOpenRejectConfirmModal(true);
-                  }}
-                >
-                  Từ chối văn bản
-                </Button>
-              </Col>
-              <Col span={12}>
-                <Button
-                  icon={<CheckOutlined style={{ color: "#52c41a" }} />}
-                  block
-                  size="middle"
-                  style={{
-                    height: 40,
-                    fontSize: 16,
-                    background: "#f6ffed", // xanh lá nhạt
-                    border: "1px solid #b7eb8f", // viền xanh lá nhạt
-                  }}
-                  onClick={() => {
-                    setOpenApproveConfirmModal(true);
-                  }}
-                >
-                  Duyệt văn bản
-                </Button>
-              </Col>
-            </Row>
-            <Row gutter={[12, 12]} style={{ marginBottom: "10px" }}>
-              <Col span={12}>
-                <Button
-                  icon={<SaveOutlined style={{ color: "#2f54eb" }} />} // icon màu geekblue
-                  block
-                  size="middle"
-                  style={{
-                    height: 40,
-                    fontSize: 16,
-                    background: "#f0f5ff", // nền geekblue nhạt
-                    border: "1px solid #adc6ff", // viền geekblue nhạt
-                    color: "#2f54eb", // màu chữ chính
-                  }}
-                  onClick={() => {
-                    setOpenArchivedConfirmModal(true);
-                  }}
-                >
-                  Lưu trữ văn bản
-                </Button>
-              </Col>
-            </Row>
+            <ActionButtonsGroup buttons={buttons} />
+
             <div
               style={{
                 position: "absolute",

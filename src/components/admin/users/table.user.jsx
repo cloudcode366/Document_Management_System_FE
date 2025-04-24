@@ -55,6 +55,7 @@ const TableUser = () => {
       const newDivisionsData = data.map((division) => ({
         divisionId: division.divisionId,
         divisionName: division.divisionName,
+        isDeleted: division.isDeleted,
       }));
       setDivisions(newDivisionsData);
       const newDivisionNames = newDivisionsData.map((division) => ({

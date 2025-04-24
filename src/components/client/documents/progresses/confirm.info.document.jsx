@@ -23,26 +23,16 @@ import { useCurrentApp } from "@/components/context/app.context";
 import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import "./confirm.info.document.scss";
 import { createInComingDocumentAPI } from "@/services/api.service";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import CreateFirstTask from "./create.first.task";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const { TextArea } = Input;
-const { Title, Text } = Typography;
-
-const docTypeOptions = [
-  { id: 1, name: "Quyết định" },
-  { id: 2, name: "Chỉ thị" },
-  { id: 3, name: "Quy chế" },
-  { id: 4, name: "Quy định" },
-  { id: 5, name: "Thông báo" },
-];
-
-const workflowOptions = [
-  { id: 1, name: "Văn bản đi" },
-  { id: 2, name: "Văn bản đến" },
-  { id: 3, name: "Văn bản phòng ban" },
-  { id: 4, name: "Văn bản toàn trường" },
-];
 
 const ConfirmInfoDocument = (props) => {
   const {
@@ -62,6 +52,10 @@ const ConfirmInfoDocument = (props) => {
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [defaultSigner, setDefaultSigner] = useState([]);
+  const [openCreateFirstTaskModal, setOpenCreateFirstTaskModal] =
+    useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [documentId, setDocumentId] = useState(null);
 
   useEffect(() => {
     if (selectedScope === "InComing") {
@@ -96,6 +90,7 @@ const ConfirmInfoDocument = (props) => {
   }, [openConfirmModal, resDocument, form, selectedScope, user]);
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     const values = await form.validateFields();
     const currentSigners = values.signerNames || [];
     const NewSignerName = currentSigners.filter(
@@ -114,13 +109,19 @@ const ConfirmInfoDocument = (props) => {
 
     const res = await createInComingDocumentAPI(resDocument);
     if (res && res.data && res.data.statusCode === 200) {
+      const data = res.data.content;
       message.success(`Khởi tạo văn bản thành công!`);
-      handleCloseConfirmInfoDocumentModal();
+
+      setOpenConfirmModal(false);
+      handleCloseCreateDocumentModal(); // Đảm bảo đóng modal cha (nếu cần)
+      setSignerList([]); // Reset danh sách người ký
+      setDocumentId(data[1].documentId);
+      setOpenCreateFirstTaskModal(true);
     } else {
       notification.error({ message: "Đã có lỗi xảy ra, vui lòng thử lại sau" });
     }
 
-    // TODO: Gọi API nếu cần
+    setIsLoading(false);
   };
 
   const handleAddSigner = () => {
@@ -149,6 +150,8 @@ const ConfirmInfoDocument = (props) => {
     setInputVisible(false); // Đóng input thêm người ký
     setInputValue(""); // Clear input value
     setDefaultSigner([]); // Nếu có cần reset lại người ký mặc định
+    setIsLoading(false); // Reset trạng thái loading
+    setDocumentId(null); // Reset documentId nếu cần thiết
   };
 
   return (
@@ -163,47 +166,44 @@ const ConfirmInfoDocument = (props) => {
         closable={false}
         bodyProps={{
           style: {
-            maxHeight: "80vh",
-            overflowY: "auto",
+            maxHeight: "80vh", // Modal body sẽ có chiều cao tối đa 80% màn hình
+            overflowY: "auto", // Bật cuộn khi nội dung vượt quá
           },
         }}
       >
-        <div style={{ display: "flex", height: "100%" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            height: "100%", // Đảm bảo container chiếm toàn bộ chiều cao của Modal
+          }}
+        >
           {/* Bên trái: Xem file PDF */}
           <Card
-            title={
-              <Space>
-                <FilePdfOutlined />
-                <span>{uploadedFile?.name || "Văn bản"}</span>
-              </Space>
-            }
+            title="Thông tin chi tiết"
             style={{
-              flex: 2,
+              flex: 1,
               display: "flex",
               flexDirection: "column",
               margin: 0,
               borderRadius: 0,
+              borderLeft: "1px solid #f0f0f0",
+              height: "100%", // Đảm bảo Card chiếm chiều cao tối đa
             }}
-            headStyle={{ flexShrink: 0, padding: "12px 16px" }}
-            bodyStyle={{ flex: 1, padding: 0 }}
           >
-            {uploadedFile && selectedScope !== "InComing" && (
-              <iframe
-                src={URL.createObjectURL(uploadedFile)}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  border: "none",
-                }}
-                title="File preview"
-              />
-            )}
-            {uploadedFile && selectedScope === "InComing" && (
-              <PDFViewerWithToken
-                url={resDocument?.canChange?.url}
-                token={localStorage.getItem(`access_token`)}
-              />
-            )}
+            <div
+              style={{
+                flex: 1,
+                overflow: "auto", // Đảm bảo cuộn nếu nội dung quá dài
+              }}
+            >
+              {uploadedFile && (
+                <PDFViewerWithToken
+                  url={resDocument?.canChange?.url}
+                  token={localStorage.getItem(`access_token`)}
+                />
+              )}
+            </div>
           </Card>
 
           {/* Bên phải: Form nhập thông tin */}
@@ -211,246 +211,257 @@ const ConfirmInfoDocument = (props) => {
             title="Thông tin chi tiết"
             style={{
               flex: 1,
-              height: "100%",
-              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
               margin: 0,
               borderRadius: 0,
               borderLeft: "1px solid #f0f0f0",
+              height: "100%", // Đảm bảo Card chiếm chiều cao tối đa
             }}
-            headStyle={{ padding: "12px 16px" }}
           >
-            <Form
-              form={form}
-              layout="vertical"
-              className="form-large-text"
-              initialValues={{ ngayky: null }}
+            <div
               style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
+                flex: 1,
+                overflow: "auto", // Đảm bảo cuộn khi nội dung form vượt quá chiều cao
               }}
             >
-              <Form.Item
-                label="Tên văn bản"
-                name="Name"
-                rules={[
-                  { required: true, message: "Vui lòng nhập tên văn bản!" },
-                ]}
-              >
-                <Input placeholder="Nhập tên văn bản" />
-              </Form.Item>
-
-              <Form.Item
-                label="Người gửi"
-                name="Sender"
-                rules={[
-                  { required: true, message: "Vui lòng nhập người gửi!" },
-                ]}
-              >
-                <Input placeholder="Tên người gửi" />
-              </Form.Item>
-
-              <Form.Item
-                label="Người nhận"
-                name="Receiver"
-                rules={[
-                  { required: true, message: "Vui lòng nhập người nhận!" },
-                ]}
-              >
-                <Input placeholder="Tên người nhận" />
-              </Form.Item>
-
-              <Form.Item
-                label="Ngày nhận"
-                name="DateReceived"
-                rules={[
-                  { required: true, message: "Vui lòng chọn ngày nhận!" },
-                ]}
-              >
-                <DatePicker
-                  format="DD-MM-YYYY HH:mm"
-                  showTime={{ format: "HH:mm" }}
-                  style={{ width: "100%" }}
-                  placeholder="Vui lòng chọn ngày nhận"
-                  disabledDate={(current) =>
-                    current && current > dayjs().endOf("day")
-                  }
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Ngày ban hành"
-                name="validTo"
-                rules={[
-                  { required: true, message: "Vui lòng chọn ngày ban hành!" },
-                ]}
-              >
-                <DatePicker
-                  format="DD-MM-YYYY HH:mm"
-                  showTime={{ format: "HH:mm" }}
-                  style={{ width: "100%" }}
-                  placeholder="Vui lòng chọn ngày ban hành"
-                  disabledDate={(current) =>
-                    current && current > dayjs().endOf("day")
-                  } // Không cho chọn ngày trong tương lai
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Ngày hết hiệu lực"
-                name="validFrom"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn ngày hết hiệu lực!",
-                  },
-                ]}
-              >
-                <DatePicker
-                  format="DD-MM-YYYY HH:mm"
-                  showTime={{ format: "HH:mm" }}
-                  style={{ width: "100%" }}
-                  placeholder="Vui lòng chọn ngày hết hiệu lực"
-                  disabledDate={(current) =>
-                    current && current < dayjs().endOf("day")
-                  }
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Ngày hết hạn"
-                name="Deadline"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn ngày hết hạn xử lý!",
-                  },
-                ]}
-              >
-                <DatePicker
-                  format="DD-MM-YYYY HH:mm"
-                  showTime={{ format: "HH:mm" }}
-                  style={{ width: "100%" }}
-                  placeholder="Vui lòng chọn ngày hết hạn"
-                  disabledDate={(current) =>
-                    current && current < dayjs().endOf("day")
-                  }
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Số hiệu văn bản"
-                name="NumberOfDocument"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số hiệu văn bản!" },
-                ]}
-              >
-                <Input placeholder="Nhập số hiệu văn bản" readOnly />
-              </Form.Item>
-
-              <Form.Item
-                label="Loại văn bản"
-                name="DocumentTypeId"
-                rules={[
-                  { required: true, message: "Vui lòng chọn loại văn bản!" },
-                ]}
-                hidden
-              >
-                <Input placeholder="Loại văn bản" readOnly />
-              </Form.Item>
-
-              <Form.Item
-                label="Loại văn bản"
-                name="DocumentTypeName"
-                rules={[
-                  { required: true, message: "Vui lòng chọn loại văn bản!" },
-                ]}
-              >
-                <Input placeholder="Loại văn bản" readOnly />
-              </Form.Item>
-
-              <Form.Item
-                label="Luồng xử lý"
-                name="WorkflowId"
-                rules={[
-                  { required: true, message: "Vui lòng chọn luồng xử lý!" },
-                ]}
-                hidden
-              >
-                <Input placeholder="Luồng xử lý" readOnly />
-              </Form.Item>
-
-              <Form.Item
-                label="Loại văn bản"
-                name="WorkflowName"
-                rules={[
-                  { required: true, message: "Vui lòng chọn luồng xử lý!" },
-                ]}
-              >
-                <Input placeholder="Luồng xử lý" readOnly />
-              </Form.Item>
-
-              <Form.Item label="Người ký" name="signerNames">
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                  {signerList.map((item) => (
-                    <Tag
-                      key={item.name}
-                      color="blue"
-                      closable={item.isNew}
-                      onClose={() => handleRemoveSigner(item.name)}
-                      style={{ display: "flex", alignItems: "center" }}
-                    >
-                      {item.name}
-                    </Tag>
-                  ))}
-                  {inputVisible ? (
-                    <Input
-                      size="small"
-                      style={{ width: 160 }}
-                      value={inputValue}
-                      autoFocus
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onBlur={handleAddSigner}
-                      onPressEnter={handleAddSigner}
-                    />
-                  ) : (
-                    <Tag
-                      onClick={() => setInputVisible(true)}
-                      style={{
-                        background: "#fff",
-                        borderStyle: "dashed",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <PlusOutlined /> Thêm
-                    </Tag>
-                  )}
-                </div>
-              </Form.Item>
-
-              <Form.Item
-                label="Nội dung"
-                name="DocumentContent"
-                rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
-              >
-                <TextArea rows={5} placeholder="Nhập nội dung tóm tắt" />
-              </Form.Item>
-
-              <div style={{ marginTop: "auto" }}>
-                <Divider />
-                <Button
-                  type="primary"
-                  onClick={handleSubmit}
-                  block
-                  size="large"
+              <Form form={form} layout="vertical" className="form-large-text">
+                <Form.Item
+                  label="Tên văn bản"
+                  name="Name"
+                  rules={[
+                    { required: true, message: "Vui lòng nhập tên văn bản!" },
+                  ]}
                 >
-                  Xác nhận
-                </Button>
-              </div>
-            </Form>
+                  <Input placeholder="Nhập tên văn bản" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Người gửi"
+                  name="Sender"
+                  rules={[
+                    { required: true, message: "Vui lòng nhập người gửi!" },
+                  ]}
+                >
+                  <Input placeholder="Tên người gửi" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Người nhận"
+                  name="Receiver"
+                  rules={[
+                    { required: true, message: "Vui lòng nhập người nhận!" },
+                  ]}
+                >
+                  <Input placeholder="Tên người nhận" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Ngày nhận"
+                  name="DateReceived"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn ngày nhận!" },
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn ngày nhận"
+                    disabledDate={(current) =>
+                      current && current > dayjs().endOf("day")
+                    }
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Ngày ban hành"
+                  name="validTo"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn ngày ban hành!" },
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn ngày ban hành"
+                    disabledDate={(current) =>
+                      current && current > dayjs().endOf("day")
+                    } // Không cho chọn ngày trong tương lai
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Ngày hết hiệu lực"
+                  name="validFrom"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn ngày hết hiệu lực!",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn ngày hết hiệu lực"
+                    disabledDate={(current) =>
+                      current && current < dayjs().endOf("day")
+                    }
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Ngày hết hạn"
+                  name="Deadline"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn ngày hết hạn xử lý!",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn ngày hết hạn"
+                    disabledDate={(current) =>
+                      current && current < dayjs().endOf("day")
+                    }
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Số hiệu văn bản"
+                  name="NumberOfDocument"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng nhập số hiệu văn bản!",
+                    },
+                  ]}
+                >
+                  <Input placeholder="Nhập số hiệu văn bản" readOnly />
+                </Form.Item>
+
+                <Form.Item
+                  label="Loại văn bản"
+                  name="DocumentTypeId"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn loại văn bản!" },
+                  ]}
+                  hidden
+                >
+                  <Input placeholder="Loại văn bản" readOnly />
+                </Form.Item>
+
+                <Form.Item
+                  label="Loại văn bản"
+                  name="DocumentTypeName"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn loại văn bản!" },
+                  ]}
+                >
+                  <Input placeholder="Loại văn bản" readOnly />
+                </Form.Item>
+
+                <Form.Item
+                  label="Luồng xử lý"
+                  name="WorkflowId"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn luồng xử lý!" },
+                  ]}
+                  hidden
+                >
+                  <Input placeholder="Luồng xử lý" readOnly />
+                </Form.Item>
+
+                <Form.Item
+                  label="Loại văn bản"
+                  name="WorkflowName"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn luồng xử lý!" },
+                  ]}
+                >
+                  <Input placeholder="Luồng xử lý" readOnly />
+                </Form.Item>
+
+                <Form.Item label="Người ký" name="signerNames">
+                  <div
+                    style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}
+                  >
+                    {signerList.map((item) => (
+                      <Tag
+                        key={item.name}
+                        color="blue"
+                        closable={item.isNew}
+                        onClose={() => handleRemoveSigner(item.name)}
+                        style={{ display: "flex", alignItems: "center" }}
+                      >
+                        {item.name}
+                      </Tag>
+                    ))}
+                    {inputVisible ? (
+                      <Input
+                        size="small"
+                        style={{ width: 160 }}
+                        value={inputValue}
+                        autoFocus
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onBlur={handleAddSigner}
+                        onPressEnter={handleAddSigner}
+                      />
+                    ) : (
+                      <Tag
+                        onClick={() => setInputVisible(true)}
+                        style={{
+                          background: "#fff",
+                          borderStyle: "dashed",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <PlusOutlined /> Thêm
+                      </Tag>
+                    )}
+                  </div>
+                </Form.Item>
+
+                <Form.Item
+                  label="Nội dung"
+                  name="DocumentContent"
+                  rules={[
+                    { required: true, message: "Vui lòng nhập nội dung!" },
+                  ]}
+                >
+                  <TextArea rows={5} placeholder="Nhập nội dung tóm tắt" />
+                </Form.Item>
+
+                <div style={{ marginTop: "auto" }}>
+                  <Divider />
+                  <Button
+                    loading={isLoading}
+                    type="primary"
+                    onClick={handleSubmit}
+                    block
+                    size="large"
+                  >
+                    Xác nhận
+                  </Button>
+                </div>
+              </Form>
+            </div>
           </Card>
         </div>
       </Modal>
+      <CreateFirstTask
+        openCreateFirstTaskModal={openCreateFirstTaskModal}
+        setOpenCreateFirstTaskModal={setOpenCreateFirstTaskModal}
+        documentId={documentId}
+        setDocumentId={setDocumentId}
+      />
     </div>
   );
 };

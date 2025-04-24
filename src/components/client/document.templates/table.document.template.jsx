@@ -1,21 +1,21 @@
-import { dateRangeValidate } from "@/services/helper";
 import {
-  CloudUploadOutlined,
+  CloudDownloadOutlined,
   DeleteTwoTone,
-  EditTwoTone,
+  EyeOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { ProTable, TableDropdown } from "@ant-design/pro-components";
-import { App, Avatar, Button, Modal, Popconfirm, Space, Tag } from "antd";
+import { ProTable } from "@ant-design/pro-components";
+import { App, Button, Popconfirm, Tooltip } from "antd";
 import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
-import templatePDF from "assets/files/template.pdf";
 import CreateDocumentTemplate from "./create.document.template";
 import { BeatLoader } from "react-spinners";
 import {
   viewAllDocumentTypesAPI,
   viewAllTemplatesAPI,
 } from "@/services/api.service";
+import ViewDetailTemplate from "./view.detail.template";
+import { useCurrentApp } from "@/components/context/app.context";
 
 const TableDocumentTemplate = () => {
   const actionRef = useRef();
@@ -24,13 +24,14 @@ const TableDocumentTemplate = () => {
     total: 1,
     page: 1,
   });
-  const [openPreview, setOpenPreview] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [openViewDetailModal, setOpenViewDetailModal] = useState(false);
+  const [dataDetail, setDataDetail] = useState(null);
   const [openModalCreate, setOpenModalCreate] = useState(false);
   const [documentTypes, setDocumentTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isDeleteUser, setIsDeleteUser] = useState(false);
   const { message } = App.useApp();
+  const { user } = useCurrentApp();
 
   const fetchDocumentType = async () => {
     setLoading(true);
@@ -62,23 +63,26 @@ const TableDocumentTemplate = () => {
         placeholder: "Vui lòng nhập tên mẫu văn bản",
       },
       formItemProps: {
-        labelCol: { span: 8 }, // Điều chỉnh label rộng hơn để không bị đè
-        wrapperCol: { span: 18 }, // Đảm bảo input không chiếm hết không gian
+        labelCol: { span: 8 },
+        wrapperCol: { span: 18 },
       },
       render(dom, entity) {
-        return (
-          <a
-            onClick={() => {
-              setOpenPreview(true);
-              setSelectedTemplate(entity);
-            }}
-            style={{ cursor: "pointer" }}
-          >
-            {entity.name}
-          </a>
-        );
+        return <div> {entity.name}</div>;
       },
       width: "40%",
+    },
+    {
+      title: "Loại văn bản",
+      dataIndex: "documentName",
+      hideInTable: true,
+      formItemProps: {
+        labelCol: { span: 8 },
+        wrapperCol: { span: 18 },
+      },
+      fieldProps: {
+        placeholder: "Vui lòng nhập loại văn bản",
+      },
+      width: "15%",
     },
     {
       title: "Loại văn bản",
@@ -92,7 +96,7 @@ const TableDocumentTemplate = () => {
       title: "Ngày tạo",
       dataIndex: "createDate",
       valueType: "date",
-      sorter: true,
+      // sorter: true,
       hideInSearch: true,
       render(dom, entity, index, action, schema) {
         return <>{dayjs(entity.createDate).format("DD-MM-YYYY HH:mm")}</>;
@@ -113,32 +117,72 @@ const TableDocumentTemplate = () => {
       width: "15%",
       render(dom, entity, index, action, schema) {
         return (
-          <>
-            <EditTwoTone
-              twoToneColor="#f57800"
-              style={{ cursor: "pointer", marginRight: 15 }}
-              onClick={() => {
-                // setDataUpdate(entity);
-                // setOpenModalUpdate(true);
-              }}
-            />
-            <Popconfirm
-              placement="leftTop"
-              title="Xác nhận khóa người dùng"
-              description="Bạn có chắc chắn muốn khóa người dùng này?"
-              // onConfirm={() => handleDeleteUser(entity._id)}
-              okText="Xác nhận"
-              cancelText="Hủy"
-              okButtonProps={{ loading: isDeleteUser }}
-            >
-              <span style={{ cursor: "pointer", marginLeft: 20 }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 20 }}>
+            <Tooltip title="Xem mẫu văn bản này">
+              <EyeOutlined
+                style={{ cursor: "pointer", color: "#52c41a", fontSize: 18 }}
+                onClick={() => {
+                  setOpenViewDetailModal(true);
+                  setDataDetail(entity);
+                }}
+              />
+            </Tooltip>
+
+            <Tooltip title="Tải mẫu văn bản này">
+              <CloudDownloadOutlined
+                style={{ cursor: "pointer", color: "#1890ff", fontSize: 18 }}
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem("access_token");
+                    if (!token) {
+                      message.error(
+                        "Không tìm thấy access token. Vui lòng đăng nhập lại!"
+                      );
+                      return;
+                    }
+                    const response = await fetch(entity.url, {
+                      method: "GET",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                      },
+                    });
+                    if (response.status === 200) {
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = "template.docx";
+                      document.body.appendChild(link);
+                      link.click();
+                      window.URL.revokeObjectURL(url);
+                    } else {
+                      message.error("Không thể tải file. Vui lòng thử lại!");
+                    }
+                  } catch (error) {
+                    message.error("Đã xảy ra lỗi khi tải file!");
+                  }
+                }}
+              />
+            </Tooltip>
+
+            <Tooltip title="Xóa mẫu văn bản này">
+              <Popconfirm
+                placement="leftTop"
+                title="Xác nhận xóa mẫu"
+                description="Bạn có chắc chắn muốn xóa mẫu văn bản này?"
+                // onConfirm={() => handleDeleteUser(entity._id)}
+                okText="Xác nhận"
+                cancelText="Hủy"
+                okButtonProps={{ loading: isDeleteUser }}
+              >
                 <DeleteTwoTone
                   twoToneColor="#ff4d4f"
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: "pointer", fontSize: 18 }}
                 />
-              </span>
-            </Popconfirm>
-          </>
+              </Popconfirm>
+            </Tooltip>
+          </div>
         );
       },
     },
@@ -188,12 +232,15 @@ const TableDocumentTemplate = () => {
         actionRef={actionRef}
         cardBordered
         request={async (params, sort, filter) => {
-          console.log(params, sort, filter);
+          console.log(params);
 
           let query = "";
           if (params) {
-            if (params.Name) {
-              query += `docName=${params.Name}&`;
+            if (params.documentName) {
+              query += `documentName=${params.documentName}&`;
+            }
+            if (params.name) {
+              query += `name=${params.name}&`;
             }
             query += `page=${params.current}&pageSize=${params.pageSize}`;
           }
@@ -212,10 +259,10 @@ const TableDocumentTemplate = () => {
             total: res.data?.size,
           };
         }}
-        rowKey="id"
+        rowKey={"id"}
         pagination={{
-          current: meta.current,
-          pageSize: meta.pageSize,
+          current: meta.page,
+          pageSize: meta.limit,
           showSizeChanger: true,
           total: meta.total,
           showTotal: (total, range) => {
@@ -238,32 +285,17 @@ const TableDocumentTemplate = () => {
           </Button>,
         ]}
       />
-      <Modal
-        open={openPreview}
-        onCancel={() => setOpenPreview(false)}
-        footer={null}
-        title={selectedTemplate?.name}
-        width="80%"
-        centered
-        style={{ top: 20 }}
-        styles={{ body: { height: "80vh", padding: 0 } }}
-        destroyOnClose
-      >
-        {selectedTemplate && (
-          <iframe
-            src={templatePDF}
-            title="PDF Preview"
-            width="100%"
-            height="100%"
-            style={{ border: "none" }}
-          />
-        )}
-      </Modal>
       <CreateDocumentTemplate
         openModalCreate={openModalCreate}
         setOpenModalCreate={setOpenModalCreate}
         refreshTable={refreshTable}
         documentTypes={documentTypes}
+      />
+      <ViewDetailTemplate
+        openViewDetailModal={openViewDetailModal}
+        setOpenViewDetailModal={setOpenViewDetailModal}
+        dataDetail={dataDetail}
+        setDataDetail={setDataDetail}
       />
     </div>
   );
