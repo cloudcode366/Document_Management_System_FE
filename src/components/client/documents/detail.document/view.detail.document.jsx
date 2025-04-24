@@ -36,7 +36,10 @@ import signatureImg from "assets/files/signature-removebg-preview.png";
 import SignatureContainer from "@/components/client/documents/initial.signature/signature.container";
 import { useCurrentApp } from "@/components/context/app.context";
 import { BeatLoader } from "react-spinners";
-import { viewDetailDocumentAPI } from "@/services/api.service";
+import {
+  createHandleTaskActionAPI,
+  viewDetailDocumentAPI,
+} from "@/services/api.service";
 import dayjs from "dayjs";
 import { version } from "nprogress";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -114,7 +117,11 @@ const ViewDetailDocument = () => {
       const rejectedVersions = data.versions.filter(
         (version) => version.isFinal === false
       );
-      const taskType = data.tasks[0]?.taskType;
+
+      const lastTask = data.tasks[data.tasks.length - 1]; // ✅ task cuối
+      const taskType = lastTask?.taskType;
+      const taskId = lastTask?.taskId;
+
       setDocument({
         ...data,
         digitalSignatures,
@@ -122,6 +129,7 @@ const ViewDetailDocument = () => {
         finalVersion,
         rejectedVersions,
         taskType,
+        taskId,
       });
     }
     setLoading(false);
@@ -131,12 +139,25 @@ const ViewDetailDocument = () => {
     fetchInfo();
   }, []);
 
-  const handleApproveDocument = () => {
-    // Gửi dữ liệu lên server ở đây nếu cần
-    message.success("Văn bản đã được duyệt thành công!");
-    setOpenApproveConfirmModal(false);
-    navigate(`/detail-document/${documentId}`);
-    // Điều hướng hoặc cập nhật UI nếu cần
+  const handleApproveDocument = async () => {
+    const res = await createHandleTaskActionAPI(
+      document?.taskId,
+      user.userId,
+      "ApproveDocument"
+    );
+    if (res?.data?.statusCode === 200) {
+      notification.success({
+        message: "Duyệt văn bản thành công!",
+        description: "Văn bản đã được duyệt thành công.",
+      });
+      setOpenApproveConfirmModal(false);
+      await fetchInfo();
+    } else {
+      notification.error({
+        message: "Hệ thống đang bận!",
+        description: "Xin vui lòng thử lại sau.",
+      });
+    }
   };
   const handleArchiveDocument = () => {
     // Gửi dữ liệu lên server ở đây nếu cần

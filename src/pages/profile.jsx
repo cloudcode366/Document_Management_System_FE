@@ -187,7 +187,7 @@ const ProfilePage = () => {
             <Col span={12}>
               <Form.Item label="Ngày sinh">
                 <Input
-                  value={dayjs(profile?.dateOfBirth).format("DD - MM - YYYY")}
+                  value={dayjs(profile?.dateOfBirth).format("DD-MM -YYYY")}
                   readOnly
                 />
               </Form.Item>
