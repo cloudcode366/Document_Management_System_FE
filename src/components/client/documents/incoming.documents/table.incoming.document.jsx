@@ -224,8 +224,8 @@ const TableIncomingDocument = () => {
         <Tabs activeKey={activeKey} onChange={setActiveKey}>
           <TabPane tab="TẤT CẢ" key="All" />
           <TabPane tab="ĐẾN LƯỢT DUYỆT" key="PendingApproval" />
-          <TabPane tab="ĐANG CHỜ DUYỆT" key="Waiting" />
           <TabPane tab="ĐÃ CHẤP NHẬN" key="Accepted" />
+          <TabPane tab="ĐANG CHỜ DUYỆT" key="Waiting" />
           <TabPane tab="ĐÃ TỪ CHỐI" key="Rejected" />
           <TabPane tab="QUÁ HẠN" key="Overdue" />
         </Tabs>

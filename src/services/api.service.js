@@ -330,11 +330,6 @@ const viewMySelfDocumentAPI = (query) => {
 const getAllArchivedDocuments = (query) => {
   const urlBackend = `/api/ArchiveDocument/view-all-documents?${query}`;
   return axios.get(urlBackend);
-
-}
-const viewDetailArchivedDocumentAPI = (documentId) => {
-  const urlBackend = `/api/ArchiveDocument/view-archive-document-detail?documentId=${documentId}`;
-  return axios.get(urlBackend);
 };
 
 const viewProcessDocumentDetailAPI = (documentId) => {
@@ -399,6 +394,59 @@ const viewAllTemplatesAPI = (query) => {
   return axios.get(urlBackend);
 };
 
+const createTaskAPI = (
+  title,
+  description,
+  startDate,
+  endDate,
+  taskType,
+  stepId,
+  documentId,
+  userId
+) => {
+  const urlBackend = `/api/Task/create-task`;
+  return axios.post(urlBackend, {
+    title,
+    description,
+    startDate,
+    endDate,
+    taskType,
+    stepId,
+    documentId,
+    userId,
+  });
+};
+
+const createFirstTaskAPI = (
+  title,
+  description,
+  startDate,
+  endDate,
+  taskType,
+  documentId,
+  userId
+) => {
+  const urlBackend = `/api/Task/create-first-task`;
+  return axios.post(urlBackend, {
+    title,
+    description,
+    startDate,
+    endDate,
+    taskType,
+    documentId,
+    userId,
+  });
+};
+
+const updateConfirmTaskWithDocumentAPI = (documentId) => {
+  const urlBackend = `/api/Document/update-confirm-task-with-document?documentId=${documentId}`;
+  return axios.post(urlBackend);
+};
+
+const createHandleTaskActionAPI = (taskId, userId, action) => {
+  const urlBackend = `/api/Task/create-handle-task-action?taskId=${taskId}&userId=${userId}&action=${action}`;
+  return axios.post(urlBackend);
+};
 
 export {
   loginAPI,
@@ -448,4 +496,8 @@ export {
   createConvertDocToPdfAPI,
   createTemplateAPI,
   viewAllTemplatesAPI,
+  createTaskAPI,
+  createFirstTaskAPI,
+  updateConfirmTaskWithDocumentAPI,
+  createHandleTaskActionAPI,
 };

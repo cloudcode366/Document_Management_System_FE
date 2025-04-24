@@ -1,4 +1,8 @@
-import { viewProcessDocumentDetailAPI } from "@/services/api.service";
+import {
+  createHandleTaskActionAPI,
+  updateConfirmTaskWithDocumentAPI,
+  viewProcessDocumentDetailAPI,
+} from "@/services/api.service";
 import { convertRoleName, convertScopeName } from "@/services/helper";
 import {
   ArrowRightOutlined,
@@ -29,8 +33,9 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Dropdown, Menu } from "antd";
-import AddTask from "./add.task";
 import { BeatLoader } from "react-spinners";
+import AddTaskModal from "./add.task.modal";
+import { useCurrentApp } from "@/components/context/app.context";
 
 const { Text, Title } = Typography;
 const { Step } = Steps;
@@ -49,7 +54,7 @@ const getTaskColor = (status) => {
   }
 };
 
-const ViewDetailProgress = () => {
+const ViewInitProgress = () => {
   const { documentId } = useParams();
   const [processDetail, setProcessDetail] = useState(null);
   const navigate = useNavigate();
@@ -58,12 +63,16 @@ const ViewDetailProgress = () => {
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
   const [taskCreated, setTaskCreated] = useState(false);
+  const [taskId, setTaskId] = useState(null);
+  const { user } = useCurrentApp();
 
   const fetchProgress = async () => {
     setLoading(true);
     const res = await viewProcessDocumentDetailAPI(documentId);
     if (res?.data?.statusCode === 200) {
-      setProcessDetail(res.data.content);
+      const data = res.data.content;
+      setProcessDetail(data);
+      setTaskId(data?.workflowRequest?.flows[0]?.steps[0]?.taskDtos[0]?.taskId);
     } else {
       notification.error({
         message: "Tải dữ liệu thất bại",
@@ -491,6 +500,34 @@ const ViewDetailProgress = () => {
     </Card>
   );
 
+  const handleComplete = async () => {
+    const res = await updateConfirmTaskWithDocumentAPI(documentId);
+    if (res?.data?.statusCode === 200) {
+      const res2 = await createHandleTaskActionAPI(
+        taskId,
+        user.userId,
+        "SubmitDocument"
+      );
+      if (res2?.data?.statusCode === 200) {
+        notification.success({
+          message: "Hoàn thành",
+          description: "Hoàn thành xử lý văn bản thành công.",
+        });
+        navigate(`/detail-progress/${documentId}`);
+      } else {
+        notification.error({
+          message: "Hệ thống đang bận!",
+          description: "Xin vui lòng thử lại sau.",
+        });
+      }
+    } else {
+      notification.error({
+        message: "Hệ thống đang bận!",
+        description: "Xin vui lòng thử lại sau.",
+      });
+    }
+  };
+
   const labelStyle = {
     fontSize: 16,
     fontWeight: 600,
@@ -591,8 +628,21 @@ const ViewDetailProgress = () => {
         {renderWorkflowRoles()}
 
         {renderWorkflowDetails()}
+        <div style={{ textAlign: "right" }}>
+          <Button
+            type="primary"
+            onClick={handleComplete}
+            style={{
+              backgroundColor: "#FC8330",
+              borderColor: "#FC8330",
+              marginTop: 20,
+            }}
+          >
+            Xác nhận hoàn thành
+          </Button>
+        </div>
 
-        <AddTask
+        <AddTaskModal
           openModalCreate={openModalCreate}
           setOpenModalCreate={setOpenModalCreate}
           currentStep={currentStep}
@@ -606,4 +656,4 @@ const ViewDetailProgress = () => {
   );
 };
 
-export default ViewDetailProgress;
+export default ViewInitProgress;

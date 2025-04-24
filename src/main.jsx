@@ -42,7 +42,8 @@ import "nprogress/nprogress.css";
 import ListDivisionPage from "pages/client/divisions/list.division";
 import { NotificationProvider } from "components/context/notification.context";
 import DetailProgress from "pages/client/progresses/detail.progress";
-import DetailArchivedDocument from "./pages/client/archived.documents/detail.archived.document";
+import DetailArchivedDocument from "pages/client/archived.documents/detail.archived.document";
+import InitProgress from "pages/client/progresses/init.progress";
 
 const router = createBrowserRouter([
   {
@@ -171,6 +172,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <DetailProgress />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/init-progress/:documentId",
+        element: (
+          <ProtectedRoute>
+            <InitProgress />
           </ProtectedRoute>
         ),
       },

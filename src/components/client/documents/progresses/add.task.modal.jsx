@@ -22,7 +22,7 @@ dayjs.extend(timezone);
 const { TextArea } = Input;
 const { Option } = Select;
 
-const AddTask = (props) => {
+const AddTaskModal = (props) => {
   const {
     openModalCreate,
     setOpenModalCreate,
@@ -262,6 +262,7 @@ const AddTask = (props) => {
                 <Select placeholder="Chọn nhiệm vụ chính" allowClear>
                   <Option value="Create">Khởi tạo văn bản</Option>
                   <Option value="Browse">Duyệt văn bản</Option>
+                  <Option value="Submit">Nộp văn bản</Option>
                   <Option value="Sign">Ký điện tử</Option>
                   <Option value="View">Xem văn bản</Option>
                   <Option value="Upload">Tải văn bản lên</Option>
@@ -318,4 +319,4 @@ const AddTask = (props) => {
   );
 };
 
-export default AddTask;
+export default AddTaskModal;

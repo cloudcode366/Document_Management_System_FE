@@ -25,6 +25,7 @@ import {
   viewWorkflowDetailsWithFlowAndStepAPI,
 } from "@/services/api.service";
 import { convertRoleName } from "@/services/helper";
+import { useCurrentApp } from "@/components/context/app.context";
 
 const { Dragger } = Upload;
 const { Option } = Select;
@@ -32,7 +33,7 @@ const { Text } = Typography;
 
 const CreateDocument = (props) => {
   const { openModalCreate, setOpenModalCreate, refreshTable } = props;
-  const { message } = App.useApp();
+  const { message, notification } = App.useApp();
   const [uploadedFile, setUploadedFile] = useState(null);
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
   const [selectedScope, setSelectedScope] = useState("");
@@ -46,6 +47,7 @@ const CreateDocument = (props) => {
   const [workflowDetail, setWorkflowDetail] = useState(null);
   const [resDocument, setResDocument] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { user } = useCurrentApp();
 
   const documentTemplates = [
     { id: "template1", name: "Mẫu quyết định khen thưởng" },
@@ -57,24 +59,81 @@ const CreateDocument = (props) => {
     name: "file",
     multiple: false,
     maxCount: 1,
-    accept: ".pdf,.doc,.docx",
+    accept: ".pdf",
     fileList: uploadedFile ? [uploadedFile] : [],
-    customRequest({ file, onSuccess }) {
+    customRequest({ file, onSuccess, onError }) {
+      const isValid = file.name.endsWith(".pdf");
+      if (!isValid) {
+        message.error("Chỉ chấp nhận file định dạng .pdf!");
+        onError?.(new Error("Định dạng file không hợp lệ"));
+        return;
+      }
+
       setTimeout(() => {
         file.status = "done";
-        onSuccess("ok");
         setUploadedFile(file);
+        onSuccess?.("ok");
         message.success(`${file.name} tải lên thành công.`);
       }, 1000);
-    },
-    onChange(info) {
-      if (info.file.status === "error") {
-        message.error(`${info.file.name} tải lên thất bại.`);
-      }
     },
     onRemove() {
       setUploadedFile(null);
     },
+  };
+
+  const handleSelectedScope = async (e) => {
+    const scope = e.target.value;
+    setSelectedScope(scope);
+    setSelectedWorkflow({});
+    setSelectedDocumentType({});
+    setShowWorkflowSelect(false);
+    setShowDocumentTypeSelect(false);
+    setUploadedFile(null);
+    setSelectedTemplate(null);
+    setWorkflowDetail(null);
+
+    const res = await viewWorkflowByScopeAPI(scope);
+    if (res && res.data && res.data.statusCode === 200) {
+      const data = res.data.content;
+      setListWorkflows(data);
+      setShowWorkflowSelect(true);
+    } else {
+      notification.error({
+        message: "Lấy dữ liệu luồng xử lý không thành công!",
+        description: "Vui lòng thử lại sau!",
+      });
+    }
+  };
+
+  const handleSelectedWorkflow = async (workflowId) => {
+    const workflow = listWorkflows.find(
+      (item) => item.workflowId === workflowId
+    );
+    if (workflow) {
+      setSelectedWorkflow(workflow);
+      setListDocumentTypes(workflow.documentTypes || []);
+      const res = await viewWorkflowDetailsWithFlowAndStepAPI(
+        workflow.workflowId
+      );
+      if (res?.data?.statusCode === 200) {
+        const data = res.data.content;
+        if (
+          user?.mainRole.roleName === data.flows[0].roleStart ||
+          user?.subRole.roleName === data.flows[0].roleStart
+        ) {
+          setWorkflowDetail(res.data.content);
+          setShowDocumentTypeSelect(true);
+        } else {
+          setShowDocumentTypeSelect(false);
+          message.error("Bạn không có quyền khởi tạo văn bản cho luồng này!");
+        }
+      } else {
+        notification.error({
+          message: "Lấy dữ liệu chi tiết luồng xử lý không thành công!",
+          description: "Vui lòng thử lại sau!",
+        });
+      }
+    }
   };
 
   const handleConfirmInComing = async (file) => {
@@ -137,47 +196,6 @@ const CreateDocument = (props) => {
     setShowWorkflowSelect(null);
     setResDocument(null);
     setLoading(false);
-  };
-
-  const handleSelectedScope = async (e) => {
-    const scope = e.target.value;
-    setSelectedScope(scope);
-    setSelectedWorkflow({});
-    setSelectedDocumentType({});
-    setShowWorkflowSelect(false);
-    setShowDocumentTypeSelect(false);
-    setUploadedFile(null);
-    setSelectedTemplate(null);
-    setWorkflowDetail(null);
-
-    const res = await viewWorkflowByScopeAPI(scope);
-    if (res && res.data && res.data.statusCode === 200) {
-      const data = res.data.content;
-      setListWorkflows(data);
-      setShowWorkflowSelect(true);
-    } else {
-      notification.error({
-        message: "Lấy dữ liệu luồng xử lý không thành công!",
-        description: "Vui lòng thử lại sau!",
-      });
-    }
-  };
-
-  const handleSelectedWorkflow = async (workflowId) => {
-    const workflow = listWorkflows.find(
-      (item) => item.workflowId === workflowId
-    );
-    if (workflow) {
-      setSelectedWorkflow(workflow);
-      setListDocumentTypes(workflow.documentTypes || []);
-      const res = await viewWorkflowDetailsWithFlowAndStepAPI(
-        workflow.workflowId
-      );
-      if (res?.data?.statusCode === 200) {
-        setWorkflowDetail(res.data.content);
-        setShowDocumentTypeSelect(true);
-      }
-    }
   };
 
   const renderWorkflowRoles = () => {

@@ -12,9 +12,11 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { createTaskAPI, viewAllUserAPI } from "@/services/api.service";
+import { createFirstTaskAPI } from "@/services/api.service";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { useNavigate } from "react-router-dom";
+import { useCurrentApp } from "@/components/context/app.context";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -22,68 +24,52 @@ dayjs.extend(timezone);
 const { TextArea } = Input;
 const { Option } = Select;
 
-const AddTask = (props) => {
+const CreateFirstTask = (props) => {
   const {
-    openModalCreate,
-    setOpenModalCreate,
-    currentStep,
-    setTaskCreated,
+    openCreateFirstTaskModal,
+    setOpenCreateFirstTaskModal,
     documentId,
+    setDocumentId,
   } = props;
   const [form] = Form.useForm();
   const [users, setUsers] = useState([]);
   const { message, notification } = App.useApp();
   const [isSubmit, setIsSubmit] = useState(false);
-
-  const fetchUsers = async () => {
-    try {
-      const res = await viewAllUserAPI(
-        1,
-        100000,
-        { role: `${currentStep.role.roleName}` },
-        {}
-      );
-      const data = res.data.content.map((user) => ({
-        userId: user.userId,
-        fullName: user.fullName,
-        userName: user.userName,
-      }));
-      setUsers(data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (openModalCreate) {
-      fetchUsers();
-    }
-  }, [openModalCreate]);
+  const { user } = useCurrentApp();
+  const navigate = useNavigate();
 
   const handleSave = async (values) => {
     setIsSubmit(true);
-    const { title, description, taskType, userId } = values;
-    const stepId = currentStep.stepId;
+    const { title, description } = values;
 
     const startDate = dayjs(values.startDate).tz("Asia/Ho_Chi_Minh").format(); // Định dạng lại theo múi giờ Việt Nam
     const endDate = dayjs(values.endDate).tz("Asia/Ho_Chi_Minh").format();
-
-    const res = await createTaskAPI(
+    const taskType = "CreateUpload";
+    console.log(
       title,
       description,
       startDate,
       endDate,
       taskType,
-      stepId,
       documentId,
-      userId
+      user.userId
+    );
+    const res = await createFirstTaskAPI(
+      title,
+      description,
+      startDate,
+      endDate,
+      taskType,
+      documentId,
+      user.userId
     );
     if (res && res.data && res.data.statusCode === 201) {
-      message.success("Tạo nhiệm vụ thành công");
-      setTaskCreated(true);
-      setOpenModalCreate(false);
+      message.success("Tạo nhiệm vụ đầu tiên thành công");
+      setOpenCreateFirstTaskModal(false);
       setUsers([]);
+      setDocumentId(null);
       form.resetFields();
+      navigate(`/detail-progress/${documentId}`);
     } else {
       let errorMessage = "";
       errorMessage = res.data.content || "Đã có lỗi xảy ra";
@@ -109,22 +95,20 @@ const AddTask = (props) => {
     setIsSubmit(false);
   };
 
-  const handleCancel = () => {
-    setOpenModalCreate(false);
-    setUsers([]);
-    form.resetFields();
-  };
-
   return (
     <Modal
-      open={openModalCreate}
-      onCancel={handleCancel}
+      open={openCreateFirstTaskModal}
       footer={null}
       centered
       width={800}
+      closable={false}
+      maskClosable={false}
+      onCancel={() => {}}
     >
-      <h2 style={{ marginBottom: 0 }}>Tạo nhiệm vụ</h2>
-      <p style={{ marginBottom: 24, color: "#999" }}>Khởi tạo nhiệm vụ</p>
+      <h2 style={{ marginBottom: 0 }}>Tạo nhiệm vụ đầu tiên</h2>
+      <p style={{ marginBottom: 24, color: "#999" }}>
+        Khởi tạo nhiệm vụ đầu tiên
+      </p>
 
       <div
         style={{
@@ -250,49 +234,6 @@ const AddTask = (props) => {
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={[16, 16]}>
-            <Col span={12}>
-              <Form.Item
-                label="Nhiệm vụ chính"
-                name="taskType"
-                rules={[
-                  { required: true, message: "Vui lòng chọn nhiệm vụ chính!" },
-                ]}
-              >
-                <Select placeholder="Chọn nhiệm vụ chính" allowClear>
-                  <Option value="Create">Khởi tạo văn bản</Option>
-                  <Option value="Browse">Duyệt văn bản</Option>
-                  <Option value="Sign">Ký điện tử</Option>
-                  <Option value="View">Xem văn bản</Option>
-                  <Option value="Upload">Tải văn bản lên</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Người thực hiện"
-                name="userId"
-                rules={[
-                  { required: true, message: "Vui lòng chọn người thực hiện!" },
-                ]}
-              >
-                <Select
-                  showSearch
-                  placeholder="Vui lòng chọn người thực hiện"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {users.map((user) => (
-                    <Select.Option key={user.userId} value={user.userId}>
-                      {user.fullName} - {user.userName}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
 
           <div style={{ textAlign: "right", marginTop: 16 }}>
             <Button
@@ -309,7 +250,7 @@ const AddTask = (props) => {
               style={{ backgroundColor: "#FC8330" }}
               loading={isSubmit}
             >
-              Tạo nhiệm vụ
+              Tạo nhiệm vụ đầu tiên
             </Button>
           </div>
         </Form>
@@ -318,4 +259,4 @@ const AddTask = (props) => {
   );
 };
 
-export default AddTask;
+export default CreateFirstTask;

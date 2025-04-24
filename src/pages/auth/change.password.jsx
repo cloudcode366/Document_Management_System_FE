@@ -103,6 +103,8 @@ const ChangePasswordPage = () => {
         navigate(
           user.mainRole.roleName === "Admin" ? "/admin/profile" : "/profile"
         );
+        setOtpCode("");
+        setCurrentStep(1);
       } else {
         throw new Error(res?.data?.content || "Đổi mật khẩu thất bại.");
       }
@@ -113,8 +115,6 @@ const ChangePasswordPage = () => {
       });
     } finally {
       setLoading(false);
-      setOtpCode("");
-      setCurrentStep(1);
     }
   };
 

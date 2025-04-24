@@ -208,19 +208,22 @@ const CreateDocumentTemplate = (props) => {
     setDragging(false);
 
     const rect = pageRef.current.getBoundingClientRect();
-
     const xRatio = dragPosition.x / rect.width;
     const yRatio = dragPosition.y / rect.height;
     const widthRatio = signatureSize.width / rect.width;
     const heightRatio = signatureSize.height / rect.height;
 
-    // Cập nhật tọa độ tính theo kích thước gốc của trang PDF
-    setLowerLeftX(xRatio * pdfPageSize.width);
-    setLowerLeftY(yRatio * pdfPageSize.height);
-    setUpperRightX((xRatio + widthRatio) * pdfPageSize.width);
-    setUpperRightY((yRatio + heightRatio) * pdfPageSize.height);
+    // PDF origin (0,0) nằm ở góc dưới trái nên phải đảo yRatio
+    const pdfLlx = xRatio * pdfPageSize.width;
+    const pdfLly = (1 - yRatio - heightRatio) * pdfPageSize.height;
+    const pdfUrx = (xRatio + widthRatio) * pdfPageSize.width;
+    const pdfUry = (1 - yRatio) * pdfPageSize.height;
 
-    // Cập nhật state vị trí ký
+    setLowerLeftX(pdfLlx);
+    setLowerLeftY(pdfLly);
+    setUpperRightX(pdfUrx);
+    setUpperRightY(pdfUry);
+
     setSignaturePosition({
       page: pageNumber,
       xRatio,
@@ -262,6 +265,11 @@ const CreateDocumentTemplate = (props) => {
       const widthRatio = signatureSize.width / rect.width;
       const heightRatio = signatureSize.height / rect.height;
 
+      const pdfLlx = xRatio * pdfPageSize.width;
+      const pdfLly = (1 - yRatio - heightRatio) * pdfPageSize.height;
+      const pdfUrx = (xRatio + widthRatio) * pdfPageSize.width;
+      const pdfUry = (1 - yRatio) * pdfPageSize.height;
+
       setSignaturePosition({
         page: pageNumber,
         xRatio,
@@ -270,11 +278,10 @@ const CreateDocumentTemplate = (props) => {
         heightRatio,
       });
 
-      // Tính lại tọa độ tuyệt đối
-      setLowerLeftX(xRatio * pdfPageSize.width);
-      setLowerLeftY(yRatio * pdfPageSize.height);
-      setUpperRightX((xRatio + widthRatio) * pdfPageSize.width);
-      setUpperRightY((yRatio + heightRatio) * pdfPageSize.height);
+      setLowerLeftX(pdfLlx);
+      setLowerLeftY(pdfLly);
+      setUpperRightX(pdfUrx);
+      setUpperRightY(pdfUry);
     }
   };
 
