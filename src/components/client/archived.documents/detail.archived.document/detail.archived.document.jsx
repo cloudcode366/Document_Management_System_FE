@@ -25,7 +25,7 @@ import {
   CloseCircleOutlined,
 } from "@ant-design/icons";
 import samplePDF from "assets/files/sample.pdf";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./view.detail.document.scss";
 import SignatureBox from "@/components/client/documents/initial.signature/signature.box";
 import signatureImg from "assets/files/signature-removebg-preview.png";
@@ -737,12 +737,15 @@ const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
 const SCOPE = "openid email https://mail.google.com/";
 // const REDIRECT_URI = window.location.origin + "/oauth2-callback";
-const REDIRECT_URI = window.location.origin + "/archived-document";
+const REDIRECT_URI = window.location.origin + "/detail-archived-document";
 console.log(REDIRECT_URI);
 
 const ViewDetailArchivedDocument = () => {
+  const location = useLocation();
+  const documentId = location.state?.documentId;
+
   const { message } = App.useApp();
-  const { documentId } = useParams();
+  // const { documentId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState(null);
@@ -775,14 +778,15 @@ const ViewDetailArchivedDocument = () => {
       `&include_granted_scopes=true` +
       `&prompt=consent`;
 
-    const popup = window.open(authUrl, "Google Login", "width=500,height=600");
+    // const popup = window.open(authUrl, "Google Login", "width=500,height=600");
+    window.location.href = authUrl;
 
     window.addEventListener("message", (event) => {
       if (event.origin === window.location.origin) {
         const { code, error } = event.data;
         if (code) {
           console.log("✅ Authorization Code:", code);
-          handleExchangeToken(code);
+          // handleExchangeToken(code);
           popup.close();
         } else if (error) {
           console.error("❌ Lỗi:", error);
