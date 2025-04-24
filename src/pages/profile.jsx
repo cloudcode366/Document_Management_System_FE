@@ -194,22 +194,57 @@ const ProfilePage = () => {
             </Col>
 
             <Col span={12}>
-              <Form.Item label="Ảnh chữ ký">
-                <div className="signature-box">
-                  {profile.signature ? (
-                    <Image
-                      width={200}
-                      height={200}
-                      src={profile?.signature || undefined}
-                      fallback="/default-avatar.png"
-                      style={{
-                        objectFit: "cover",
-                        borderRadius: "30px",
-                      }}
-                    />
-                  ) : (
-                    <span>Chưa có chữ ký</span>
-                  )}
+              <Form.Item label="Ảnh chữ ký nháy">
+                <div
+                  className="signature-box"
+                  style={{
+                    width: "100%",
+                    height: "220px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "10px",
+                    backgroundColor: "#ffffff",
+                  }}
+                >
+                  <Image
+                    width="100%"
+                    height="100%"
+                    src="https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png"
+                    fallback="/default-avatar.png"
+                    style={{
+                      objectFit: "contain",
+                      borderRadius: "10px",
+                    }}
+                  />
+                </div>
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item label="Ảnh chữ ký điện tử">
+                <div
+                  className="signature-box"
+                  style={{
+                    width: "100%",
+                    height: "220px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "10px",
+                    backgroundColor: "#ffffff",
+                  }}
+                >
+                  <Image
+                    width="100%"
+                    height="100%"
+                    src="https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png"
+                    fallback="/default-avatar.png"
+                    style={{
+                      objectFit: "contain",
+                      borderRadius: "10px",
+                    }}
+                  />
                 </div>
               </Form.Item>
             </Col>
