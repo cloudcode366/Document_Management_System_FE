@@ -347,6 +347,54 @@ const UpdateUser = (props) => {
 
           <Row>
             <Col span={12}>
+              <Form.Item label="Ảnh chữ ký" name="signature">
+                <Image
+                  width={150}
+                  src={
+                    "https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png"
+                  }
+                  fallback="/default-avatar.png"
+                />
+                <Upload
+                  showUploadList={false}
+                  beforeUpload={() => false}
+                  onChange={handleSignatureImageChange}
+                >
+                  <Button
+                    icon={<UploadOutlined />}
+                    type="link"
+                    style={{ marginLeft: 8, marginTop: 8 }}
+                  >
+                    Chọn ảnh chữ ký mới
+                  </Button>
+                </Upload>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Ảnh chữ ký" name="signature">
+                <Image
+                  width={150}
+                  src={
+                    "https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png"
+                  }
+                  fallback="/default-avatar.png"
+                />
+                <Upload
+                  showUploadList={false}
+                  beforeUpload={() => false}
+                  onChange={handleSignatureImageChange}
+                >
+                  <Button
+                    icon={<UploadOutlined />}
+                    type="link"
+                    style={{ marginLeft: 8, marginTop: 8 }}
+                  >
+                    Chọn ảnh chữ ký mới
+                  </Button>
+                </Upload>
+              </Form.Item>
+            </Col>
+            <Col span={24}>
               <Form.Item
                 label="Ảnh đại diện"
                 name="avatar"
@@ -370,28 +418,6 @@ const UpdateUser = (props) => {
                     style={{ marginLeft: 8, marginTop: 8 }}
                   >
                     Chọn ảnh đại diện mới
-                  </Button>
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Ảnh chữ ký" name="signature">
-                <Image
-                  width={150}
-                  src={signatureImageUrl}
-                  fallback="/default-avatar.png"
-                />
-                <Upload
-                  showUploadList={false}
-                  beforeUpload={() => false}
-                  onChange={handleSignatureImageChange}
-                >
-                  <Button
-                    icon={<UploadOutlined />}
-                    type="link"
-                    style={{ marginLeft: 8, marginTop: 8 }}
-                  >
-                    Chọn ảnh chữ ký mới
                   </Button>
                 </Upload>
               </Form.Item>

@@ -50,7 +50,7 @@ const TableAllArchivedDocument = () => {
       },
       render: (_, row) => (
         <div>
-          <Tooltip title={row.Name}>
+          <Tooltip title={row.name}>
             <div
               style={{
                 whiteSpace: "nowrap",
@@ -66,12 +66,12 @@ const TableAllArchivedDocument = () => {
                   style={{ marginRight: 6, color: "#fa8c16" }}
                 />
               )}
-              {row.Name}
+              {row.name}
             </div>
           </Tooltip>
           <br />
-          <Tag color={tagColor[convertScopeName(row.Scope)]}>
-            {convertScopeName(row.Scope)}
+          <Tag color={tagColor[convertScopeName(row.scope)]}>
+            {convertScopeName(row.scope)}
           </Tag>
         </div>
       ),
@@ -85,33 +85,33 @@ const TableAllArchivedDocument = () => {
     },
     {
       title: "Loại văn bản",
-      dataIndex: "Type",
+      dataIndex: "type",
       width: "15%",
       hideInSearch: true,
     },
     {
       title: "Người lưu",
-      dataIndex: "CreateBy",
+      dataIndex: "createBy",
       width: "15%",
       hideInSearch: true,
     },
     {
       title: "Ngày lưu",
-      dataIndex: "CreatedDate",
+      dataIndex: "createdDate",
       width: "15%",
       hideInSearch: true,
       render: (_, row) => {
-        return dayjs(row.CreatedDate).format("DD-MM-YYYY HH:mm");
+        return dayjs(row.createdDate).format("DD-MM-YYYY HH:mm");
       },
     },
     {
       title: "Trạng thái",
-      dataIndex: "Status",
+      dataIndex: "status",
       width: "15%",
       render: (_, row) => (
         <Badge
-          color={statusColor[row.Status]}
-          text={convertArchivedStatus(row.Status)}
+          color={statusColor[row.status]}
+          text={convertArchivedStatus(row.status)}
           className="custom-dot"
         />
       ),
@@ -168,7 +168,7 @@ const TableAllArchivedDocument = () => {
               total: res.data?.size,
             };
           }}
-          rowKey={"Id"}
+          rowKey={"id"}
           pagination={{
             current: meta.page,
             pageSize: meta.limit,
@@ -197,7 +197,7 @@ const TableAllArchivedDocument = () => {
             onDoubleClick: () => {
               clearTimeout(clickTimer); // Hủy click nếu là double click
 
-              navigate(`/detail-archived-document/${record.Id}`);
+              navigate(`/detail-archived-document/${record.id}`);
             },
           })}
         />

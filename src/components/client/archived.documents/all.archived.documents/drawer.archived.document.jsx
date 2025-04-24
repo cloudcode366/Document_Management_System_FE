@@ -73,12 +73,12 @@ const DrawerArchivedDocument = (props) => {
                     textOverflow: "ellipsis",
                     cursor: "pointer",
                   }}
-                  title={selectedRecord?.Name}
+                  title={selectedRecord?.name}
                 >
-                  {selectedRecord?.Name}
+                  {selectedRecord?.name}
                 </p>
-                <Tag color={convertColorArchivedStatus(selectedRecord?.Status)}>
-                  {convertArchivedStatus(selectedRecord?.Status)}
+                <Tag color={convertColorArchivedStatus(selectedRecord?.status)}>
+                  {convertArchivedStatus(selectedRecord?.status)}
                 </Tag>
               </div>
 
@@ -92,7 +92,7 @@ const DrawerArchivedDocument = (props) => {
                     height: 40,
                   }}
                   onClick={() =>
-                    navigate(`/detail-archived-document/${selectedRecord?.Id}`)
+                    navigate(`/detail-archived-document/${selectedRecord?.id}`)
                   }
                 >
                   <p style={{ fontWeight: "bold" }}>Mở</p>
@@ -110,32 +110,32 @@ const DrawerArchivedDocument = (props) => {
             <div style={{ marginBottom: "20px" }}>
               <strong style={{ marginLeft: "10px" }}>Phạm vi ban hành</strong>
               <br />
-              <p style={{ marginLeft: "10px" }}>{selectedRecord?.Scope}</p>
+              <p style={{ marginLeft: "10px" }}>{selectedRecord?.scope}</p>
             </div>
             <div style={{ marginBottom: "20px" }}>
               <strong style={{ marginLeft: "10px" }}>Số hiệu văn bản</strong>
               <br />
               <p style={{ marginLeft: "10px" }}>
-                {selectedRecord?.NumberOfDocument}
+                {selectedRecord?.numberOfDocument}
               </p>
             </div>
             <div style={{ marginBottom: "20px" }}>
               <strong style={{ marginLeft: "10px" }}>Loại văn bản</strong>
               <br />
-              <p style={{ marginLeft: "10px" }}>{selectedRecord?.Type}</p>
+              <p style={{ marginLeft: "10px" }}>{selectedRecord?.type}</p>
             </div>
-            {selectedRecord?.Scope === "InComing" && (
+            {selectedRecord?.scope === "InComing" && (
               <>
                 <div style={{ marginBottom: "20px" }}>
                   <strong style={{ marginLeft: "10px" }}>Người gửi</strong>
                   <br />
-                  <p style={{ marginLeft: "10px" }}>{selectedRecord?.Sender}</p>
+                  <p style={{ marginLeft: "10px" }}>{selectedRecord?.sender}</p>
                 </div>
                 <div style={{ marginBottom: "20px" }}>
                   <strong style={{ marginLeft: "10px" }}>Ngày nhận</strong>
                   <br />
                   <p style={{ marginLeft: "10px" }}>
-                    {dayjs(selectedRecord?.DateReceived).format(
+                    {dayjs(selectedRecord?.dateReceived).format(
                       "DD-MM-YYYY HH:mm"
                     )}
                   </p>
@@ -144,14 +144,14 @@ const DrawerArchivedDocument = (props) => {
                   <strong style={{ marginLeft: "10px" }}>Người nhận</strong>
                   <br />
                   <p style={{ marginLeft: "10px" }}>
-                    {selectedRecord?.CreateBy}
+                    {selectedRecord?.createBy}
                   </p>
                 </div>
                 <div style={{ marginBottom: "20px" }}>
                   <strong style={{ marginLeft: "10px" }}>Ngày lưu</strong>
                   <br />
                   <p style={{ marginLeft: "10px" }}>
-                    {dayjs(selectedRecord?.CreateDate).format(
+                    {dayjs(selectedRecord?.createDate).format(
                       "DD-MM-YYYY HH:mm"
                     )}
                   </p>
@@ -159,20 +159,20 @@ const DrawerArchivedDocument = (props) => {
               </>
             )}
 
-            {selectedRecord?.Scope === "OutGoing" && (
+            {selectedRecord?.scope === "OutGoing" && (
               <>
                 <div style={{ marginBottom: "20px" }}>
                   <strong style={{ marginLeft: "10px" }}>Người lưu</strong>
                   <br />
                   <p style={{ marginLeft: "10px" }}>
-                    {selectedRecord?.CreateBy}
+                    {selectedRecord?.createBy}
                   </p>
                 </div>
                 <div style={{ marginBottom: "20px" }}>
                   <strong style={{ marginLeft: "10px" }}>Ngày lưu</strong>
                   <br />
                   <p style={{ marginLeft: "10px" }}>
-                    {dayjs(selectedRecord?.CreateDate).format(
+                    {dayjs(selectedRecord?.createDate).format(
                       "DD-MM-YYYY HH:mm"
                     )}
                   </p>
@@ -183,35 +183,35 @@ const DrawerArchivedDocument = (props) => {
                   </strong>
                   <br />
                   <p style={{ marginLeft: "10px" }}>
-                    {selectedRecord?.ExternalPartner}
+                    {selectedRecord?.externalPartner}
                   </p>
                 </div>
                 <div style={{ marginBottom: "20px" }}>
                   <strong style={{ marginLeft: "10px" }}>Ngày gửi</strong>
                   <br />
                   <p style={{ marginLeft: "10px" }}>
-                    {dayjs(selectedRecord?.DateSented).format(
+                    {dayjs(selectedRecord?.dateSented).format(
                       "DD-MM-YYYY HH:mm"
                     )}
                   </p>
                 </div>
               </>
             )}
-            {selectedRecord?.Scope === "Division" ||
-              (selectedRecord?.Scope === "School" && (
+            {selectedRecord?.scope === "Division" ||
+              (selectedRecord?.scope === "School" && (
                 <>
                   <div style={{ marginBottom: "20px" }}>
                     <strong style={{ marginLeft: "10px" }}>Người lưu</strong>
                     <br />
                     <p style={{ marginLeft: "10px" }}>
-                      {selectedRecord?.CreateBy}
+                      {selectedRecord?.createBy}
                     </p>
                   </div>
                   <div style={{ marginBottom: "20px" }}>
                     <strong style={{ marginLeft: "10px" }}>Ngày lưu</strong>
                     <br />
                     <p style={{ marginLeft: "10px" }}>
-                      {dayjs(selectedRecord?.CreateDate).format(
+                      {dayjs(selectedRecord?.createDate).format(
                         "DD-MM-YYYY HH:mm"
                       )}
                     </p>
