@@ -69,7 +69,7 @@ const CreateFirstTask = (props) => {
       setUsers([]);
       setDocumentId(null);
       form.resetFields();
-      navigate(`/detail-progress/${documentId}`);
+      navigate(`/init-progress/${documentId}`);
     } else {
       let errorMessage = "";
       errorMessage = res.data.content || "Đã có lỗi xảy ra";

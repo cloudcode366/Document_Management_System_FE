@@ -84,6 +84,7 @@ const ViewInitProgress = () => {
 
   useEffect(() => {
     fetchProgress();
+    setTaskCreated(false);
   }, [taskCreated]);
 
   const renderWorkflowRoles = () => {
