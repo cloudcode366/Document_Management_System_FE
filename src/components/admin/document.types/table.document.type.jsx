@@ -62,7 +62,6 @@ const TableDocumentType = () => {
     {
       title: "Chữ viết tắt",
       dataIndex: "acronym",
-      copyable: true,
       width: "20%",
       hideInSearch: true,
     },
@@ -79,7 +78,7 @@ const TableDocumentType = () => {
         ),
     },
     {
-      title: "Hành động",
+      title: "Thao tác",
       hideInSearch: true,
       width: "20%",
       render(dom, entity, index, action, schema) {

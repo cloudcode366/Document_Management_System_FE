@@ -90,7 +90,7 @@ const TableWorkflow = () => {
         ),
     },
     {
-      title: "Hành động",
+      title: "Thao tác",
       hideInSearch: true,
       width: "15%",
       render(dom, entity, index, action, schema) {

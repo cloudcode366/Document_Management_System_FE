@@ -76,7 +76,7 @@ const TableDivision = () => {
         ),
     },
     {
-      title: "Hành động",
+      title: "Thao tác",
       hideInSearch: true,
       width: "20%",
       render(dom, entity, index, action, schema) {

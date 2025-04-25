@@ -280,7 +280,7 @@ const TableUser = () => {
       width: "10%",
     },
     {
-      title: "Hành động",
+      title: "Thao tác",
       hideInSearch: true,
       width: "10%",
       render(dom, entity, index, action, schema) {

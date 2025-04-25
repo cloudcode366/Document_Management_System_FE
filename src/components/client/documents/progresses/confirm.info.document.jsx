@@ -90,38 +90,46 @@ const ConfirmInfoDocument = (props) => {
   }, [openConfirmModal, resDocument, form, selectedScope, user]);
 
   const handleSubmit = async () => {
-    setIsLoading(true);
-    const values = await form.validateFields();
-    const currentSigners = values.signerNames || [];
-    const NewSignerName = currentSigners.filter(
-      (s) => !defaultSigner.includes(s)
-    );
+    try {
+      setIsLoading(true);
 
-    const updatedCanChange = {
-      ...resDocument?.canChange,
-      ...values, // Ghi đè các giá trị mới từ form vào canChange
-      NewSignerName: NewSignerName,
-    };
+      // Sẽ throw nếu còn ô chưa thỏa mãn validate
+      const values = await form.validateFields();
 
-    // Ghi đè vào resDocument.canChange
-    resDocument.canChange = updatedCanChange;
-    console.log(`>>> Check resDocument: `, resDocument);
+      const currentSigners = values.signerNames || [];
+      const NewSignerName = currentSigners.filter(
+        (s) => !defaultSigner.includes(s)
+      );
 
-    const res = await createInComingDocumentAPI(resDocument);
-    if (res && res.data && res.data.statusCode === 200) {
-      const data = res.data.content;
-      message.success(`Khởi tạo văn bản thành công!`);
+      const updatedCanChange = {
+        ...resDocument?.canChange,
+        ...values,
+        NewSignerName: NewSignerName,
+      };
 
-      setOpenConfirmModal(false);
-      handleCloseCreateDocumentModal(); // Đảm bảo đóng modal cha (nếu cần)
-      setSignerList([]); // Reset danh sách người ký
-      setDocumentId(data[1].documentId);
-      setOpenCreateFirstTaskModal(true);
-    } else {
-      notification.error({ message: "Đã có lỗi xảy ra, vui lòng thử lại sau" });
+      resDocument.canChange = updatedCanChange;
+      console.log(`>>> Check resDocument: `, resDocument);
+
+      const res = await createInComingDocumentAPI(resDocument);
+      if (res && res.data && res.data.statusCode === 200) {
+        const data = res.data.content;
+        message.success(`Khởi tạo văn bản thành công!`);
+
+        setOpenConfirmModal(false);
+        handleCloseCreateDocumentModal();
+        setSignerList([]);
+        setDocumentId(data[1].documentId);
+        setOpenCreateFirstTaskModal(true);
+      } else {
+        notification.error({
+          message: "Đã có lỗi xảy ra, vui lòng thử lại sau",
+        });
+      }
+    } catch (err) {
+      console.warn("Form chưa hợp lệ:", err);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleAddSigner = () => {
@@ -276,7 +284,7 @@ const ConfirmInfoDocument = (props) => {
 
                 <Form.Item
                   label="Ngày ban hành"
-                  name="validTo"
+                  name="validFrom"
                   rules={[
                     { required: true, message: "Vui lòng chọn ngày ban hành!" },
                   ]}
@@ -294,7 +302,7 @@ const ConfirmInfoDocument = (props) => {
 
                 <Form.Item
                   label="Ngày hết hiệu lực"
-                  name="validFrom"
+                  name="validTo"
                   rules={[
                     {
                       required: true,
