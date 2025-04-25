@@ -136,7 +136,8 @@ const router = createBrowserRouter([
       },
 
       {
-        path: "/detail-archived-document/:documentId",
+        // path: "/detail-archived-document/:documentId",
+        path: "/detail-archived-document",
         element: (
           <ProtectedRoute>
             <DetailArchivedDocument />

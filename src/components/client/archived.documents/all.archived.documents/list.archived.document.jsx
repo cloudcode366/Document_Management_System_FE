@@ -197,7 +197,12 @@ const TableAllArchivedDocument = () => {
             onDoubleClick: () => {
               clearTimeout(clickTimer); // Hủy click nếu là double click
 
-              navigate(`/detail-archived-document/${record.id}`);
+              // navigate(`/detail-archived-document/${record.id}`);
+              navigate("/detail-archived-document", {
+                state: {
+                  documentId: record.id, // truyền documentId
+                },
+              });
             },
           })}
         />

@@ -63,7 +63,7 @@ export const convertScopeName = (scope) => {
 
 export const convertStatus = (status) => {
   switch (status) {
-    case "Pending":
+    case "Waiting":
       return "Đang chờ xác nhận";
     case "Revised":
       return "Cần chỉnh sửa";
@@ -146,3 +146,25 @@ export const convertColorArchivedStatus = (status) => {
       return "default";
   }
 };
+
+
+
+export function convertTaskType(taskType) {
+  switch (taskType) {
+    case "Create":
+      return "Khởi tạo văn bản";
+    case "Browse":
+      return "Duyệt văn bản";
+    case "Sign":
+      return "Ký điện tử";
+    case "View":
+      return "Xem văn bản";
+    case "Upload":
+      return "Tải văn bản lên";
+    case "CreateUpload":
+      return "Khởi tạo và tải văn bản lên";
+    default:
+      return "Không xác định";
+  }
+}
+
