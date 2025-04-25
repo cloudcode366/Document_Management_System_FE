@@ -787,11 +787,11 @@ const ViewDetailArchivedDocument = () => {
         if (code) {
           console.log("✅ Authorization Code:", code);
           // handleExchangeToken(code);
-          popup.close();
+          // popup.close();
         } else if (error) {
           console.error("❌ Lỗi:", error);
           message.error("❌ Lỗi khi đăng nhập: " + error);
-          popup.close();
+          // popup.close();
         }
       }
     });

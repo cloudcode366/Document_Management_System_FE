@@ -29,8 +29,6 @@ import ListTaskPage from "pages/client/tasks/list.task";
 import ListWorkflowPage from "pages/client/workflows/list.workflow";
 import viVN from "antd/locale/vi_VN";
 import { App, ConfigProvider } from "antd";
-import ManageDigitalSignature from "pages/admin/digital.signatures/manage.digital.signature";
-import ManageInitialSignature from "pages/admin/initial.signatures/manage.initial.signature";
 import ListAllDocumentPage from "pages/client/documents/all.documents/list.all.documents";
 import LayoutClient from "@/layout";
 import DraftDocument from "pages/client/documents/draft.document";
@@ -328,22 +326,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <UserGuidePage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "digital-signature",
-        element: (
-          <ProtectedRoute>
-            <ManageDigitalSignature />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "initial-signature",
-        element: (
-          <ProtectedRoute>
-            <ManageInitialSignature />
           </ProtectedRoute>
         ),
       },
