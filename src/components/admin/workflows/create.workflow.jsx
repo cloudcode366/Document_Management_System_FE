@@ -46,7 +46,6 @@ const CreateWorkflow = ({
   openModalCreate,
   setOpenModalCreate,
   refreshTable,
-  setDataViewDetail,
   mainWorkflows,
 }) => {
   const { user } = useCurrentApp();

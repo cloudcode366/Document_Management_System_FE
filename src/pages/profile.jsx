@@ -187,7 +187,7 @@ const ProfilePage = () => {
             <Col span={12}>
               <Form.Item label="Ngày sinh">
                 <Input
-                  value={dayjs(profile?.dateOfBirth).format("DD-MM -YYYY")}
+                  value={dayjs(profile?.dateOfBirth).format("DD-MM-YYYY")}
                   readOnly
                 />
               </Form.Item>
@@ -210,7 +210,7 @@ const ProfilePage = () => {
                   <Image
                     width="100%"
                     height="100%"
-                    src={profile.sign}
+                    src={profile?.sign}
                     fallback="/default-avatar.png"
                     style={{
                       objectFit: "contain",
@@ -238,7 +238,7 @@ const ProfilePage = () => {
                   <Image
                     width="100%"
                     height="100%"
-                    src={profile.signDigital}
+                    src={profile?.signDigital}
                     fallback="/default-avatar.png"
                     style={{
                       objectFit: "contain",

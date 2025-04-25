@@ -181,10 +181,7 @@ const DetailUser = (props) => {
             <Image
               width={200}
               height={200}
-              src={
-                "https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png" ||
-                undefined
-              }
+              src={dataViewDetail?.sign || undefined}
               fallback="/default-avatar.png"
               style={{
                 objectFit: "cover",
@@ -199,10 +196,7 @@ const DetailUser = (props) => {
             <Image
               width={200}
               height={200}
-              src={
-                "https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png" ||
-                undefined
-              }
+              src={dataViewDetail?.signDigital || undefined}
               fallback="/default-avatar.png"
               style={{
                 objectFit: "cover",

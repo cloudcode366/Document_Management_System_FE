@@ -380,9 +380,7 @@ const CreateDocument = (props) => {
                 <p className="ant-upload-text">
                   Nhấp hoặc kéo văn bản vào khu vực này
                 </p>
-                <p className="ant-upload-hint">
-                  Chỉ hỗ trợ định dạng .pdf, .docx, .doc
-                </p>
+                <p className="ant-upload-hint">Chỉ hỗ trợ định dạng .pdf</p>
               </Dragger>
             ) : (
               <Select

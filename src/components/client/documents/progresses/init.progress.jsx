@@ -1,20 +1,22 @@
 import {
   createHandleTaskActionAPI,
+  deleteTaskAPI,
   updateConfirmTaskWithDocumentAPI,
   viewProcessDocumentDetailAPI,
 } from "@/services/api.service";
 import { convertRoleName, convertScopeName } from "@/services/helper";
 import {
   ArrowRightOutlined,
+  CheckOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
+  EditTwoTone,
   LeftOutlined,
   PlusCircleOutlined,
   RightOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
 import {
   App,
   Button,
@@ -32,10 +34,11 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Dropdown, Menu } from "antd";
 import { BeatLoader } from "react-spinners";
 import AddTaskModal from "./add.task.modal";
 import { useCurrentApp } from "@/components/context/app.context";
+import DetailTaskModal from "./detail.task";
+import EditInitTaskModal from "./edit.init.task.modal";
 
 const { Text, Title } = Typography;
 const { Step } = Steps;
@@ -55,7 +58,7 @@ const getTaskColor = (status) => {
 };
 
 const ViewInitProgress = () => {
-  const { documentId } = useParams();
+  const { documentId, taskChiefId } = useParams();
   const [processDetail, setProcessDetail] = useState(null);
   const navigate = useNavigate();
   const [openModalCreate, setOpenModalCreate] = useState(false);
@@ -64,7 +67,12 @@ const ViewInitProgress = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [taskCreated, setTaskCreated] = useState(false);
   const [taskId, setTaskId] = useState(null);
+  const [isSubmit, setIsSubmit] = useState(false);
   const { user } = useCurrentApp();
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [openTaskDetailModal, setOpenTaskDetailModal] = useState(false);
+  const [isDeleteTask, setIsDeleteTask] = useState(false);
+  const [openEditInitTaskModal, setOpenEditInitTaskModal] = useState(false);
 
   const fetchProgress = async () => {
     setLoading(true);
@@ -321,69 +329,93 @@ const ViewInitProgress = () => {
     <Card
       key={index}
       onClick={() => {
-        // setSelectedTask(task);
-        // setOpenTaskDetailModal(true);
+        setSelectedTask(task);
+        setOpenTaskDetailModal(true);
       }}
       hoverable
       style={{
         width: 300,
         borderRadius: 12,
-        border: "1px solid transparent", // 👈 ẩn viền ban đầu
-        boxShadow: "0 0 20px 4px rgba(0,0,0,0.1)", // đổ bóng đều
+        border: "1px solid transparent",
+        boxShadow: "0 0 20px 4px rgba(0,0,0,0.1)",
         backgroundColor: "#fff",
         position: "relative",
         padding: "16px",
-        height: 300,
-        transition: "all 0.3s ease-in-out", // hiệu ứng mượt cho cả border và shadow
+        height: 320,
+        transition: "all 0.3s ease-in-out",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = "0 0 28px 6px rgba(0,0,0,0.15)";
-        e.currentTarget.style.border = "1px solid #1890ff"; // 👈 hiện viền khi hover
+        e.currentTarget.style.border = "1px solid #1890ff";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.boxShadow = "0 0 20px 4px rgba(0,0,0,0.1)";
-        e.currentTarget.style.border = "1px solid transparent"; // 👈 ẩn lại viền
+        e.currentTarget.style.border = "1px solid transparent";
       }}
     >
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          modal.confirm({
-            title: "Bạn có chắc muốn xoá nhiệm vụ này?",
-            onOk: () => {
-              // const updated = listTask[stepId]?.filter((_, i) => i !== index);
-              // setListTask((prev) => ({ ...prev, [stepId]: updated }));
-              message.success(`Xóa nhiệm vụ thành công`);
-            },
-          });
-        }}
-        style={{
-          position: "absolute",
-          top: 8,
-          right: 8,
-          background: "#fff",
-          borderRadius: "50%",
-          boxShadow: "0 0 4px rgba(0,0,0,0.2)",
-          padding: 4,
-          zIndex: 10,
-          cursor: "pointer",
-        }}
-      >
-        <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
-      </div>
+      {task.taskId !== taskId && (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            modal.confirm({
+              title: "Bạn có chắc muốn xoá nhiệm vụ này?",
+              onOk: async () => {
+                setIsDeleteTask(true);
+
+                try {
+                  const res = await deleteTaskAPI(task.taskId);
+
+                  if (res?.data?.statusCode === 200) {
+                    message.success("Xoá nhiệm vụ thành công");
+                    setTaskCreated(true);
+                  } else {
+                    notification.error({
+                      message: "Hệ thống đang bận",
+                      description: "Xin vui lòng thử lại sau.",
+                    });
+                  }
+                } catch (error) {
+                  notification.error({
+                    message: "Lỗi hệ thống",
+                    description:
+                      "Không thể xóa nhiệm vụ, xin vui lòng thử lại sau.",
+                  });
+                } finally {
+                  setIsDeleteTask(false);
+                }
+              },
+              loading: isDeleteTask,
+            });
+          }}
+          style={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            background: "#fff",
+            borderRadius: "50%",
+            boxShadow: "0 0 4px rgba(0,0,0,0.2)",
+            padding: 4,
+            zIndex: 10,
+            cursor: "pointer",
+          }}
+        >
+          <Tooltip title="Xoá nhiệm vụ">
+            <CloseCircleOutlined style={{ color: "#ff4d4f", fontSize: 18 }} />
+          </Tooltip>
+        </div>
+      )}
+
       <Space direction="vertical" style={{ width: "100%" }}>
-        {/* Simulate the blurred "Thông tin chi tiết" section */}
         <div
           style={{
             width: "100%",
-            height: "60px", // Adjust height to match the blurred area in the image
-            background: "rgba(200, 200, 200, 0.3)", // Light gray background to mimic blur
-            filter: "blur(4px)", // CSS blur effect
+            height: "60px",
+            background: "rgba(200, 200, 200, 0.3)",
+            filter: "blur(4px)",
             borderRadius: "4px",
             margin: "8px 0",
           }}
         >
-          {/* Optional: Add placeholder text or shapes to mimic content underneath */}
           <div
             style={{
               width: "80%",
@@ -408,44 +440,36 @@ const ViewInitProgress = () => {
             justifyContent: "space-between",
           }}
         >
-          <Title
-            level={5}
-            style={{ margin: 0, fontWeight: "bold", color: "#333" }}
-          >
-            {task.title}
-          </Title>
-          <Dropdown
-            trigger={["click"]}
-            overlay={
-              <Menu
-                onClick={({ key }) => {
-                  if (key === "edit") {
-                    // Thực hiện mở modal chỉnh sửa
-                    console.log("Chỉnh sửa:", task);
-                    // setSelectedTask(task);
-                    // setOpenEditTaskModal(true);
-                  } else if (key === "view") {
-                    navigate(`/task-detail/${task.taskId}`);
-                  }
+          <Tooltip title={task.title}>
+            <Title
+              level={5}
+              style={{
+                margin: 0,
+                fontWeight: "bold",
+                color: "#333",
+                maxWidth: "80%",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {task.title}
+            </Title>
+          </Tooltip>
+          {task.taskId !== taskId && (
+            <Tooltip title="Cập nhật nhiệm vụ này">
+              <EditTwoTone
+                twoToneColor="#f57800"
+                style={{ cursor: "pointer", marginRight: 15, fontSize: 18 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedTask(task);
+                  setCurrentStep(step);
+                  setOpenEditInitTaskModal(true);
                 }}
-                items={[
-                  {
-                    key: "edit",
-                    label: "Chỉnh sửa",
-                  },
-                  {
-                    key: "view",
-                    label: "Xem chi tiết",
-                  },
-                ]}
               />
-            }
-          >
-            <HiOutlineDotsCircleHorizontal
-              style={{ fontSize: 20, cursor: "pointer" }}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </Dropdown>
+            </Tooltip>
+          )}
         </div>
 
         <Text style={{ color: "#666", fontSize: 14, marginTop: 0 }}>
@@ -458,7 +482,13 @@ const ViewInitProgress = () => {
           </Text>
           <div style={{ display: "flex", alignItems: "center", marginTop: 4 }}>
             <Progress
-              percent={task.taskStatus === "Completed" ? 100 : 0}
+              percent={
+                task.taskStatus === "Completed"
+                  ? 100
+                  : task.taskStatus === "InProgress"
+                  ? 50
+                  : 0
+              }
               showInfo={false}
               strokeColor={getTaskColor(task.taskStatus)}
               trailColor="#e6f7ff"
@@ -471,7 +501,12 @@ const ViewInitProgress = () => {
                 color: getTaskColor(task.taskStatus),
               }}
             >
-              {task.taskStatus === "Completed" ? 100 : 0}%
+              {task.taskStatus === "Completed"
+                ? 100
+                : task.taskStatus === "InProgress"
+                ? 50
+                : 0}
+              %
             </Text>
           </div>
         </div>
@@ -494,6 +529,7 @@ const ViewInitProgress = () => {
               height={24}
               src={task?.user?.avatar}
               style={{ borderRadius: "50%", objectFit: "cover" }}
+              preview={false}
             />
           </Tooltip>
         </div>
@@ -502,17 +538,21 @@ const ViewInitProgress = () => {
   );
 
   const handleComplete = async () => {
-    const res = await updateConfirmTaskWithDocumentAPI(documentId);
-    if (res?.data?.statusCode === 200) {
-      const res2 = await createHandleTaskActionAPI(
-        taskId,
+    setIsSubmit(true);
+    if (
+      (user?.mainRole?.roleName === "Chief" ||
+        user?.subRole?.roleName === "Chief") &&
+      processDetail?.workflowRequest?.scope === "InComing"
+    ) {
+      const res = await createHandleTaskActionAPI(
+        taskChiefId,
         user.userId,
         "SubmitDocument"
       );
-      if (res2?.data?.statusCode === 200) {
+      if (res?.data?.statusCode === 200) {
         notification.success({
           message: "Hoàn thành",
-          description: "Hoàn thành xử lý văn bản thành công.",
+          description: "Hoàn thành phân bổ văn bản thành công.",
         });
         navigate(`/detail-progress/${documentId}`);
       } else {
@@ -522,11 +562,35 @@ const ViewInitProgress = () => {
         });
       }
     } else {
-      notification.error({
-        message: "Hệ thống đang bận!",
-        description: "Xin vui lòng thử lại sau.",
-      });
+      const res = await updateConfirmTaskWithDocumentAPI(documentId);
+      if (res?.data?.statusCode === 200) {
+        const res2 = await createHandleTaskActionAPI(
+          taskId,
+          user.userId,
+          "SubmitDocument"
+        );
+        if (res2?.data?.statusCode === 200) {
+          notification.success({
+            message: "Hoàn thành",
+            description:
+              "Hoàn thành giao văn bản tới chánh văn phòng thành công.",
+          });
+          navigate(`/detail-progress/${documentId}`);
+        } else {
+          notification.error({
+            message: "Hệ thống đang bận!",
+            description: "Xin vui lòng thử lại sau.",
+          });
+        }
+      } else {
+        notification.error({
+          message: "Hệ thống đang bận!",
+          description: "Xin vui lòng thử lại sau.",
+        });
+      }
     }
+
+    setIsSubmit(false);
   };
 
   const labelStyle = {
@@ -571,13 +635,13 @@ const ViewInitProgress = () => {
           overflowY: "auto",
         }}
       >
-        <h2>Thông tin quá trình xử lý văn bản</h2>
+        <h2>Khởi tạo nhiệm vụ xử lý văn bản</h2>
         <div style={{ margin: "20px 10px 0 10px" }}>
           <Row gutter={[16, 16]} align="middle">
             <Col span={4}>
               <div style={labelStyle}>Tên văn bản:</div>
             </Col>
-            <Col span={7} style={{ marginRight: 80 }}>
+            <Col span={18} style={{ marginRight: 80 }}>
               <Input
                 style={inputStyle}
                 allowClear
@@ -585,7 +649,22 @@ const ViewInitProgress = () => {
                 readOnly
               />
             </Col>
+          </Row>
+          <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
+            <Col span={4}>
+              <div style={labelStyle}>Tên luồng xử lý:</div>
+            </Col>
+            <Col span={18} style={{ marginRight: 80 }}>
+              <Input
+                style={inputStyle}
+                allowClear
+                value={processDetail?.workflowRequest?.workflowName}
+                readOnly
+              />
+            </Col>
+          </Row>
 
+          <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
             <Col span={4}>
               <div style={labelStyle}>Loại văn bản:</div>
             </Col>
@@ -597,21 +676,6 @@ const ViewInitProgress = () => {
                 readOnly
               />
             </Col>
-          </Row>
-
-          <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
-            <Col span={4}>
-              <div style={labelStyle}>Tên luồng xử lý:</div>
-            </Col>
-            <Col span={7} style={{ marginRight: 80 }}>
-              <Input
-                style={inputStyle}
-                allowClear
-                value={processDetail?.workflowRequest?.workflowName}
-                readOnly
-              />
-            </Col>
-
             <Col span={4}>
               <div style={labelStyle}>Phạm vi ban hành:</div>
             </Col>
@@ -637,7 +701,10 @@ const ViewInitProgress = () => {
               backgroundColor: "#FC8330",
               borderColor: "#FC8330",
               marginTop: 20,
+              marginBottom: 40,
             }}
+            loading={isSubmit}
+            icon={<CheckOutlined />}
           >
             Xác nhận hoàn thành
           </Button>
@@ -651,6 +718,20 @@ const ViewInitProgress = () => {
           taskCreated={taskCreated}
           setTaskCreated={setTaskCreated}
           documentId={documentId}
+        />
+        <DetailTaskModal
+          openTaskDetailModal={openTaskDetailModal}
+          setOpenTaskDetailModal={setOpenTaskDetailModal}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
+        />
+        <EditInitTaskModal
+          openEditInitTaskModal={openEditInitTaskModal}
+          setOpenEditInitTaskModal={setOpenEditInitTaskModal}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
+          setTaskCreated={setTaskCreated}
+          currentStep={currentStep}
         />
       </div>
     </div>

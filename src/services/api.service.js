@@ -448,6 +448,68 @@ const createHandleTaskActionAPI = (taskId, userId, action) => {
   return axios.post(urlBackend);
 };
 
+const deleteTaskAPI = (taskId) => {
+  const urlBackend = `/api/Task/delete-task?taskId=${taskId}`;
+  return axios.post(urlBackend);
+};
+
+const updateTaskAPI = (
+  taskId,
+  title,
+  description,
+  startDate,
+  endDate,
+  userId
+) => {
+  const urlBackend = `/api/Task/update-task`;
+  return axios.post(urlBackend, {
+    taskId,
+    title,
+    description,
+    startDate,
+    endDate,
+    userId,
+  });
+};
+
+const updateInsertNameSignatureImgAPI = (file, fullName) => {
+  const URL_BACKEND = `/api/User/update-insert-name-signature-img`;
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    responseType: "blob",
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("file", file);
+  bodyFormData.append("fullName", fullName);
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
+const updateSignatureImgAPI = (NormalSignature, DigitalSignature) => {
+  const URL_BACKEND = `/api/User/update-signature-img`;
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("NormalSignature", NormalSignature);
+  bodyFormData.append("DigitalSignature", DigitalSignature);
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
+const createRejectDocumentActionAPI = (reason, taskId, userId) => {
+  const urlBackend = `/api/Task/create-reject-document-action`;
+  return axios.post(urlBackend, {
+    reason,
+    taskId,
+    userId,
+  });
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -500,4 +562,9 @@ export {
   createFirstTaskAPI,
   updateConfirmTaskWithDocumentAPI,
   createHandleTaskActionAPI,
+  deleteTaskAPI,
+  updateTaskAPI,
+  updateInsertNameSignatureImgAPI,
+  updateSignatureImgAPI,
+  createRejectDocumentActionAPI,
 };

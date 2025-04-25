@@ -3,14 +3,14 @@ import { convertRoleName, convertScopeName } from "@/services/helper";
 import {
   ArrowRightOutlined,
   ClockCircleOutlined,
-  CloseCircleOutlined,
+  EditTwoTone,
   LeftOutlined,
   PlusCircleOutlined,
+  RightCircleFilled,
   RightOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
 import {
   App,
   Button,
@@ -28,9 +28,10 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Dropdown, Menu } from "antd";
-import AddTask from "./add.task";
 import { BeatLoader } from "react-spinners";
+import { useCurrentApp } from "@/components/context/app.context";
+import DetailTaskModal from "./detail.task.modal";
+import EditTaskModal from "./edit.task.modal";
 
 const { Text, Title } = Typography;
 const { Step } = Steps;
@@ -53,17 +54,26 @@ const ViewDetailProgress = () => {
   const { documentId } = useParams();
   const [processDetail, setProcessDetail] = useState(null);
   const navigate = useNavigate();
-  const [openModalCreate, setOpenModalCreate] = useState(false);
-  const { message, notification, modal } = App.useApp();
+  const { notification } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
   const [taskCreated, setTaskCreated] = useState(false);
+  const [taskId, setTaskId] = useState(null);
+  const [isSubmit, setIsSubmit] = useState(false);
+  const { user } = useCurrentApp();
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [openTaskDetailModal, setOpenTaskDetailModal] = useState(false);
+  const [openEditInitTaskModal, setOpenEditInitTaskModal] = useState(false);
+  const [firstTask, setFirstTask] = useState(null);
 
   const fetchProgress = async () => {
     setLoading(true);
     const res = await viewProcessDocumentDetailAPI(documentId);
     if (res?.data?.statusCode === 200) {
-      setProcessDetail(res.data.content);
+      const data = res.data.content;
+      setProcessDetail(data);
+      setTaskId(data?.workflowRequest?.flows[0]?.steps[0]?.taskDtos[0]?.taskId);
+      setFirstTask(data?.workflowRequest?.flows[0]?.steps[0]?.taskDtos[0]);
     } else {
       notification.error({
         message: "Tải dữ liệu thất bại",
@@ -75,6 +85,7 @@ const ViewDetailProgress = () => {
 
   useEffect(() => {
     fetchProgress();
+    setTaskCreated(false);
   }, [taskCreated]);
 
   const renderWorkflowRoles = () => {
@@ -214,18 +225,6 @@ const ViewDetailProgress = () => {
                           </span>
                         </Tag>
                       </div>
-
-                      <Button
-                        type="primary"
-                        icon={<PlusCircleOutlined />}
-                        onClick={() => {
-                          setCurrentStep(step);
-                          setOpenModalCreate(true);
-                        }}
-                        style={{ top: -20, backgroundColor: "#FC8330" }}
-                      >
-                        Tạo nhiệm vụ
-                      </Button>
                     </div>
                     {step.taskDtos.length > 0 && (
                       <div style={{ position: "relative", marginTop: 12 }}>
@@ -311,69 +310,41 @@ const ViewDetailProgress = () => {
     <Card
       key={index}
       onClick={() => {
-        // setSelectedTask(task);
-        // setOpenTaskDetailModal(true);
+        setSelectedTask(task);
+        setOpenTaskDetailModal(true);
       }}
       hoverable
       style={{
         width: 300,
         borderRadius: 12,
-        border: "1px solid transparent", // 👈 ẩn viền ban đầu
-        boxShadow: "0 0 20px 4px rgba(0,0,0,0.1)", // đổ bóng đều
+        border: "1px solid transparent",
+        boxShadow: "0 0 20px 4px rgba(0,0,0,0.1)",
         backgroundColor: "#fff",
         position: "relative",
         padding: "16px",
-        height: 300,
-        transition: "all 0.3s ease-in-out", // hiệu ứng mượt cho cả border và shadow
+        height: 320,
+        transition: "all 0.3s ease-in-out",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = "0 0 28px 6px rgba(0,0,0,0.15)";
-        e.currentTarget.style.border = "1px solid #1890ff"; // 👈 hiện viền khi hover
+        e.currentTarget.style.border = "1px solid #1890ff";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.boxShadow = "0 0 20px 4px rgba(0,0,0,0.1)";
-        e.currentTarget.style.border = "1px solid transparent"; // 👈 ẩn lại viền
+        e.currentTarget.style.border = "1px solid transparent";
       }}
     >
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          modal.confirm({
-            title: "Bạn có chắc muốn xoá nhiệm vụ này?",
-            onOk: () => {
-              // const updated = listTask[stepId]?.filter((_, i) => i !== index);
-              // setListTask((prev) => ({ ...prev, [stepId]: updated }));
-              message.success(`Xóa nhiệm vụ thành công`);
-            },
-          });
-        }}
-        style={{
-          position: "absolute",
-          top: 8,
-          right: 8,
-          background: "#fff",
-          borderRadius: "50%",
-          boxShadow: "0 0 4px rgba(0,0,0,0.2)",
-          padding: 4,
-          zIndex: 10,
-          cursor: "pointer",
-        }}
-      >
-        <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
-      </div>
       <Space direction="vertical" style={{ width: "100%" }}>
-        {/* Simulate the blurred "Thông tin chi tiết" section */}
         <div
           style={{
             width: "100%",
-            height: "60px", // Adjust height to match the blurred area in the image
-            background: "rgba(200, 200, 200, 0.3)", // Light gray background to mimic blur
-            filter: "blur(4px)", // CSS blur effect
+            height: "60px",
+            background: "rgba(200, 200, 200, 0.3)",
+            filter: "blur(4px)",
             borderRadius: "4px",
             margin: "8px 0",
           }}
         >
-          {/* Optional: Add placeholder text or shapes to mimic content underneath */}
           <div
             style={{
               width: "80%",
@@ -398,44 +369,37 @@ const ViewDetailProgress = () => {
             justifyContent: "space-between",
           }}
         >
-          <Title
-            level={5}
-            style={{ margin: 0, fontWeight: "bold", color: "#333" }}
-          >
-            {task.title}
-          </Title>
-          <Dropdown
-            trigger={["click"]}
-            overlay={
-              <Menu
-                onClick={({ key }) => {
-                  if (key === "edit") {
-                    // Thực hiện mở modal chỉnh sửa
-                    console.log("Chỉnh sửa:", task);
-                    // setSelectedTask(task);
-                    // setOpenEditTaskModal(true);
-                  } else if (key === "view") {
-                    navigate(`/task-detail/${task.taskId}`);
-                  }
+          <Tooltip title={task.title}>
+            <Title
+              level={5}
+              style={{
+                margin: 0,
+                fontWeight: "bold",
+                color: "#333",
+                maxWidth: "80%",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {task.title}
+            </Title>
+          </Tooltip>
+
+          {task.taskId !== taskId && task.status === "Waiting" && (
+            <Tooltip title="Cập nhật nhiệm vụ này">
+              <EditTwoTone
+                twoToneColor="#f57800"
+                style={{ cursor: "pointer", marginRight: 15, fontSize: 18 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedTask(task);
+                  setCurrentStep(step);
+                  setOpenEditInitTaskModal(true);
                 }}
-                items={[
-                  {
-                    key: "edit",
-                    label: "Chỉnh sửa",
-                  },
-                  {
-                    key: "view",
-                    label: "Xem chi tiết",
-                  },
-                ]}
               />
-            }
-          >
-            <HiOutlineDotsCircleHorizontal
-              style={{ fontSize: 20, cursor: "pointer" }}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </Dropdown>
+            </Tooltip>
+          )}
         </div>
 
         <Text style={{ color: "#666", fontSize: 14, marginTop: 0 }}>
@@ -448,7 +412,13 @@ const ViewDetailProgress = () => {
           </Text>
           <div style={{ display: "flex", alignItems: "center", marginTop: 4 }}>
             <Progress
-              percent={task.taskStatus === "Completed" ? 100 : 0}
+              percent={
+                task.taskStatus === "Completed"
+                  ? 100
+                  : task.taskStatus === "InProgress"
+                  ? 50
+                  : 0
+              }
               showInfo={false}
               strokeColor={getTaskColor(task.taskStatus)}
               trailColor="#e6f7ff"
@@ -461,7 +431,12 @@ const ViewDetailProgress = () => {
                 color: getTaskColor(task.taskStatus),
               }}
             >
-              {task.taskStatus === "Completed" ? 100 : 0}%
+              {task.taskStatus === "Completed"
+                ? 100
+                : task.taskStatus === "InProgress"
+                ? 50
+                : 0}
+              %
             </Text>
           </div>
         </div>
@@ -484,6 +459,7 @@ const ViewDetailProgress = () => {
               height={24}
               src={task?.user?.avatar}
               style={{ borderRadius: "50%", objectFit: "cover" }}
+              preview={false}
             />
           </Tooltip>
         </div>
@@ -533,13 +509,41 @@ const ViewDetailProgress = () => {
           overflowY: "auto",
         }}
       >
-        <h2>Thông tin quá trình xử lý văn bản</h2>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <h2>Thông tin quá trình xử lý văn bản</h2>
+          {user.userId === firstTask?.user?.userId &&
+            firstTask.taskStatus === "InProgress" && (
+              <Button
+                type="primary"
+                onClick={() => {
+                  navigate(`/init-progress/${documentId}`);
+                }}
+                style={{
+                  backgroundColor: "#FC8330",
+                  borderColor: "#FC8330",
+                  marginTop: 20,
+                  marginBottom: 40,
+                }}
+                loading={isSubmit}
+                icon={<RightCircleFilled />}
+              >
+                Khởi tạo nhiệm vụ
+              </Button>
+            )}
+        </div>
+
         <div style={{ margin: "20px 10px 0 10px" }}>
           <Row gutter={[16, 16]} align="middle">
             <Col span={4}>
               <div style={labelStyle}>Tên văn bản:</div>
             </Col>
-            <Col span={7} style={{ marginRight: 80 }}>
+            <Col span={18} style={{ marginRight: 80 }}>
               <Input
                 style={inputStyle}
                 allowClear
@@ -547,7 +551,22 @@ const ViewDetailProgress = () => {
                 readOnly
               />
             </Col>
+          </Row>
+          <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
+            <Col span={4}>
+              <div style={labelStyle}>Tên luồng xử lý:</div>
+            </Col>
+            <Col span={18} style={{ marginRight: 80 }}>
+              <Input
+                style={inputStyle}
+                allowClear
+                value={processDetail?.workflowRequest?.workflowName}
+                readOnly
+              />
+            </Col>
+          </Row>
 
+          <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
             <Col span={4}>
               <div style={labelStyle}>Loại văn bản:</div>
             </Col>
@@ -559,21 +578,6 @@ const ViewDetailProgress = () => {
                 readOnly
               />
             </Col>
-          </Row>
-
-          <Row gutter={[16, 16]} align="middle" style={{ marginTop: 16 }}>
-            <Col span={4}>
-              <div style={labelStyle}>Tên luồng xử lý:</div>
-            </Col>
-            <Col span={7} style={{ marginRight: 80 }}>
-              <Input
-                style={inputStyle}
-                allowClear
-                value={processDetail?.workflowRequest?.workflowName}
-                readOnly
-              />
-            </Col>
-
             <Col span={4}>
               <div style={labelStyle}>Phạm vi ban hành:</div>
             </Col>
@@ -592,14 +596,19 @@ const ViewDetailProgress = () => {
 
         {renderWorkflowDetails()}
 
-        <AddTask
-          openModalCreate={openModalCreate}
-          setOpenModalCreate={setOpenModalCreate}
-          currentStep={currentStep}
-          setCurrentStep={setCurrentStep}
-          taskCreated={taskCreated}
+        <DetailTaskModal
+          openTaskDetailModal={openTaskDetailModal}
+          setOpenTaskDetailModal={setOpenTaskDetailModal}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
+        />
+        <EditTaskModal
+          openEditInitTaskModal={openEditInitTaskModal}
+          setOpenEditInitTaskModal={setOpenEditInitTaskModal}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
           setTaskCreated={setTaskCreated}
-          documentId={documentId}
+          currentStep={currentStep}
         />
       </div>
     </div>

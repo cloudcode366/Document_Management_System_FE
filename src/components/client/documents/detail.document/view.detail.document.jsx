@@ -26,6 +26,7 @@ import {
   SaveOutlined,
   SolutionOutlined,
   DownloadOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import samplePDF from "assets/files/sample.pdf";
 import { useNavigate, useParams } from "react-router-dom";
@@ -38,10 +39,10 @@ import { useCurrentApp } from "@/components/context/app.context";
 import { BeatLoader } from "react-spinners";
 import {
   createHandleTaskActionAPI,
+  createRejectDocumentActionAPI,
   viewDetailDocumentAPI,
 } from "@/services/api.service";
 import dayjs from "dayjs";
-import { version } from "nprogress";
 import { Document, Page, pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 
@@ -93,12 +94,15 @@ const ViewDetailDocument = () => {
     useState(false);
   const [openApproveConfirmModal, setOpenApproveConfirmModal] = useState(false);
   const [openRejectConfirmModal, setOpenRejectConfirmModal] = useState(false);
+  const [openViewConfirmModal, setOpenViewConfirmModal] = useState(false);
+  const [openSubmitConfirmModal, setOpenSubmitConfirmModal] = useState(false);
   const [openArchivedConfirmModal, setOpenArchivedConfirmModal] =
     useState(false);
   const [rejectForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState(null);
   const buttons = [];
+  const [isSubmit, setIsSubmit] = useState(false);
 
   const fetchInfo = async () => {
     setLoading(true);
@@ -118,10 +122,13 @@ const ViewDetailDocument = () => {
         (version) => version.isFinal === false
       );
 
-      const lastTask = data.tasks[data.tasks.length - 1]; // ✅ task cuối
-      const taskType = lastTask?.taskType;
-      const taskId = lastTask?.taskId;
-
+      const currentTask = data.tasks.find((task) => {
+        return task.status === "InProgress";
+      });
+      const taskType = currentTask?.taskType;
+      const taskId = currentTask?.taskId;
+      const taskStatus = currentTask?.status;
+      console.log("currentTask", currentTask);
       setDocument({
         ...data,
         digitalSignatures,
@@ -130,16 +137,20 @@ const ViewDetailDocument = () => {
         rejectedVersions,
         taskType,
         taskId,
+        taskStatus,
       });
     }
     setLoading(false);
   };
+
+  console.log("document", document);
 
   useEffect(() => {
     fetchInfo();
   }, []);
 
   const handleApproveDocument = async () => {
+    setIsSubmit(true);
     const res = await createHandleTaskActionAPI(
       document?.taskId,
       user.userId,
@@ -158,48 +169,105 @@ const ViewDetailDocument = () => {
         description: "Xin vui lòng thử lại sau.",
       });
     }
+    setIsSubmit(false);
   };
+
   const handleArchiveDocument = () => {
+    setIsSubmit(true);
     // Gửi dữ liệu lên server ở đây nếu cần
     message.success("Văn bản đã được lưu trữ thành công!");
     setOpenArchivedConfirmModal(false);
-    navigate(`/detail-document/${documentId}`);
+    navigate(`/detail-archived-document/${documentId}`);
     // Điều hướng hoặc cập nhật UI nếu cần
+    setIsSubmit(false);
   };
 
   const handleRejectDocument = async () => {
     try {
+      setIsSubmit(true);
       const values = await rejectForm.validateFields();
-      console.log("Lý do từ chối:", values.reason); // Thay bằng logic xử lý thật
-      setOpenRejectConfirmModal(false);
-      notification.success({
-        message: "Văn bản đã bị từ chối thành công!",
-        description: `Lý do: ${values.reason}`,
-      });
-      rejectForm.resetFields(); // reset sau khi dùng
-      message.success("Đã từ chối văn bản.");
+      console.log("Lý do từ chối:", values.reason);
+      const res = await createRejectDocumentActionAPI(
+        values.reason,
+        document?.taskId,
+        user?.userId
+      );
+      if (res?.data?.statusCode === 201) {
+        const res2 = await createHandleTaskActionAPI(
+          document?.taskId,
+          user.userId,
+          "RejectDocument"
+        );
+        if (res2?.data?.statusCode === 200) {
+          notification.success({
+            message: "Văn bản đã bị từ chối thành công!",
+            description: `Lý do: ${values.reason}`,
+          });
+          rejectForm.resetFields();
+          setOpenRejectConfirmModal(false);
+        }
+      }
     } catch (errorInfo) {
-      // Nếu không nhập lý do thì sẽ báo lỗi
       console.log("Validation Failed:", errorInfo);
+      notification.error({
+        message: "Hệ thống đang trong thời gian bảo trì!",
+        description: "Xin vui lòng thử lại sau.",
+      });
+    } finally {
+      setIsSubmit(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div
-        className="full-screen-overlay"
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-      >
-        <BeatLoader size={25} color="#364AD6" />
-      </div>
+  const handleViewDocument = async () => {
+    setIsSubmit(true);
+    const res = await createHandleTaskActionAPI(
+      document?.taskId,
+      user.userId,
+      "SubmitDocument"
     );
-  }
-  if (document?.taskType === "Upload") {
+    if (res?.data?.statusCode === 200) {
+      notification.success({
+        message: "Hoàn thành",
+        description: "Xác nhận đã xem văn bản thành công.",
+      });
+      await fetchInfo();
+    } else {
+      notification.error({
+        message: "Hệ thống đang bận!",
+        description: "Xin vui lòng thử lại sau.",
+      });
+    }
+    setIsSubmit(false);
+  };
+
+  const handleSubmitDocument = async () => {
+    setIsSubmit(true);
+    const res = await createHandleTaskActionAPI(
+      document?.taskId,
+      user.userId,
+      "SubmitDocument"
+    );
+    if (res?.data?.statusCode === 200) {
+      notification.success({
+        message: "Nộp văn bản thành công!",
+        description: "Văn bản đã được duyệt thành công.",
+      });
+      setOpenApproveConfirmModal(false);
+      await fetchInfo();
+    } else {
+      notification.error({
+        message: "Hệ thống đang trong thời gian bảo trì!",
+        description: "Xin vui lòng thử lại sau.",
+      });
+    }
+    setIsSubmit(false);
+  };
+
+  // Tải văn bản: Chưa xử lý
+  if (
+    document?.taskType === "Upload" &&
+    document?.taskStatus === "InProgress"
+  ) {
     buttons.push(
       <Button
         icon={<FileTextOutlined style={{ color: "#08979c" }} />}
@@ -233,7 +301,8 @@ const ViewDetailDocument = () => {
     );
   }
 
-  if (document?.taskType === "Sign") {
+  // Ký điện tử: Chưa xử lý
+  if (document?.taskType === "Sign" && document?.taskStatus === "InProgress") {
     buttons.push(
       <Button
         icon={<EditOutlined style={{ color: "#1890ff" }} />}
@@ -266,7 +335,11 @@ const ViewDetailDocument = () => {
     );
   }
 
-  if (document?.taskType === "Submit") {
+  // Nộp văn bản: đã xử lý
+  if (
+    document?.taskType === "Submit" &&
+    document?.taskStatus === "InProgress"
+  ) {
     buttons.push(
       <Button
         icon={<ExportOutlined style={{ color: "#fa8c16" }} />}
@@ -292,14 +365,18 @@ const ViewDetailDocument = () => {
           e.currentTarget.style.color = "#fa8c16";
           e.currentTarget.style.transform = "scale(1)";
         }}
-        onClick={() => console.log("Nộp văn bản")}
+        onClick={() => setOpenSubmitConfirmModal(true)}
       >
         Nộp văn bản
       </Button>
     );
   }
 
-  if (document?.taskType === "Browse") {
+  // Từ chối: đã xử lý
+  if (
+    document?.taskType === "Browse" &&
+    document?.taskStatus === "InProgress"
+  ) {
     buttons.push(
       <Button
         icon={<CloseOutlined style={{ color: "#ff4d4f" }} />}
@@ -334,7 +411,11 @@ const ViewDetailDocument = () => {
     );
   }
 
-  if (document?.taskType === "Browse") {
+  // Duyệt văn bản: đã xử lý
+  if (
+    document?.taskType === "Browse" &&
+    document?.taskStatus === "InProgress"
+  ) {
     buttons.push(
       <Button
         icon={<CheckOutlined style={{ color: "#52c41a" }} />}
@@ -369,7 +450,11 @@ const ViewDetailDocument = () => {
     );
   }
 
-  if (document?.taskType === "Create") {
+  // Khởi tạo nhiệm vụ: đã xử lý
+  if (
+    document?.taskType === "Create" &&
+    document?.taskStatus === "InProgress"
+  ) {
     buttons.push(
       <Button
         icon={<SolutionOutlined />}
@@ -397,7 +482,7 @@ const ViewDetailDocument = () => {
           e.currentTarget.style.transform = "scale(1)";
         }}
         onClick={() => {
-          navigate(`/init-progress/${documentId}`);
+          navigate(`/init-progress/${documentId}/${document?.taskId}`);
         }}
       >
         Khởi tạo nhiệm vụ
@@ -405,6 +490,44 @@ const ViewDetailDocument = () => {
     );
   }
 
+  // Đã xem văn bản: đã xử lý
+  if (document?.taskType === "View" && document?.taskStatus === "InProgress") {
+    buttons.push(
+      <Button
+        icon={<CheckCircleOutlined />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#f6ffed",
+          border: "1px solid #b7eb8f",
+          color: "#52c41a",
+          fontWeight: 600,
+          transition: "all 0.3s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#d9f7be";
+          e.currentTarget.style.border = "1px solid #95de64";
+          e.currentTarget.style.color = "#389e0d";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#f6ffed";
+          e.currentTarget.style.border = "1px solid #b7eb8f";
+          e.currentTarget.style.color = "#52c41a";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => {
+          setOpenViewConfirmModal(true);
+        }}
+      >
+        Xác nhận đã xem
+      </Button>
+    );
+  }
+
+  // Lưu trữ văn bản: Chưa xử lý
   if (document) {
     buttons.push(
       <Button
@@ -438,6 +561,22 @@ const ViewDetailDocument = () => {
       >
         Lưu trữ văn bản
       </Button>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <BeatLoader size={25} color="#364AD6" />
+      </div>
     );
   }
 
@@ -557,12 +696,28 @@ const ViewDetailDocument = () => {
                 {document?.documentTypeName}
               </span>
             </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+            <div
+              style={{
+                fontSize: "14px",
+                marginBottom: "8px",
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+              }}
+            >
               <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
+              <span
+                style={{
+                  fontWeight: 500,
+                  textAlign: "right",
+                  maxWidth: "50%",
+                  wordBreak: "break-word",
+                }}
+              >
                 {document?.workflowName}
               </span>
             </div>
+
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Người gửi:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
@@ -599,16 +754,14 @@ const ViewDetailDocument = () => {
                 {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              {/* Người ký + tên đầu tiên */}
+            {/* <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "#5f6368" }}>Người ký:</span>
                 <span style={{ fontWeight: 500, marginBottom: 4 }}>
                   {document?.digitalSignatures?.[0]?.signerName}
                 </span>
               </div>
-
-              {/* Các tên còn lại */}
+  
               <div style={{ textAlign: "right", fontWeight: 500 }}>
                 {document?.digitalSignatures?.slice(1).map((sig, index) => (
                   <div key={index} style={{ marginBottom: 4 }}>
@@ -616,7 +769,52 @@ const ViewDetailDocument = () => {
                   </div>
                 ))}
               </div>
+            </div> */}
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: "12px",
+                }}
+              >
+                <span style={{ color: "#5f6368", whiteSpace: "nowrap" }}>
+                  Người ký:
+                </span>
+
+                <div
+                  style={{
+                    flex: 1,
+                    textAlign: "right",
+                    wordBreak: "break-word",
+                    fontWeight: 500,
+                    display: "inline-block",
+                    maxWidth: "50%",
+                  }}
+                >
+                  {/* Người ký đầu tiên */}
+                  <span>{document?.digitalSignatures?.[0]?.signerName}</span>
+                </div>
+              </div>
+
+              {/* Các tên còn lại */}
+              {document?.digitalSignatures?.slice(1).map((sig, index) => (
+                <div
+                  key={index}
+                  style={{
+                    textAlign: "right",
+                    fontWeight: 500,
+                    wordBreak: "break-word",
+                    marginTop: 4,
+                    maxWidth: "70%",
+                  }}
+                >
+                  {sig.signerName}
+                </div>
+              ))}
             </div>
+
             <Divider
               variant="solid"
               style={{
@@ -732,7 +930,7 @@ const ViewDetailDocument = () => {
         onOk={handleRejectDocument}
         onCancel={() => {
           setOpenRejectConfirmModal(false);
-          rejectForm.resetFields(); // reset nếu người dùng huỷ
+          rejectForm.resetFields();
         }}
         okText="Từ chối"
         cancelText="Hủy"
@@ -753,6 +951,32 @@ const ViewDetailDocument = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title="Xác nhận đã xem văn bản"
+        open={openViewConfirmModal}
+        onOk={handleViewDocument}
+        onCancel={() => setOpenViewConfirmModal(false)}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        centered
+        maskClosable={false}
+      >
+        <p>Bạn có chắc chắn xác nhận đã xem văn bản này không?</p>
+      </Modal>
+
+      <Modal
+        title="Xác nhận nộp văn bản"
+        open={openSubmitConfirmModal}
+        onOk={handleSubmitDocument}
+        onCancel={() => setOpenSubmitConfirmModal(false)}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        centered
+        maskClosable={false}
+      >
+        <p>Bạn có chắc chắn xác nhận nộp văn bản này không?</p>
       </Modal>
     </div>
   );

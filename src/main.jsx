@@ -177,13 +177,14 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/init-progress/:documentId",
+        path: "/init-progress/:documentId/:taskChiefId?",
         element: (
           <ProtectedRoute>
             <InitProgress />
           </ProtectedRoute>
         ),
       },
+
       {
         path: "/task",
         element: (
