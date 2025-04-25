@@ -210,7 +210,7 @@ const ProfilePage = () => {
                   <Image
                     width="100%"
                     height="100%"
-                    src="https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png"
+                    src={profile.sign}
                     fallback="/default-avatar.png"
                     style={{
                       objectFit: "contain",
@@ -238,7 +238,7 @@ const ProfilePage = () => {
                   <Image
                     width="100%"
                     height="100%"
-                    src="https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png"
+                    src={profile.signDigital}
                     fallback="/default-avatar.png"
                     style={{
                       objectFit: "contain",

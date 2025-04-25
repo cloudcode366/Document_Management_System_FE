@@ -1,5 +1,5 @@
 import { getTaskById, viewProfileUserAPI } from "@/services/api.service";
-import { convertScopeName } from "@/services/helper";
+import { convertScopeName, convertTaskType } from "@/services/helper";
 import { Image, Tooltip } from "antd";
 import React, { useEffect, useState } from "react";
 import { MdOutlineMoreVert } from "react-icons/md";
@@ -274,7 +274,7 @@ const TaskDetail = () => {
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Nhiệm vụ chính:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  {taskData.taskDto.taskType}
+                  {convertTaskType(taskData.taskDto.taskType)}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>

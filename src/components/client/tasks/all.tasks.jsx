@@ -6,7 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { getAllTasks } from "@/services/api.service";
 import { useCurrentApp } from "@/components/context/app.context";
 import React, { useEffect, useState } from "react";
-import { convertScopeName, convertStatus } from "@/services/helper";
+import {
+  convertScopeName,
+  convertStatus,
+  convertTaskType,
+} from "@/services/helper";
 import { getStatusColor } from "@/services/helper";
 
 const AllTasks = () => {
@@ -137,7 +141,7 @@ const AllTasks = () => {
                         margin: "5px 0",
                       }}
                     >
-                      {task.taskType}
+                      {convertTaskType(task.taskType)}
                     </p>
                     <p
                       style={{
