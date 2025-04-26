@@ -44,7 +44,6 @@ import dayjs from "dayjs";
 import { Document, Page, pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 import CreateVersionModal from "./create.version.modal";
-import DigitalSignatureModal from "../digital.signature/digital.signature";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -95,8 +94,6 @@ const ViewDetailDocument = () => {
   const [openRejectConfirmModal, setOpenRejectConfirmModal] = useState(false);
   const [openViewConfirmModal, setOpenViewConfirmModal] = useState(false);
   const [openSubmitConfirmModal, setOpenSubmitConfirmModal] = useState(false);
-  const [openDigitalSignatureModal, setOpenDigitalSignatureModal] =
-    useState(false);
   const [rejectForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState(null);
@@ -141,8 +138,6 @@ const ViewDetailDocument = () => {
     }
     setLoading(false);
   };
-
-  console.log("document", document);
 
   useEffect(() => {
     fetchInfo();
@@ -311,7 +306,7 @@ const ViewDetailDocument = () => {
           e.currentTarget.style.color = "#1890ff";
           e.currentTarget.style.transform = "scale(1)";
         }}
-        onClick={() => setOpenDigitalSignatureModal(true)}
+        onClick={() => navigate(`/digital-signature/${documentId}`)}
       >
         Ký điện tử
       </Button>
@@ -916,11 +911,6 @@ const ViewDetailDocument = () => {
         openCreateVersionModal={openCreateVersionModal}
         setOpenCreateVersionModal={setOpenCreateVersionModal}
         documentId={documentId}
-      />
-      <DigitalSignatureModal
-        openDigitalSignatureModal={openDigitalSignatureModal}
-        setOpenDigitalSignatureModal={setOpenDigitalSignatureModal}
-        documentUrl={document?.versions?.[document?.versions?.length - 1]?.url}
       />
     </div>
   );

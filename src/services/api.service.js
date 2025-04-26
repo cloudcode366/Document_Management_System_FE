@@ -515,6 +515,34 @@ const createRejectDocumentActionAPI = (reason, taskId, userId) => {
   });
 };
 
+const createSignInSignatureDigitalAPI = (userName, password) => {
+  const urlBackend = `/api/SignatureDIgitalApi/create-sign-in-signature-digital`;
+  return axios.post(urlBackend, { userName, password });
+};
+
+const createSignatureDigitalAPI = (
+  otpCode,
+  token,
+  llx,
+  lly,
+  urx,
+  ury,
+  pageNumber,
+  documentId
+) => {
+  const urlBackend = `/api/SignatureDIgitalApi/create-signature-digital`;
+  return axios.post(urlBackend, {
+    otpCode,
+    token,
+    llx,
+    lly,
+    urx,
+    ury,
+    pageNumber,
+    documentId,
+  });
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -573,4 +601,6 @@ export {
   updateSignatureImgAPI,
   createRejectDocumentActionAPI,
   viewMainWorkflowByScopeAPI,
+  createSignInSignatureDigitalAPI,
+  createSignatureDigitalAPI,
 };
