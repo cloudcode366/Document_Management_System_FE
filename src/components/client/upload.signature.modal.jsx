@@ -50,7 +50,9 @@ const UploadSignatureModal = () => {
         setDigitalBlob(blob);
       }
     } catch (err) {
-      message.error("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+      message.error(
+        "Kích thước hình ảnh phải lớn hơn 300x150 và nhỏ hơn 330x200."
+      );
     }
   };
 
@@ -81,7 +83,7 @@ const UploadSignatureModal = () => {
       }, 1000); // chờ 1s cho message hiển thị xong
     } catch (error) {
       console.error("Lỗi gửi chữ ký:", error);
-      message.error("Có lỗi xảy ra khi gửi chữ ký.");
+      message.error("Có lỗi xảy ra khi xác nhận chữ ký.");
     }
     setIsSubmit(false);
   };
