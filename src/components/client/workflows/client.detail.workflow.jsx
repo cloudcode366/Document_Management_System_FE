@@ -52,7 +52,6 @@ const ClientDetailWorkflow = (props) => {
     const roles = workflowDetail.flows.flatMap((flow, idx, arr) =>
       idx === arr.length - 1 ? [flow.roleStart, flow.roleEnd] : [flow.roleStart]
     );
-    const uniqueRoles = [...new Set(roles)];
 
     return (
       <div
@@ -75,7 +74,7 @@ const ClientDetailWorkflow = (props) => {
           Sơ đồ quy trình:
         </Text>
         <Row gutter={12} align="middle" justify="start">
-          {uniqueRoles.map((role, idx) => (
+          {roles.map((role, idx) => (
             <React.Fragment key={idx}>
               <Col>
                 <Tag
@@ -91,7 +90,7 @@ const ClientDetailWorkflow = (props) => {
                   {convertRoleName(role)}
                 </Tag>
               </Col>
-              {idx < uniqueRoles.length - 1 && (
+              {idx < roles.length - 1 && (
                 <Col>
                   <ArrowRightOutlined
                     style={{ fontSize: 18, color: "#999", marginTop: "10px" }}

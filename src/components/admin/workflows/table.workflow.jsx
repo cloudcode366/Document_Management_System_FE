@@ -20,7 +20,6 @@ const TableWorkflow = () => {
   });
 
   const [openModalCreate, setOpenModalCreate] = useState(false);
-  const [mainWorkflows, setMainWorkflows] = useState([]);
 
   const [openViewDetail, setOpenViewDetail] = useState(false);
   const [dataViewDetail, setDataViewDetail] = useState(null);
@@ -218,10 +217,6 @@ const TableWorkflow = () => {
               limit: res.data?.meatadataDto.limit,
               total: res.data?.size,
             });
-            const mainWorkflowsData = res.data.content.filter(
-              (w) => w.createAt === null
-            );
-            setMainWorkflows(mainWorkflowsData);
           }
           return {
             data: res.data?.content,
@@ -261,7 +256,6 @@ const TableWorkflow = () => {
         setOpenModalCreate={setOpenModalCreate}
         refreshTable={refreshTable}
         setDataViewDetail={setDataViewDetail}
-        mainWorkflows={mainWorkflows}
       />
       <DetailWorkflow
         openViewDetail={openViewDetail}

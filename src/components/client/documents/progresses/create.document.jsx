@@ -37,7 +37,7 @@ const CreateDocument = (props) => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
   const [selectedScope, setSelectedScope] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState("");
   const [listWorkflows, setListWorkflows] = useState([]);
   const [listDocumentTypes, setListDocumentTypes] = useState([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState({});
@@ -118,8 +118,8 @@ const CreateDocument = (props) => {
       if (res?.data?.statusCode === 200) {
         const data = res.data.content;
         if (
-          user?.mainRole.roleName === data.flows[0].roleStart ||
-          user?.subRole.roleName === data.flows[0].roleStart
+          user?.mainRole?.roleName === data.flows[0].roleStart ||
+          user?.subRole?.roleName === data.flows[0].roleStart
         ) {
           setWorkflowDetail(res.data.content);
           setShowDocumentTypeSelect(true);
@@ -159,7 +159,7 @@ const CreateDocument = (props) => {
     setLoading(false);
   };
 
-  const handleConfirmRest = async (documentTemplateId) => {
+  const handleConfirmRest = async (selectedTemplate) => {
     if (selectedScope !== "InComing" && !selectedTemplate) {
       message.error("Vui lòng chọn một mẫu văn bản trước khi xác nhận.");
       return;
@@ -204,7 +204,6 @@ const CreateDocument = (props) => {
     const roles = workflowDetail.flows.flatMap((flow, idx, arr) =>
       idx === arr.length - 1 ? [flow.roleStart, flow.roleEnd] : [flow.roleStart]
     );
-    const uniqueRoles = [...new Set(roles)];
 
     return (
       <div
@@ -227,7 +226,7 @@ const CreateDocument = (props) => {
           Sơ đồ quy trình:
         </Text>
         <Row gutter={12} align="middle" justify="start">
-          {uniqueRoles.map((role, idx) => (
+          {roles.map((role, idx) => (
             <React.Fragment key={idx}>
               <Col>
                 <Tag
@@ -243,7 +242,7 @@ const CreateDocument = (props) => {
                   {convertRoleName(role)}
                 </Tag>
               </Col>
-              {idx < uniqueRoles.length - 1 && (
+              {idx < roles.length - 1 && (
                 <Col>
                   <ArrowRightOutlined
                     style={{ fontSize: 18, color: "#999", marginTop: "10px" }}
@@ -383,18 +382,35 @@ const CreateDocument = (props) => {
                 <p className="ant-upload-hint">Chỉ hỗ trợ định dạng .pdf</p>
               </Dragger>
             ) : (
-              <Select
-                placeholder="Chọn mẫu văn bản"
-                style={{ width: "100%" }}
-                onChange={(value) => setSelectedTemplate(value)}
-                value={selectedTemplate}
-              >
-                {documentTemplates.map((template) => (
-                  <Option key={template.id} value={template.id}>
-                    {template.name}
-                  </Option>
-                ))}
-              </Select>
+              <>
+                <div
+                  style={{
+                    marginBottom: 8,
+                    marginTop: 8,
+                    fontWeight: "bold",
+                    fontSize: "15px",
+                  }}
+                >
+                  Vui lòng chọn loại văn bản:
+                </div>
+                <Select
+                  placeholder="Chọn mẫu văn bản"
+                  style={{ width: "100%" }}
+                  onChange={(value) => {
+                    const selected = documentTemplates.find(
+                      (tpl) => tpl.id === value
+                    );
+                    setSelectedTemplate(selected);
+                  }}
+                  value={selectedTemplate?.id}
+                >
+                  {documentTemplates.map((template) => (
+                    <Option key={template.id} value={template.id}>
+                      {template.name}
+                    </Option>
+                  ))}
+                </Select>
+              </>
             )}
           </div>
         )}
@@ -408,6 +424,7 @@ const CreateDocument = (props) => {
         resDocument={resDocument}
         selectedWorkflow={selectedWorkflow}
         selectedTemplate={selectedTemplate}
+        setSelectedTemplate={setSelectedTemplate}
         selectedScope={selectedScope}
         selectedDocumentType={selectedDocumentType}
         handleCloseCreateDocumentModal={handleCloseCreateDocumentModal}

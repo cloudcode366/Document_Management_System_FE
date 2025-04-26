@@ -104,7 +104,6 @@ const ViewInitProgress = () => {
           ? [flow.roleStart, flow.roleEnd]
           : [flow.roleStart]
     );
-    const uniqueRoles = [...new Set(roles)];
 
     if (loading) {
       return (
@@ -143,7 +142,7 @@ const ViewInitProgress = () => {
           Sơ đồ quy trình:
         </Text>
         <Row gutter={12} align="middle" justify="start">
-          {uniqueRoles.map((role, idx) => (
+          {roles.map((role, idx) => (
             <React.Fragment key={idx}>
               <Col>
                 <Tag
@@ -159,7 +158,7 @@ const ViewInitProgress = () => {
                   {convertRoleName(role)}
                 </Tag>
               </Col>
-              {idx < uniqueRoles.length - 1 && (
+              {idx < roles.length - 1 && (
                 <Col>
                   <ArrowRightOutlined
                     style={{ fontSize: 18, color: "#999", marginTop: "10px" }}

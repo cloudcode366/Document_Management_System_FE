@@ -1,5 +1,9 @@
 import { getTaskById, viewProfileUserAPI } from "@/services/api.service";
-import { convertScopeName, convertTaskType } from "@/services/helper";
+import {
+  convertRoleName,
+  convertScopeName,
+  convertTaskType,
+} from "@/services/helper";
 import { Image, Tooltip } from "antd";
 import React, { useEffect, useState } from "react";
 import { MdOutlineMoreVert } from "react-icons/md";
@@ -88,28 +92,31 @@ const TaskDetail = () => {
                   filter: "blur(5px)",
                 }}
               />
-              <button
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "40px",
-                  height: "40px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
-                onClick={() =>
-                  navigate(`/detail-document/${taskData.documentId}`)
-                }
-              >
-                <span style={{ color: "white", fontSize: "20px" }}>🔍</span>
-              </button>
+              <Tooltip title="Xem văn bản cần xử lý">
+                {" "}
+                <button
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: "40px",
+                    height: "40px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                  onClick={() =>
+                    navigate(`/detail-document/${taskData.documentId}`)
+                  }
+                >
+                  <span style={{ color: "white", fontSize: "20px" }}>🔍</span>
+                </button>
+              </Tooltip>
             </div>
 
             <div
@@ -165,7 +172,7 @@ const TaskDetail = () => {
                   navigate(`/detail-document/${taskData.documentId}`)
                 }
               >
-                Xử lý văn bản
+                Mở văn bản mẫu
               </button>
             </div>
 
@@ -228,10 +235,10 @@ const TaskDetail = () => {
                       margin: "0",
                     }}
                   >
-                    {profile.fullName}
+                    {profile?.fullName}
                   </p>
                   <p style={{ fontSize: "12px", color: "#666", margin: "0" }}>
-                    {profile.mainRole.roleName}
+                    {convertRoleName(profile?.mainRole?.roleName)}
                   </p>
                 </div>
               </div>

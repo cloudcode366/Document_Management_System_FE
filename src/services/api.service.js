@@ -394,6 +394,11 @@ const viewAllTemplatesAPI = (query) => {
   return axios.get(urlBackend);
 };
 
+const viewMainWorkflowByScopeAPI = (scope) => {
+  const urlBackend = `/api/Workflow/view-main-workflow-by-scope?scope=${scope}`;
+  return axios.get(urlBackend);
+};
+
 const createTaskAPI = (
   title,
   description,
@@ -567,4 +572,5 @@ export {
   updateInsertNameSignatureImgAPI,
   updateSignatureImgAPI,
   createRejectDocumentActionAPI,
+  viewMainWorkflowByScopeAPI,
 };

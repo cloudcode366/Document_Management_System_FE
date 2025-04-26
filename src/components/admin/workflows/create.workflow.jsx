@@ -16,6 +16,7 @@ import {
   Descriptions,
   Tooltip,
   notification,
+  App,
 } from "antd";
 import {
   PlusOutlined,
@@ -30,6 +31,7 @@ import {
   viewAllDocumentTypesAPI,
   viewAllFlowsAPI,
   viewAllRoles,
+  viewMainWorkflowByScopeAPI,
   viewWorkflowDetailsWithFlowAndStepAPI,
 } from "@/services/api.service";
 import { convertRoleName, convertScopeName } from "@/services/helper";
@@ -37,19 +39,20 @@ import "styles/loading.scss";
 import { BeatLoader } from "react-spinners";
 import { useCurrentApp } from "@/components/context/app.context";
 import uniqBy from "lodash/uniqBy";
+import { values } from "lodash";
 
 const { Option } = Select;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Step } = Steps;
 
 const CreateWorkflow = ({
   openModalCreate,
   setOpenModalCreate,
   refreshTable,
-  mainWorkflows,
 }) => {
   const { user } = useCurrentApp();
   const [form] = Form.useForm();
+  const { message, notification } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [documentTypes, setDocumentTypes] = useState([]);
   const [roleRes, setRoleRes] = useState([]);
@@ -60,6 +63,9 @@ const CreateWorkflow = ({
   const [workflowRoles, setWorkflowRoles] = useState([]);
   const [addingIndex, setAddingIndex] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
+  const [workflowId, setWorkflowId] = useState(null);
+  const [workflowOptions, setWorkflowOptions] = useState([]);
+  const [showSelect, setShowSelect] = useState(false);
 
   const fetchDocumentTypes = async () => {
     setLoading(true);
@@ -86,7 +92,6 @@ const CreateWorkflow = ({
           roleId: role.roleId,
           roleName: role.roleName,
         }));
-      console.log(`>>> newRolesData: `, newRolesData);
       setRoleRes(newRolesData);
     }
     setLoading(false);
@@ -108,24 +113,33 @@ const CreateWorkflow = ({
     fetchFlows();
   }, [openModalCreate]);
 
+  const handleScopeChange = async (selectedScope) => {
+    setScope(selectedScope);
+    const res = await viewMainWorkflowByScopeAPI(selectedScope);
+    if (res?.data?.statusCode === 200) {
+      setWorkflowOptions(res.data.content);
+      setWorkflowId(null);
+      setShowSelect(true);
+    } else {
+      notification.error({
+        message: "Hệ thống đang trong thời gian bảo trì!",
+        description: "Xin lòng thử lại sau ít phút",
+      });
+    }
+  };
+
   const getWorkflowDetailsData = async (workflowId) => {
     const res = await viewWorkflowDetailsWithFlowAndStepAPI(workflowId);
-    const filterScope = mainWorkflows.find(
-      (w) => w.workflowId === workflowId
-    )?.scope;
-    setScope(filterScope);
     if (res?.data?.statusCode === 200) {
       const detail = res.data.content;
       setWorkflowDetail(detail);
 
-      // Tạo danh sách role từ flows
       const roles = detail.flows.flatMap((flow, idx, arr) =>
         idx === arr.length - 1
           ? [flow.roleStart, flow.roleEnd]
           : [flow.roleStart]
       );
-      const uniqueRoles = [...new Set(roles)];
-      setWorkflowRoles(uniqueRoles);
+      setWorkflowRoles(roles);
       setCurrentStep(2);
     }
   };
@@ -135,17 +149,20 @@ const CreateWorkflow = ({
     const nextRole = workflowRoles[index + 1];
 
     const pair1 = { roleStart: prevRole, roleEnd: selectedRole };
-    const pair2 = { roleStart: selectedRole, roleEnd: nextRole };
+    const pair2 = nextRole
+      ? { roleStart: selectedRole, roleEnd: nextRole }
+      : null;
 
     const isValid =
       flows.some(
         (flow) =>
           flow.roleStart === pair1.roleStart && flow.roleEnd === pair1.roleEnd
       ) &&
-      flows.some(
-        (flow) =>
-          flow.roleStart === pair2.roleStart && flow.roleEnd === pair2.roleEnd
-      );
+      (pair2 === null ||
+        flows.some(
+          (flow) =>
+            flow.roleStart === pair2.roleStart && flow.roleEnd === pair2.roleEnd
+        ));
 
     if (!isValid) {
       message.error(
@@ -161,6 +178,7 @@ const CreateWorkflow = ({
 
     // Cập nhật flows sau khi thêm role
     const updatedFlows = generateFlowsFromRoles(updatedRoles);
+
     setWorkflowDetail((prev) => ({
       ...prev,
       flows: updatedFlows,
@@ -179,11 +197,13 @@ const CreateWorkflow = ({
         newFlows.push(foundFlow);
       }
     }
-    return uniqBy(newFlows, (flow) => `${flow.roleStart}-${flow.roleEnd}`);
+    return newFlows;
   };
 
-  const handleRemoveRole = (roleToRemove) => {
-    const updatedRoles = workflowRoles.filter((role) => role !== roleToRemove);
+  const handleRemoveRole = (idx) => {
+    const updatedRoles = [...workflowRoles];
+    console.log(`>>> Check idx: `, idx);
+    updatedRoles.splice(idx, 1);
 
     // Kiểm tra cặp liên tiếp mới có hợp lệ không
     const newPairs = [];
@@ -213,15 +233,12 @@ const CreateWorkflow = ({
         updatedRoles.includes(flow.roleEnd)
     );
 
-    const remainingFlows = uniqBy(
-      filteredFlows,
-      (flow) => `${flow.roleStart}-${flow.roleEnd}`
-    );
-
     setWorkflowRoles(updatedRoles);
+    const updatedFlows = generateFlowsFromRoles(updatedRoles);
+
     setWorkflowDetail((prev) => ({
       ...prev,
-      flows: remainingFlows,
+      flows: updatedFlows,
     }));
   };
 
@@ -236,10 +253,19 @@ const CreateWorkflow = ({
     if (scope === "OutGoing") {
       rolesToSelect = roleRes.filter(
         (role) =>
-          role.roleName !== "Leader" &&
-          role.roleName !== "Chief" &&
-          role.roleName !== "Clerical Assistant"
+          role.roleName !== "Chief" && role.roleName !== "Clerical Assistant"
       );
+    }
+
+    if (scope === "InComing") {
+      rolesToSelect = roleRes.filter(
+        (role) =>
+          role.roleName !== "Chief" && role.roleName !== "Clerical Assistant"
+      );
+    }
+
+    if (scope === "Division" || scope === "School") {
+      rolesToSelect = roleRes;
     }
 
     return (
@@ -265,7 +291,8 @@ const CreateWorkflow = ({
         <Row gutter={15} align="middle" justify="start">
           {workflowRoles.map((role, idx) => (
             <React.Fragment key={idx}>
-              {JSON.parse(workflowDetail.requiredRolesJson).includes(role) ? (
+              {JSON.parse(workflowDetail.requiredRolesJson).includes(role) ||
+              (scope === "Division" && (idx === 0 || idx === 1)) ? (
                 <Tooltip title="Vai trò bắt buộc, không thể xóa">
                   <LockOutlined
                     style={{ color: "gray", fontSize: 20, marginTop: "10px" }}
@@ -274,7 +301,7 @@ const CreateWorkflow = ({
               ) : (
                 <Col>
                   <MinusCircleOutlined
-                    onClick={() => handleRemoveRole(role)}
+                    onClick={() => handleRemoveRole(idx)}
                     style={{
                       fontSize: "20px",
                       color: "red",
@@ -299,8 +326,15 @@ const CreateWorkflow = ({
                 </Tag>
               </Col>
               <Col>
-                {!(scope === "OutGoing" && idx === roles.length - 1) &&
-                  !(scope === "OutGoing" && idx === roles.length - 2) && (
+                {!(
+                  scope === "OutGoing" &&
+                  (idx === roles.length - 1 || idx === roles.length - 2)
+                ) &&
+                  !(scope === "InComing" && idx === 0) &&
+                  !(
+                    scope === "School" &&
+                    (idx === roles.length - 1 || idx === roles.length - 2)
+                  ) && (
                     <PlusCircleOutlined
                       onClick={() => {
                         // Mở Select tại vị trí này
@@ -325,9 +359,9 @@ const CreateWorkflow = ({
                     placeholder="Chọn vai trò"
                     onSelect={(value) => {
                       handleAddRoleAtIndex(idx, value);
-                      setAddingIndex(null); // Ẩn Select sau khi chọn
+                      setAddingIndex(null);
                     }}
-                    onBlur={() => setAddingIndex(null)} // Đóng Select nếu mất focus
+                    onBlur={() => setAddingIndex(null)}
                     filterOption={(input, option) =>
                       (option?.children ?? "")
                         .toLowerCase()
@@ -364,7 +398,6 @@ const CreateWorkflow = ({
   };
 
   const renderWorkflowDetails = () => {
-    // Đảm bảo rằng mỗi lần render lại, flows đã được cập nhật
     if (!workflowDetail?.flows?.length) return null;
 
     return workflowDetail.flows.map((flow, idx) => (
@@ -409,7 +442,7 @@ const CreateWorkflow = ({
                   <>
                     Vai trò:{"  "}
                     <Tag color="geekblue">
-                      {convertRoleName(step.role?.roleName) || "Không xác định"}
+                      {convertRoleName(step?.role?.roleName)}
                     </Tag>
                   </>
                 }
@@ -445,6 +478,7 @@ const CreateWorkflow = ({
     setCurrentStep(1);
     setScope("");
     setWorkflowDetail(null);
+    setShowSelect(false);
     form.resetFields();
   };
 
@@ -521,26 +555,35 @@ const CreateWorkflow = ({
       >
         {currentStep === 1 && (
           <>
-            <Form.Item
-              label="Chọn phạm vi ban hành:"
-              rules={[
-                { required: true, message: "Vui lòng chọn phạm vi ban hành!" },
-              ]}
-            >
-              {console.log(`>>> Check mainWorkflows: `, mainWorkflows)}
+            <Form.Item label="Vui lòng chọn phạm vi ban hành">
               <Radio.Group
-                onChange={(e) => {
-                  const workflowId = e.target.value;
-                  getWorkflowDetailsData(workflowId);
-                }}
+                value={scope}
+                onChange={(e) => handleScopeChange(e.target.value)}
               >
-                {mainWorkflows.map((workflow) => (
-                  <Radio key={workflow.workflowId} value={workflow.workflowId}>
-                    {convertScopeName(workflow.scope)}
-                  </Radio>
-                ))}
+                <Radio value="InComing">Văn bản đến</Radio>
+                <Radio value="OutGoing">Văn bản đi</Radio>
+                <Radio value="Division">Nội bộ phòng ban</Radio>
+                <Radio value="School">Nội bộ toàn trường</Radio>
               </Radio.Group>
             </Form.Item>
+
+            {showSelect && (
+              <Form.Item label="Vui lòng chọn luồng xử lý mẫu">
+                <Select
+                  showSearch
+                  value={workflowId}
+                  placeholder="Chọn luồng xử lý mẫu"
+                  optionFilterProp="children"
+                  onChange={(value) => getWorkflowDetailsData(value)}
+                >
+                  {workflowOptions.map((wf) => (
+                    <Option key={wf.workflowId} value={wf.workflowId}>
+                      {wf.workflowName}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            )}
           </>
         )}
         {currentStep === 2 && (

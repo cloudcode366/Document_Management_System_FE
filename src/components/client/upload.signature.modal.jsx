@@ -44,10 +44,10 @@ const UploadSignatureModal = () => {
 
       if (type === "initial") {
         setInitialPreview(objectURL);
-        setInitialBlob(blob); // 👈 lưu lại blob gốc
+        setInitialBlob(blob);
       } else {
         setDigitalPreview(objectURL);
-        setDigitalBlob(blob); // 👈 lưu lại blob gốc
+        setDigitalBlob(blob);
       }
     } catch (err) {
       message.error("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
@@ -75,7 +75,7 @@ const UploadSignatureModal = () => {
 
     try {
       await updateSignatureImgAPI(normalFile, digitalFile);
-      message.success("Gửi chữ ký thành công!");
+      message.success("Tải ảnh chữ ký lên hệ thống thành công!");
       setTimeout(() => {
         window.location.reload(); // ✅ Reload lại trang sau khi gửi thành công
       }, 1000); // chờ 1s cho message hiển thị xong
@@ -91,6 +91,7 @@ const UploadSignatureModal = () => {
       open={openUploadSignatureModal}
       closable={false}
       footer={null}
+      loading={isSubmit}
       centered
       width="60vw"
     >

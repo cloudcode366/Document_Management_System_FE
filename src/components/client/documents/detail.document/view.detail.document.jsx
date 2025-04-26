@@ -28,10 +28,8 @@ import {
   DownloadOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
-import samplePDF from "assets/files/sample.pdf";
 import { useNavigate, useParams } from "react-router-dom";
 import "./view.detail.document.scss";
-import CreateDraftDocument from "@/components/client/documents/draft.documents/create.draft.document";
 import SignatureBox from "@/components/client/documents/initial.signature/signature.box";
 import signatureImg from "assets/files/signature-removebg-preview.png";
 import SignatureContainer from "@/components/client/documents/initial.signature/signature.container";
@@ -45,6 +43,8 @@ import {
 import dayjs from "dayjs";
 import { Document, Page, pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
+import CreateVersionModal from "./create.version.modal";
+import DigitalSignatureModal from "../digital.signature/digital.signature";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -90,13 +90,12 @@ const ViewDetailDocument = () => {
   const { user } = useCurrentApp();
   const { message, notification } = App.useApp();
   const navigate = useNavigate();
-  const [openModalCreateDraftDocument, setOpenModalCreateDraftDocument] =
-    useState(false);
+  const [openCreateVersionModal, setOpenCreateVersionModal] = useState(false);
   const [openApproveConfirmModal, setOpenApproveConfirmModal] = useState(false);
   const [openRejectConfirmModal, setOpenRejectConfirmModal] = useState(false);
   const [openViewConfirmModal, setOpenViewConfirmModal] = useState(false);
   const [openSubmitConfirmModal, setOpenSubmitConfirmModal] = useState(false);
-  const [openArchivedConfirmModal, setOpenArchivedConfirmModal] =
+  const [openDigitalSignatureModal, setOpenDigitalSignatureModal] =
     useState(false);
   const [rejectForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -172,16 +171,6 @@ const ViewDetailDocument = () => {
     setIsSubmit(false);
   };
 
-  const handleArchiveDocument = () => {
-    setIsSubmit(true);
-    // Gửi dữ liệu lên server ở đây nếu cần
-    message.success("Văn bản đã được lưu trữ thành công!");
-    setOpenArchivedConfirmModal(false);
-    navigate(`/detail-archived-document/${documentId}`);
-    // Điều hướng hoặc cập nhật UI nếu cần
-    setIsSubmit(false);
-  };
-
   const handleRejectDocument = async () => {
     try {
       setIsSubmit(true);
@@ -193,19 +182,13 @@ const ViewDetailDocument = () => {
         user?.userId
       );
       if (res?.data?.statusCode === 201) {
-        const res2 = await createHandleTaskActionAPI(
-          document?.taskId,
-          user.userId,
-          "RejectDocument"
-        );
-        if (res2?.data?.statusCode === 200) {
-          notification.success({
-            message: "Văn bản đã bị từ chối thành công!",
-            description: `Lý do: ${values.reason}`,
-          });
-          rejectForm.resetFields();
-          setOpenRejectConfirmModal(false);
-        }
+        notification.success({
+          message: "Văn bản đã bị từ chối thành công!",
+          description: `Lý do: ${values.reason}`,
+        });
+        rejectForm.resetFields();
+        setOpenRejectConfirmModal(false);
+        await fetchInfo();
       }
     } catch (errorInfo) {
       console.log("Validation Failed:", errorInfo);
@@ -230,7 +213,7 @@ const ViewDetailDocument = () => {
         message: "Hoàn thành",
         description: "Xác nhận đã xem văn bản thành công.",
       });
-      await fetchInfo();
+      navigate(`/archived-document`);
     } else {
       notification.error({
         message: "Hệ thống đang bận!",
@@ -263,7 +246,7 @@ const ViewDetailDocument = () => {
     setIsSubmit(false);
   };
 
-  // Tải văn bản: Chưa xử lý
+  // Tải văn bản: Chưa kết nối API
   if (
     document?.taskType === "Upload" &&
     document?.taskStatus === "InProgress"
@@ -294,7 +277,7 @@ const ViewDetailDocument = () => {
           e.currentTarget.style.color = "#08979c";
           e.currentTarget.style.transform = "scale(1)";
         }}
-        onClick={() => console.log("Tải văn bản")}
+        onClick={() => setOpenCreateVersionModal(true)}
       >
         Tải văn bản lên
       </Button>
@@ -328,7 +311,7 @@ const ViewDetailDocument = () => {
           e.currentTarget.style.color = "#1890ff";
           e.currentTarget.style.transform = "scale(1)";
         }}
-        onClick={() => console.log("Ký")}
+        onClick={() => setOpenDigitalSignatureModal(true)}
       >
         Ký điện tử
       </Button>
@@ -527,43 +510,6 @@ const ViewDetailDocument = () => {
     );
   }
 
-  // Lưu trữ văn bản: Chưa xử lý
-  if (document) {
-    buttons.push(
-      <Button
-        icon={<SaveOutlined style={{ color: "#2f54eb" }} />}
-        block
-        size="middle"
-        style={{
-          height: 40,
-          fontSize: 16,
-          background: "#f0f5ff",
-          border: "1px solid #adc6ff",
-          color: "#2f54eb",
-          fontWeight: 600,
-          transition: "all 0.3s ease",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "#e6f4ff";
-          e.currentTarget.style.border = "1px solid #91d5ff";
-          e.currentTarget.style.color = "#1d39c4";
-          e.currentTarget.style.transform = "scale(1.05)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "#f0f5ff";
-          e.currentTarget.style.border = "1px solid #adc6ff";
-          e.currentTarget.style.color = "#2f54eb";
-          e.currentTarget.style.transform = "scale(1)";
-        }}
-        onClick={() => {
-          setOpenArchivedConfirmModal(true);
-        }}
-      >
-        Lưu trữ văn bản
-      </Button>
-    );
-  }
-
   if (loading) {
     return (
       <div
@@ -603,7 +549,7 @@ const ViewDetailDocument = () => {
         >
           <div style={{ height: "100%", overflowY: "auto" }}>
             <PDFViewerWithToken
-              url={document?.versions?.[0]?.url}
+              url={document?.versions?.[document?.versions?.length - 1]?.url}
               token={localStorage.getItem(`access_token`)}
             />
 
@@ -890,7 +836,7 @@ const ViewDetailDocument = () => {
                 type="primary"
                 ghost
                 icon={<ArrowLeftOutlined />}
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/")}
               >
                 Quay lại
               </Button>
@@ -909,19 +855,6 @@ const ViewDetailDocument = () => {
         maskClosable={false}
       >
         <p>Bạn có chắc chắn muốn duyệt văn bản này không?</p>
-      </Modal>
-
-      <Modal
-        title="Xác nhận lưu trữ văn bản"
-        open={openArchivedConfirmModal}
-        onOk={handleArchiveDocument}
-        onCancel={() => setOpenArchivedConfirmModal(false)}
-        okText="Xác nhận"
-        cancelText="Hủy"
-        centered
-        maskClosable={false}
-      >
-        <p>Bạn có chắc chắn muốn lưu trữ văn bản này không?</p>
       </Modal>
 
       <Modal
@@ -978,6 +911,17 @@ const ViewDetailDocument = () => {
       >
         <p>Bạn có chắc chắn xác nhận nộp văn bản này không?</p>
       </Modal>
+
+      <CreateVersionModal
+        openCreateVersionModal={openCreateVersionModal}
+        setOpenCreateVersionModal={setOpenCreateVersionModal}
+        documentId={documentId}
+      />
+      <DigitalSignatureModal
+        openDigitalSignatureModal={openDigitalSignatureModal}
+        setOpenDigitalSignatureModal={setOpenDigitalSignatureModal}
+        documentUrl={document?.versions?.[document?.versions?.length - 1]?.url}
+      />
     </div>
   );
 };
