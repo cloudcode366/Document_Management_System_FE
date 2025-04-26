@@ -111,7 +111,7 @@ const LayoutClient = () => {
   const items = [
     {
       label: <span>Danh sách văn bản</span>,
-      key: "/",
+      key: "/all",
       icon: <FileTextOutlined />,
       children: [
         {

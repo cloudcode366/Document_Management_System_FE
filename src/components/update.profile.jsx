@@ -173,7 +173,7 @@ const UpdateProfile = ({
               rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
             >
               <DatePicker
-                format="DD - MM - YYYY"
+                format="DD-MM-YYYY"
                 style={{ width: "100%" }}
                 placeholder="Vui lòng chọn ngày sinh"
                 disabledDate={(current) =>

@@ -162,7 +162,7 @@ const TableAllDocument = () => {
         {
           title: "Luồng xử lý",
           dataIndex: "workflowName",
-          width: "15%",
+          width: "30%",
           render: (_, row) => row?.workflowName || "-",
           hideInSearch: true,
         },
@@ -170,7 +170,7 @@ const TableAllDocument = () => {
         {
           title: "Loại văn bản",
           dataIndex: ["documentDto", "documentType", "documentTypeName"],
-          width: "15%",
+          width: "10%",
           render: (_, row) =>
             row?.documentDto?.documentType?.documentTypeName || "-",
           hideInSearch: true,
@@ -178,13 +178,13 @@ const TableAllDocument = () => {
         {
           title: "Người tạo",
           dataIndex: "fullName",
-          width: "15%",
+          width: "10%",
           hideInSearch: true,
         },
         {
           title: "Ngày tạo",
           dataIndex: ["documentDto", "createdDate"],
-          width: "15%",
+          width: "10%",
           hideInSearch: true,
           render: (_, row) => {
             const createdDate = row?.documentDto?.createdDate;
@@ -223,14 +223,18 @@ const TableAllDocument = () => {
           marginTop: "20px",
         }}
       >
-        <Tabs activeKey={activeKey} onChange={setActiveKey}>
-          <TabPane tab="TẤT CẢ" key="All" />
-          <TabPane tab="ĐẾN LƯỢT DUYỆT" key="PendingApproval" />
-          <TabPane tab="ĐÃ CHẤP NHẬN" key="Accepted" />
-          <TabPane tab="ĐANG CHỜ DUYỆT" key="Waiting" />
-          <TabPane tab="ĐÃ TỪ CHỐI" key="Rejected" />
-          <TabPane tab="QUÁ HẠN" key="Overdue" />
-        </Tabs>
+        <Tabs
+          activeKey={activeKey}
+          onChange={setActiveKey}
+          items={[
+            { label: "TẤT CẢ", key: "All" },
+            { label: "ĐẾN LƯỢT DUYỆT", key: "PendingApproval" },
+            { label: "ĐANG CHỜ DUYỆT", key: "Waiting" },
+            { label: "ĐÃ ĐƯỢC CHẤP NHẬN", key: "Accepted" },
+            { label: "ĐÃ TỪ CHỐI", key: "Rejected" },
+            { label: "QUÁ HẠN", key: "Overdue" },
+          ]}
+        />
 
         <ProTable
           columns={getColumns()}
@@ -295,11 +299,16 @@ const TableAllDocument = () => {
               total: res.data?.size,
             };
           }}
-          rowKey={
-            activeKey === "Rejected"
-              ? "documentId"
-              : ["documentDto", "documentName"]
-          }
+          rowKey={(record) => {
+            if (activeKey === "Rejected") {
+              return `${record.documentId}-${record.versionNumber}`;
+            } else {
+              return (
+                record.documentDto?.documentId ||
+                `${record.documentDto?.documentName}-${Math.random()}`
+              );
+            }
+          }}
           pagination={{
             current: meta.page,
             pageSize: meta.limit,

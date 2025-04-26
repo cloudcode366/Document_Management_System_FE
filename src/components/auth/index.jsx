@@ -31,7 +31,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   const isAdminRoute = location.pathname.includes("admin");
-  const role = user.mainRole.roleName;
+  const role = user?.mainRole?.roleName;
 
   // Nếu là route admin và người dùng không phải admin
   if (isAdminRoute && role !== "Admin") {
