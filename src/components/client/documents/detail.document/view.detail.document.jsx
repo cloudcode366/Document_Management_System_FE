@@ -230,7 +230,7 @@ const ViewDetailDocument = () => {
         message: "Nộp văn bản thành công!",
         description: "Văn bản đã được duyệt thành công.",
       });
-      setOpenApproveConfirmModal(false);
+      setOpenSubmitConfirmModal(false);
       await fetchInfo();
     } else {
       notification.error({
@@ -306,7 +306,13 @@ const ViewDetailDocument = () => {
           e.currentTarget.style.color = "#1890ff";
           e.currentTarget.style.transform = "scale(1)";
         }}
-        onClick={() => navigate(`/digital-signature/${documentId}`)}
+        onClick={() =>
+          navigate(`/digital-signature/${documentId}`, {
+            state: {
+              taskId: document?.taskId,
+            },
+          })
+        }
       >
         Ký điện tử
       </Button>
@@ -544,7 +550,7 @@ const ViewDetailDocument = () => {
         >
           <div style={{ height: "100%", overflowY: "auto" }}>
             <PDFViewerWithToken
-              url={document?.versions?.[document?.versions?.length - 1]?.url}
+              url={document?.finalVersion?.url}
               token={localStorage.getItem(`access_token`)}
             />
 
@@ -674,13 +680,15 @@ const ViewDetailDocument = () => {
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
+                {document?.dataReceived &&
+                  dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
+                {document?.dateIssued &&
+                  dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
@@ -911,6 +919,8 @@ const ViewDetailDocument = () => {
         openCreateVersionModal={openCreateVersionModal}
         setOpenCreateVersionModal={setOpenCreateVersionModal}
         documentId={documentId}
+        fetchInfo={fetchInfo}
+        taskId={document?.taskId}
       />
     </div>
   );

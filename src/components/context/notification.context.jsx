@@ -43,7 +43,7 @@ export const NotificationProvider = ({ children }) => {
   const connectSignalR = async () => {
     const token = localStorage.getItem("access_token");
     const newConnection = new HubConnectionBuilder()
-      .withUrl("http://nghetrenghetre.xyz:5290/notificationHub", {
+      .withUrl("http://103.90.227.64:5290/notificationHub", {
         accessTokenFactory: () => token,
       }) // Địa chỉ SignalR Hub của bạn
       .configureLogging(4) // Chọn mức log
