@@ -1,8 +1,10 @@
+import { useCurrentApp } from "@/components/context/app.context";
 import {
+  createHandleTaskActionAPI,
   createSignatureDigitalAPI,
   createSignInSignatureDigitalAPI,
 } from "@/services/api.service";
-import { Form, Modal, Input, Row, Col, Button, message } from "antd";
+import { Form, Modal, Input, Row, Col, Button, message, App } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -13,6 +15,7 @@ const LoginESignModal = (props) => {
     resultSignaturePosition,
     setResultSignaturePosition,
     documentId,
+    taskId,
   } = props;
   const [currentStep, setCurrentStep] = useState(1);
   const [form] = Form.useForm();
@@ -23,6 +26,8 @@ const LoginESignModal = (props) => {
   const [counter, setCounter] = useState(180);
   const [token, setToken] = useState("");
   const navigate = useNavigate();
+  const { user } = useCurrentApp();
+  const { notification, message } = App.useApp();
 
   useEffect(() => {
     let timer;
@@ -76,7 +81,24 @@ const LoginESignModal = (props) => {
         documentId
       );
       if (res.data.statusCode === 201) {
-        message.success("Xác thực OTP thành công!");
+        message.success("Xác thực OTP và thực hiện ký điện tử thành công!");
+        const res = await createHandleTaskActionAPI(
+          taskId,
+          user.userId,
+          "SubmitDocument"
+        );
+        if (res?.data?.statusCode === 200) {
+          notification.success({
+            message: "Chuyển giao văn bản thành công!",
+            description: "Văn bản đã được chuyển giao thành công.",
+          });
+          navigate(`/detail-progress/${documentId}`);
+        } else {
+          notification.error({
+            message: "Hệ thống đang bận!",
+            description: "Xin vui lòng thử lại sau giây lát.",
+          });
+        }
         navigate(`/detail-document/${documentId}`);
         setOpenLoginESignModal(false);
         setResultSignaturePosition(false);

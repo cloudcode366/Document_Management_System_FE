@@ -1,26 +1,36 @@
 import { InboxOutlined } from "@ant-design/icons";
 import { App, Modal, Upload, Select, Radio, Typography, Button } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ConfirmInfoDocument from "@/components/client/documents/progresses/confirm.info.document";
 import templatePDF from "assets/files/template.pdf";
 import {
   createUploadDocumentAPI,
+  createUploadDocumentForSubmitAPI,
   viewWorkflowByScopeAPI,
   viewWorkflowDetailsWithFlowAndStepAPI,
 } from "@/services/api.service";
+import { BeatLoader } from "react-spinners";
+import ConfirmVersionModal from "./confirm.version.modal";
 
 const { Dragger } = Upload;
 const { Option } = Select;
 const { Text } = Typography;
 
 const CreateVersionModal = (props) => {
-  const { openCreateVersionModal, setOpenCreateVersionModal, documentId } =
-    props;
+  const {
+    openCreateVersionModal,
+    setOpenCreateVersionModal,
+    documentId,
+    fetchInfo,
+    taskId,
+  } = props;
   const { message, notification } = App.useApp();
   const [uploadedFile, setUploadedFile] = useState(null);
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
   const [isSubmit, setIsSubmit] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resDocument, setResDocument] = useState({});
+  const [pdfFile, setPdfFile] = useState(null);
 
   const propsUpload = {
     name: "file",
@@ -49,20 +59,82 @@ const CreateVersionModal = (props) => {
   };
 
   const handleConfirm = async () => {
-    // const response = await fetch(templatePDF, documentId);
-    // const blob = await response.blob();
-    // const file = new File([blob], "template.pdf", {
-    //   type: "application/pdf",
-    // });
-    // setUploadedFile(file);
-    setOpenCreateVersionModal(false);
-    setOpenConfirmModal(true);
+    setLoading(true);
+    const res = await createUploadDocumentForSubmitAPI(
+      documentId,
+      uploadedFile
+    );
+    if (res.data.statusCode === 200) {
+      const data = res.data.content;
+      const fileURL = convertBase64ToPdf(data.fileBase64);
+      setPdfFile(fileURL);
+      console.log(`>>> check pdf`, fileURL);
+      setResDocument(data);
+      setOpenCreateVersionModal(false);
+      setOpenConfirmModal(true);
+    } else {
+      notification.error({
+        description: "Có lỗi xảy ra!",
+        message: res.data.content || "Xin vui lòng thử lại sau ít phút.",
+      });
+    }
+    setLoading(false);
+  };
+
+  const convertBase64ToPdf = (base64Data) => {
+    console.log(`>>>check  convertBase64ToPdf: `, base64Data);
+    const uint8Array = new Uint8Array(
+      atob(base64Data)
+        .split("")
+        .map((char) => char.charCodeAt(0))
+    );
+    const fileBlob = new Blob([uint8Array], { type: "application/pdf" });
+    return URL.createObjectURL(fileBlob); // Trả về URL của PDF
   };
 
   const handleCloseCreateVersionModal = () => {
     setOpenCreateVersionModal(false);
     setUploadedFile(null);
   };
+
+  if (loading) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "16px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "18px",
+            color: "#364AD6",
+            textAlign: "center",
+            animation: "blink 1.5s infinite",
+          }}
+        >
+          AI đang hỗ trợ scan văn bản của bạn, xin vui lòng đợi trong giây lát
+        </div>
+        <BeatLoader size={25} color="#364AD6" />
+        <style>
+          {`
+            @keyframes blink {
+              0% { opacity: 1; }
+              50% { opacity: 0.6; }
+              100% { opacity: 1; }
+            }
+          `}
+        </style>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -105,11 +177,16 @@ const CreateVersionModal = (props) => {
         </Dragger>
       </Modal>
 
-      <ConfirmInfoDocument
+      <ConfirmVersionModal
         openConfirmModal={openConfirmModal}
         setOpenConfirmModal={setOpenConfirmModal}
-        uploadedFile={uploadedFile}
         documentId={documentId}
+        resDocument={resDocument}
+        setResDocument={setResDocument}
+        fetchInfo={fetchInfo}
+        pdfFile={pdfFile}
+        setPdfFile={setPdfFile}
+        taskId={taskId}
       />
     </>
   );

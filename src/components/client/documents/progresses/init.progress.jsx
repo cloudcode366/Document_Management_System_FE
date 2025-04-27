@@ -560,7 +560,11 @@ const ViewInitProgress = () => {
           description: "Xin vui lòng thử lại sau.",
         });
       }
-    } else {
+    } else if (
+      (user?.mainRole?.roleName === "Clerical Assistant" ||
+        user?.subRole?.roleName === "Clerical Assistant") &&
+      processDetail?.workflowRequest?.scope === "InComing"
+    ) {
       const res = await updateConfirmTaskWithDocumentAPI(documentId);
       if (res?.data?.statusCode === 200) {
         const res2 = await createHandleTaskActionAPI(
@@ -581,6 +585,24 @@ const ViewInitProgress = () => {
             description: "Xin vui lòng thử lại sau.",
           });
         }
+      } else {
+        notification.error({
+          message: "Hệ thống đang bận!",
+          description: "Xin vui lòng thử lại sau.",
+        });
+      }
+    } else {
+      const res = await createHandleTaskActionAPI(
+        taskId,
+        user.userId,
+        "SubmitDocument"
+      );
+      if (res?.data?.statusCode === 200) {
+        notification.success({
+          message: "Hoàn thành",
+          description: "Hoàn thành khởi tạo nhiệm vụ xử lý văn bản thành công.",
+        });
+        navigate(`/detail-progress/${documentId}`);
       } else {
         notification.error({
           message: "Hệ thống đang bận!",

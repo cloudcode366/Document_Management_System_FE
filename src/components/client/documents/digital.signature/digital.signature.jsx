@@ -7,7 +7,7 @@ import "react-pdf/dist/esm/Page/TextLayer.css";
 import "styles/loading.scss";
 import "./digital.signature.scss";
 import { viewDetailDocumentAPI } from "@/services/api.service";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import axios from "@/services/axios.customize";
 import { useCurrentApp } from "@/components/context/app.context";
 import LoginESignModal from "./login.e.sign";
@@ -54,6 +54,8 @@ const DigitalSignatureComponent = () => {
     ury: 0,
     page: 1,
   });
+  const location = useLocation();
+  const { taskId } = location.state || {};
 
   const fetchInfo = async () => {
     setLoading(true);
@@ -392,6 +394,7 @@ const DigitalSignatureComponent = () => {
         resultSignaturePosition={resultSignaturePosition}
         setResultSignaturePosition={setResultSignaturePosition}
         documentId={documentId}
+        taskId={taskId}
       />
     </div>
   );

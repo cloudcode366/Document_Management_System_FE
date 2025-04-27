@@ -21,6 +21,7 @@ import ConfirmInfoDocument from "@/components/client/documents/progresses/confir
 import templatePDF from "assets/files/template.pdf";
 import {
   createUploadDocumentAPI,
+  viewAllTemplatesAPI,
   viewWorkflowByScopeAPI,
   viewWorkflowDetailsWithFlowAndStepAPI,
 } from "@/services/api.service";
@@ -48,12 +49,7 @@ const CreateDocument = (props) => {
   const [resDocument, setResDocument] = useState(null);
   const [loading, setLoading] = useState(false);
   const { user } = useCurrentApp();
-
-  const documentTemplates = [
-    { id: "template1", name: "Mẫu quyết định khen thưởng" },
-    { id: "template2", name: "Mẫu công văn thông báo" },
-    { id: "template3", name: "Mẫu biên bản họp" },
-  ];
+  const [listDocumentTemplates, setListDocumentTemplates] = useState([]);
 
   const propsUpload = {
     name: "file",
@@ -164,20 +160,6 @@ const CreateDocument = (props) => {
       message.error("Vui lòng chọn một mẫu văn bản trước khi xác nhận.");
       return;
     }
-
-    if (
-      selectedScope === "Outgoing" ||
-      selectedScope === "School" ||
-      selectedScope === "Division"
-    ) {
-      const response = await fetch(templatePDF);
-      const blob = await response.blob();
-      const file = new File([blob], "template.pdf", {
-        type: "application/pdf",
-      });
-      setUploadedFile(file);
-    }
-
     setOpenModalCreate(false);
     setOpenConfirmModal(true);
   };
@@ -196,6 +178,8 @@ const CreateDocument = (props) => {
     setShowWorkflowSelect(null);
     setResDocument(null);
     setLoading(false);
+    setListDocumentTemplates([]);
+    setSelectedTemplate(null);
   };
 
   const renderWorkflowRoles = () => {
@@ -256,9 +240,17 @@ const CreateDocument = (props) => {
     );
   };
 
-  const handleSelectedDocumentType = (value) => {
+  const handleSelectedDocumentType = async (value) => {
     const docType = listDocumentTypes.find((dt) => dt.documentTypeId === value);
     setSelectedDocumentType(docType);
+    if (selectedScope !== "InComing") {
+      const res = await viewAllTemplatesAPI(
+        `documentName=${docType.documentTypeName}&page=1&pageSize=10`
+      );
+      if (res?.data?.statusCode === 200) {
+        setListDocumentTemplates(res?.data?.content);
+      }
+    }
   };
 
   return (
@@ -397,14 +389,14 @@ const CreateDocument = (props) => {
                   placeholder="Chọn mẫu văn bản"
                   style={{ width: "100%" }}
                   onChange={(value) => {
-                    const selected = documentTemplates.find(
+                    const selected = listDocumentTemplates.find(
                       (tpl) => tpl.id === value
                     );
                     setSelectedTemplate(selected);
                   }}
                   value={selectedTemplate?.id}
                 >
-                  {documentTemplates.map((template) => (
+                  {listDocumentTemplates.map((template) => (
                     <Option key={template.id} value={template.id}>
                       {template.name}
                     </Option>

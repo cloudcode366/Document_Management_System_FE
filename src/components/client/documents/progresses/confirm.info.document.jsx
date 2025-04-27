@@ -22,7 +22,10 @@ import PDFViewerWithToken from "@/components/pdf.viewer";
 import { useCurrentApp } from "@/components/context/app.context";
 import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import "./confirm.info.document.scss";
-import { createInComingDocumentAPI } from "@/services/api.service";
+import {
+  createDocumentByTemplateAPI,
+  createInComingDocumentAPI,
+} from "@/services/api.service";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import CreateFirstTask from "./create.first.task";
@@ -136,13 +139,34 @@ const ConfirmInfoDocument = (props) => {
         }
       } else {
         console.log(
-          selectedTemplate.templateId,
-          values.name,
+          selectedTemplate.id,
+          values.Name,
           selectedWorkflow.workflowId,
           selectedDocumentType.documentTypeId,
           values.validTo,
           values.Deadline
         );
+        const res = await createDocumentByTemplateAPI(
+          selectedTemplate.id,
+          selectedWorkflow.workflowId,
+          selectedDocumentType.documentTypeId,
+          values.Name,
+          values.Deadline,
+          values.validTo
+        );
+        if (res.data.statusCode === 200) {
+          const data = res.data.content;
+          message.success(`Khởi tạo văn bản thành công!`);
+          setOpenConfirmModal(false);
+          handleCloseCreateDocumentModal();
+          setSignerList([]);
+          setDocumentId(data);
+          setOpenCreateFirstTaskModal(true);
+        } else {
+          notification.error({
+            message: "Đã có lỗi xảy ra, vui lòng thử lại sau",
+          });
+        }
       }
     } catch (err) {
       console.warn("Form chưa hợp lệ:", err);
@@ -220,9 +244,14 @@ const ConfirmInfoDocument = (props) => {
                 overflow: "auto",
               }}
             >
-              {uploadedFile && (
+              {selectedScope === "InComing" ? (
                 <PDFViewerWithToken
                   url={resDocument?.canChange?.url}
+                  token={localStorage.getItem(`access_token`)}
+                />
+              ) : (
+                <PDFViewerWithToken
+                  url={`${selectedTemplate?.url}&isPdf=true`}
                   token={localStorage.getItem(`access_token`)}
                 />
               )}
