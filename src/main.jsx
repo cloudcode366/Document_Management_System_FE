@@ -42,7 +42,11 @@ import { NotificationProvider } from "components/context/notification.context";
 import DetailProgress from "pages/client/progresses/detail.progress";
 import DetailArchivedDocument from "pages/client/archived.documents/detail.archived.document";
 import InitProgress from "pages/client/progresses/init.progress";
+
+import SendEmailPage from "./pages/client/send.email/send.email";
+
 import DigitalSignature from "./pages/client/digital.signatures/digital.signature";
+
 
 const router = createBrowserRouter([
   {
@@ -245,6 +249,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <UserGuidePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/send-email",
+        element: (
+          <ProtectedRoute>
+            <SendEmailPage />
           </ProtectedRoute>
         ),
       },

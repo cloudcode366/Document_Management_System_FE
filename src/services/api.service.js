@@ -515,6 +515,35 @@ const createRejectDocumentActionAPI = (reason, taskId, userId) => {
   });
 };
 
+
+const grantPermissionAPI = (documentId, userIds) => {
+  const urlBackend = "/api/UserDocPermission/create-grand-permission-for-document";
+  return axios.post(urlBackend, {
+    documentId,
+    userIds,
+  });
+};
+
+
+const createSendEmailAPI = ({
+  receiverEmail,
+  ccEmails,
+  bccEmails,
+  subject,
+  body,
+  accessToken,
+  documentId,
+}) => {
+  const urlBackend = `/api/ArchiveDocument/create-send-email`;
+  return axios.post(urlBackend, {
+    receiverEmail,
+    ccEmails,
+    bccEmails,
+    subject,
+    body,
+    accessToken,
+    documentId,
+
 const createSignInSignatureDigitalAPI = (userName, password) => {
   const urlBackend = `/api/SignatureDIgitalApi/create-sign-in-signature-digital`;
   return axios.post(urlBackend, { userName, password });
@@ -598,6 +627,7 @@ const updateConfirmDocumentBySubmit = (
     numberOfDocument,
     isDifferent,
     fileBase64,
+
   });
 };
 
@@ -659,6 +689,8 @@ export {
   updateSignatureImgAPI,
   createRejectDocumentActionAPI,
   viewMainWorkflowByScopeAPI,
+  grantPermissionAPI,
+  createSendEmailAPI
   createSignInSignatureDigitalAPI,
   createSignatureDigitalAPI,
   createDocumentByTemplateAPI,
