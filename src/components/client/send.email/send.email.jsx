@@ -204,6 +204,8 @@ const SendEmailPage = () => {
           boxShadow: `0px 4px 10px rgba(0, 0, 0, 0.1)`,
           borderRadius: "10px",
           marginTop: "20px",
+          overflowY: "auto",
+          maxHeight: "calc(100vh - 40px)",
         }}
       >
         <div style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}>
