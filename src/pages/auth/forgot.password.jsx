@@ -60,6 +60,15 @@ const ForgotPasswordPage = () => {
     }
   };
 
+  const handlePaste = (e) => {
+    const pastedData = e.clipboardData.getData("text").trim();
+    if (/^\d{6}$/.test(pastedData)) {
+      const newOtpValues = pastedData.split("").slice(0, 6);
+      setOtpValues(newOtpValues);
+      inputRefs.current[5].focus();
+    }
+  };
+
   const handleSendOtp = async (values) => {
     try {
       setLoading(true);
@@ -233,6 +242,7 @@ const ForgotPasswordPage = () => {
                             handleOtpChange(index, e.target.value)
                           }
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          onPaste={index === 0 ? handlePaste : null}
                           style={{
                             width: "40px",
                             height: "40px",

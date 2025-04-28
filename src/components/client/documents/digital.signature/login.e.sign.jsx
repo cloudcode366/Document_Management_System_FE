@@ -81,6 +81,7 @@ const LoginESignModal = (props) => {
         documentId
       );
       if (res.data.statusCode === 201) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         message.success("Xác thực OTP và thực hiện ký điện tử thành công!");
         const res = await createHandleTaskActionAPI(
           taskId,
@@ -117,21 +118,29 @@ const LoginESignModal = (props) => {
     }
   };
 
-  const handleOtpChange = (e, index) => {
-    const value = e.target.value.replace(/\D/g, ""); // chỉ cho số
-    if (!value) return;
-    const newOtp = [...otpValues];
-    newOtp[index] = value.slice(-1);
-    setOtpValues(newOtp);
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return; // Chỉ cho phép số
+    const newOtpValues = [...otpValues];
+    newOtpValues[index] = value;
+    setOtpValues(newOtpValues);
 
-    if (index < 5 && value) {
-      otpInputs.current[index + 1]?.focus();
+    // Tự động chuyển focus sang ô tiếp theo
+    if (value && index < 5) {
+      otpInputs.current[index + 1].focus();
+    }
+  };
+  const handleKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
+      otpInputs.current[index - 1].focus();
     }
   };
 
-  const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
-      otpInputs.current[index - 1]?.focus();
+  const handlePaste = (e) => {
+    const pastedData = e.clipboardData.getData("text").trim();
+    if (/^\d{6}$/.test(pastedData)) {
+      const newOtpValues = pastedData.split("").slice(0, 6);
+      setOtpValues(newOtpValues);
+      otpInputs.current[5].focus();
     }
   };
 
@@ -211,8 +220,9 @@ const LoginESignModal = (props) => {
               <Col key={index}>
                 <Input
                   value={value}
-                  onChange={(e) => handleOtpChange(e, index)}
-                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={index === 0 ? handlePaste : null}
                   ref={(el) => (otpInputs.current[index] = el)}
                   maxLength={1}
                   style={{

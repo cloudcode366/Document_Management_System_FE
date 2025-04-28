@@ -101,26 +101,6 @@ const UpdateUser = (props) => {
     }
   };
 
-  const handleSignatureImageChange = async (info) => {
-    // const file = info.file;
-    // if (!file) return;
-    // try {
-    //   const res = await updateAvatarAPI(dataUpdate.userId, file);
-    //   const newAvatarUrl = res?.data?.content;
-    //   if (newAvatarUrl) {
-    //     setAvatarRawUrl(newAvatarUrl);
-    //     setImageUrl(`${newAvatarUrl}?t=${Date.now()}`);
-    //     form.setFieldsValue({ avatar: newAvatarUrl });
-    //     message.success("Tải ảnh đại diện thành công!");
-    //   } else {
-    //     message.error("Không nhận được đường dẫn ảnh từ server.");
-    //   }
-    // } catch (err) {
-    //   console.error("Upload avatar failed:", err);
-    //   message.error("Tải ảnh lên thất bại.");
-    // }
-  };
-
   const onFinish = async (values) => {
     try {
       setIsSubmit(true);
@@ -177,7 +157,7 @@ const UpdateUser = (props) => {
           </div>
         }
         open={openModalUpdate}
-        width={"80vw"}
+        width={"60vw"}
         centered={true}
         bodyProps={{
           style: {
@@ -301,7 +281,7 @@ const UpdateUser = (props) => {
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={12}>
               <Form.Item
                 label="Địa chỉ"
                 name="address"
@@ -311,7 +291,7 @@ const UpdateUser = (props) => {
               </Form.Item>
             </Col>
 
-            <Col span={8}>
+            <Col span={12}>
               <Form.Item
                 label="Giới tính"
                 name="gender"
@@ -325,7 +305,10 @@ const UpdateUser = (props) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={8}>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
               <Form.Item
                 label="Ngày sinh"
                 name="dateOfBirth"
@@ -343,58 +326,7 @@ const UpdateUser = (props) => {
                 />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row>
             <Col span={12}>
-              <Form.Item label="Ảnh chữ ký" name="signature">
-                <Image
-                  width={150}
-                  src={
-                    "https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png"
-                  }
-                  fallback="/default-avatar.png"
-                />
-                <Upload
-                  showUploadList={false}
-                  beforeUpload={() => false}
-                  onChange={handleSignatureImageChange}
-                >
-                  <Button
-                    icon={<UploadOutlined />}
-                    type="link"
-                    style={{ marginLeft: 8, marginTop: 8 }}
-                  >
-                    Chọn ảnh chữ ký mới
-                  </Button>
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Ảnh chữ ký" name="signature">
-                <Image
-                  width={150}
-                  src={
-                    "https://chukydep.vn/Upload/chuky/loc/chu-ky-ten-loc-sm_fontss_139-otf-sm.png"
-                  }
-                  fallback="/default-avatar.png"
-                />
-                <Upload
-                  showUploadList={false}
-                  beforeUpload={() => false}
-                  onChange={handleSignatureImageChange}
-                >
-                  <Button
-                    icon={<UploadOutlined />}
-                    type="link"
-                    style={{ marginLeft: 8, marginTop: 8 }}
-                  >
-                    Chọn ảnh chữ ký mới
-                  </Button>
-                </Upload>
-              </Form.Item>
-            </Col>
-            <Col span={24}>
               <Form.Item
                 label="Ảnh đại diện"
                 name="avatar"
@@ -404,8 +336,13 @@ const UpdateUser = (props) => {
               >
                 <Image
                   width={150}
+                  height={150}
                   src={imageUrl}
                   fallback="/default-avatar.png"
+                  style={{
+                    objectFit: "cover",
+                    borderRadius: "30px",
+                  }}
                 />
                 <Upload
                   showUploadList={false}

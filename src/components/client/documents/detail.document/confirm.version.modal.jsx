@@ -147,7 +147,7 @@ const ConfirmVersionModal = (props) => {
                     render: (text) => <Typography.Text>{text}</Typography.Text>,
                   },
                   {
-                    title: "Bạn nhập",
+                    title: "Thông tin lúc khởi tạo",
                     dataIndex: "userInput",
                     key: "userInput",
                     render: (text) => <Typography.Text>{text}</Typography.Text>,

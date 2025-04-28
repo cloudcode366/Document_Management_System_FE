@@ -4,6 +4,7 @@ import {
   DeleteTwoTone,
   EditTwoTone,
   PlusOutlined,
+  SignatureOutlined,
   UnlockOutlined,
 } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
@@ -16,6 +17,7 @@ import UpdateUser from "./update.user";
 import DetailUser from "./detail.user";
 import {
   changeStatusUserAPI,
+  updateEnableSignatureImgAPI,
   viewAllDivisionsAPI,
   viewAllRoles,
   viewAllUserAPI,
@@ -40,6 +42,7 @@ const TableUser = () => {
   const [dataUpdate, setDataUpdate] = useState(null);
 
   const [isDeleteUser, setIsDeleteUser] = useState(false);
+  const [isEnable, setIsEnable] = useState(false);
   const { message, notification } = App.useApp();
   const [divisions, setDivisions] = useState([]);
   const [divisionNames, setDivisionNames] = useState([]);
@@ -285,11 +288,18 @@ const TableUser = () => {
       width: "10%",
       render(dom, entity, index, action, schema) {
         return (
-          <>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
             <Tooltip title="Cập nhật tài khoản này">
               <EditTwoTone
                 twoToneColor="#f57800"
-                style={{ cursor: "pointer", marginRight: 15 }}
+                style={{ cursor: "pointer" }}
                 onClick={() => {
                   const mainRole = entity.roles?.find(
                     (r) => r.createdDate === null
@@ -302,6 +312,25 @@ const TableUser = () => {
                 }}
               />
             </Tooltip>
+
+            <Popconfirm
+              placement="leftTop"
+              title="Xác nhận cấp quyền tải ảnh chữ ký"
+              description="Bạn có chắc chắn muốn cấp quyền tải ảnh chữ ký cho tài khoản này?"
+              onConfirm={() =>
+                handleEnableSignature(entity.userId, entity.userName)
+              }
+              okText="Xác nhận"
+              cancelText="Hủy"
+              okButtonProps={{ loading: isDeleteUser }}
+            >
+              <Tooltip title="Cấp quyền tải ảnh chữ ký">
+                <SignatureOutlined
+                  style={{ cursor: "pointer", color: "#1890ff" }}
+                />
+              </Tooltip>
+            </Popconfirm>
+
             {!entity.isDeleted ? (
               <Popconfirm
                 placement="leftTop"
@@ -318,14 +347,12 @@ const TableUser = () => {
                 cancelText="Hủy"
                 okButtonProps={{ loading: isDeleteUser }}
               >
-                <span style={{ cursor: "pointer", marginLeft: 20 }}>
-                  <Tooltip title="Khóa tài khoản này">
-                    <DeleteTwoTone
-                      twoToneColor="#ff4d4f"
-                      style={{ cursor: "pointer" }}
-                    />
-                  </Tooltip>
-                </span>
+                <Tooltip title="Khóa tài khoản này">
+                  <DeleteTwoTone
+                    twoToneColor="#ff4d4f"
+                    style={{ cursor: "pointer" }}
+                  />
+                </Tooltip>
               </Popconfirm>
             ) : (
               <Popconfirm
@@ -343,20 +370,18 @@ const TableUser = () => {
                 cancelText="Hủy"
                 okButtonProps={{ loading: isDeleteUser }}
               >
-                <span style={{ cursor: "pointer", marginLeft: 20 }}>
-                  <Tooltip title="Mở lại tài khoản này">
-                    <UnlockOutlined
-                      style={{
-                        color: "green",
-                        fontSize: 18,
-                        cursor: "pointer",
-                      }}
-                    />
-                  </Tooltip>
-                </span>
+                <Tooltip title="Mở lại tài khoản này">
+                  <UnlockOutlined
+                    style={{
+                      color: "green",
+                      fontSize: 18,
+                      cursor: "pointer",
+                    }}
+                  />
+                </Tooltip>
               </Popconfirm>
             )}
-          </>
+          </div>
         );
       },
     },
@@ -383,6 +408,24 @@ const TableUser = () => {
       });
     }
     setIsDeleteUser(false);
+  };
+
+  const handleEnableSignature = async (userId, userName) => {
+    setIsEnable(true);
+    const res = await updateEnableSignatureImgAPI(userId);
+    if (res && res.data && res.data.statusCode === 200) {
+      message.success(
+        `Cấp quyền tải ảnh chữ ký cho tài khoản ${userName} thành công!`
+      );
+
+      refreshTable();
+    } else {
+      notification.error({
+        message: `Đã có lỗi xảy ra!`,
+        description: res.data.content,
+      });
+    }
+    setIsEnable(false);
   };
 
   if (loading) {

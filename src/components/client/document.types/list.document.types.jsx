@@ -83,8 +83,8 @@ const ListDocumentType = () => {
   ];
 
   if (
-    user?.mainRole.roleName === "Chief" ||
-    user?.subRole.roleName === "Chief"
+    user?.mainRole?.roleName === "Chief" ||
+    user?.subRole?.roleName === "Chief"
   ) {
     columns.push({
       title: "Thao tác",
@@ -210,8 +210,8 @@ const ListDocumentType = () => {
           <span style={{ fontWeight: "bold" }}>Danh sách loại văn bản</span>
         }
         toolBarRender={() =>
-          user?.mainRole.roleName === "Chief" ||
-          user?.subRole.roleName === "Chief"
+          user?.mainRole?.roleName === "Chief" ||
+          user?.subRole?.roleName === "Chief"
             ? [
                 <Button
                   key="buttonAddNew"
