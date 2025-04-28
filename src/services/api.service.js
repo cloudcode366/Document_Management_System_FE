@@ -543,6 +543,8 @@ const createSendEmailAPI = ({
     body,
     accessToken,
     documentId,
+  });
+};
 
 const createSignInSignatureDigitalAPI = (userName, password) => {
   const urlBackend = `/api/SignatureDIgitalApi/create-sign-in-signature-digital`;
@@ -690,7 +692,7 @@ export {
   createRejectDocumentActionAPI,
   viewMainWorkflowByScopeAPI,
   grantPermissionAPI,
-  createSendEmailAPI
+  createSendEmailAPI,
   createSignInSignatureDigitalAPI,
   createSignatureDigitalAPI,
   createDocumentByTemplateAPI,
