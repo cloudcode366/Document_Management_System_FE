@@ -515,6 +515,36 @@ const createRejectDocumentActionAPI = (reason, taskId, userId) => {
   });
 };
 
+const grantPermissionAPI = (documentId, userIds) => {
+  const urlBackend = "/api/UserDocPermission/create-grand-permission-for-document";
+  return axios.post(urlBackend, {
+    documentId,
+    userIds,
+  });
+};
+
+
+const createSendEmailAPI = ({
+  receiverEmail,
+  ccEmails,
+  bccEmails,
+  subject,
+  body,
+  accessToken,
+  documentId,
+}) => {
+  const urlBackend = `/api/ArchiveDocument/create-send-email`;
+  return axios.post(urlBackend, {
+    receiverEmail,
+    ccEmails,
+    bccEmails,
+    subject,
+    body,
+    accessToken,
+    documentId,
+  });
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -573,4 +603,6 @@ export {
   updateSignatureImgAPI,
   createRejectDocumentActionAPI,
   viewMainWorkflowByScopeAPI,
+  grantPermissionAPI,
+  createSendEmailAPI
 };
