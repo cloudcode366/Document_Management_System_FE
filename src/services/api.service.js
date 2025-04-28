@@ -633,6 +633,11 @@ const updateConfirmDocumentBySubmit = (
   });
 };
 
+const updateEnableSignatureImgAPI = (userId) => {
+  const urlBackend = `/api/User/update-enable-signature-img?userId=${userId}`;
+  return axios.post(urlBackend);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -698,4 +703,5 @@ export {
   createDocumentByTemplateAPI,
   createUploadDocumentForSubmitAPI,
   updateConfirmDocumentBySubmit,
+  updateEnableSignatureImgAPI,
 };

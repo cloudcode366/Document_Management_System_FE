@@ -11,6 +11,12 @@ import { useLocation, useParams } from "react-router-dom";
 import axios from "@/services/axios.customize";
 import { useCurrentApp } from "@/components/context/app.context";
 import LoginESignModal from "./login.e.sign";
+import {
+  EditOutlined,
+  SignatureOutlined,
+  UsbOutlined,
+} from "@ant-design/icons";
+import USBDigitalSignatureModal from "./usb.digital.signature";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -56,6 +62,9 @@ const DigitalSignatureComponent = () => {
   });
   const location = useLocation();
   const { taskId } = location.state || {};
+  const [openUSBDigitalSignatureModal, setOpenUSBDigitalSignatureModal] =
+    useState(false);
+  const [USBReq, setUSBReq] = useState(null);
 
   const fetchInfo = async () => {
     setLoading(true);
@@ -131,7 +140,33 @@ const DigitalSignatureComponent = () => {
     };
   });
 
-  const handleSignUSB = () => {};
+  const handleSignUSB = () => {
+    if (!signaturePosition) {
+      message.warning("Bạn chưa đặt vị trí số văn bản!");
+      return;
+    }
+    console.log("Tọa độ chữ ký gửi về backend:", signaturePosition);
+    console.log(`llx`, lowerLeftX);
+    console.log(`lly`, lowerLeftY);
+    console.log(`urx`, upperRightX);
+    console.log(`ury`, upperRightY);
+    console.log(`page`, pageNumber);
+    // Convert tọa độ thành số nguyên
+    const intLowerLeftX = Math.round(lowerLeftX);
+    const intLowerLeftY = Math.round(lowerLeftY);
+    const intUpperRightX = Math.round(upperRightX);
+    const intUpperRightY = Math.round(upperRightY);
+    setUSBReq({
+      token: localStorage.getItem(`access_token`),
+      documentId: documentId,
+      llx: intLowerLeftX,
+      lly: intLowerLeftY,
+      urx: intUpperRightX,
+      ury: intUpperRightY,
+      page: pageNumber,
+    });
+    setOpenLoginESignModal(true);
+  };
 
   const handleESign = async () => {
     if (!signaturePosition) {
@@ -291,6 +326,9 @@ const DigitalSignatureComponent = () => {
             minWidth: 300,
             height: "88vh",
             overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
           }}
         >
           <div
@@ -384,8 +422,74 @@ const DigitalSignatureComponent = () => {
               </div>
             </div>
           </div>
-          <Button onClick={handleSignUSB}>Xác nhận vị trí ký bằng USB</Button>
-          <Button onClick={handleESign}>Xác nhận vị trí ký bằng e-sign</Button>
+          <div
+            style={{
+              display: "flex",
+              gap: "30px",
+              justifyContent: "center",
+              marginTop: "30px",
+            }}
+          >
+            <Button
+              icon={<UsbOutlined style={{ color: "#1890ff" }} />}
+              block
+              size="middle"
+              style={{
+                height: 40,
+                fontSize: 16,
+                background: "#e6f4ff",
+                border: "1px solid #91d5ff",
+                fontWeight: 600,
+                transition: "all 0.3s ease",
+                width: "20%",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#d1e9ff";
+                e.currentTarget.style.border = "1px solid #69c0ff";
+                e.currentTarget.style.color = "#096dd9";
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#e6f4ff";
+                e.currentTarget.style.border = "1px solid #91d5ff";
+                e.currentTarget.style.color = "#1890ff";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+              onClick={handleSignUSB}
+            >
+              Ký điện tử bằng USB
+            </Button>
+            <Button
+              icon={<SignatureOutlined style={{ color: "#08979c" }} />}
+              block
+              size="middle"
+              style={{
+                height: 40,
+                fontSize: 16,
+                background: "#e6fffb",
+                border: "1px solid #87e8de",
+                color: "#08979c",
+                fontWeight: 600,
+                transition: "all 0.3s ease",
+                width: "20%",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#b5f5ec";
+                e.currentTarget.style.border = "1px solid #5cdbd3";
+                e.currentTarget.style.color = "#006d75";
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#e6fffb";
+                e.currentTarget.style.border = "1px solid #87e8de";
+                e.currentTarget.style.color = "#08979c";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+              onClick={handleESign}
+            >
+              Ký điện tử bằng e-Sign
+            </Button>
+          </div>
         </Card>
       </div>
       <LoginESignModal
@@ -394,6 +498,13 @@ const DigitalSignatureComponent = () => {
         resultSignaturePosition={resultSignaturePosition}
         setResultSignaturePosition={setResultSignaturePosition}
         documentId={documentId}
+        taskId={taskId}
+      />
+      <USBDigitalSignatureModal
+        openUSBDigitalSignatureModal={openUSBDigitalSignatureModal}
+        setOpenUSBDigitalSignatureModal={setOpenUSBDigitalSignatureModal}
+        USBReq={USBReq}
+        setUSBReq={setUSBReq}
         taskId={taskId}
       />
     </div>

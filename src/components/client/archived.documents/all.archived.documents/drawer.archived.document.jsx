@@ -92,7 +92,11 @@ const DrawerArchivedDocument = (props) => {
                     height: 40,
                   }}
                   onClick={() =>
-                    navigate(`/detail-archived-document/${selectedRecord?.id}`)
+                    navigate("/detail-archived-document", {
+                      state: {
+                        documentId: selectedRecord?.id,
+                      },
+                    })
                   }
                 >
                   <p style={{ fontWeight: "bold" }}>Mở</p>

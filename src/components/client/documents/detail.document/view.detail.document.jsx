@@ -44,6 +44,7 @@ import dayjs from "dayjs";
 import { Document, Page, pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 import CreateVersionModal from "./create.version.modal";
+import { version } from "nprogress";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -469,7 +470,7 @@ const ViewDetailDocument = () => {
           navigate(`/init-progress/${documentId}/${document?.taskId}`);
         }}
       >
-        Khởi tạo nhiệm vụ
+        Phân bổ văn bản
       </Button>
     );
   }
@@ -680,7 +681,7 @@ const ViewDetailDocument = () => {
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.dataReceived &&
+                {document?.dateReceived &&
                   dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
@@ -791,14 +792,20 @@ const ViewDetailDocument = () => {
               renderItem={(item) => (
                 <List.Item
                   actions={[
-                    <Tooltip title="Xem chi tiết" key="view">
-                      <EyeOutlined
-                        style={{ fontSize: 18, color: "#1890ff" }}
-                        onClick={() => {
-                          navigate("/draft-document");
-                        }}
-                      />
-                    </Tooltip>,
+                    !item.finalVersion && (
+                      <Tooltip title="Xem chi tiết" key="view">
+                        <EyeOutlined
+                          style={{ fontSize: 18, color: "#1890ff" }}
+                          onClick={() => {
+                            navigate("/version-document", {
+                              state: {
+                                version: item,
+                              },
+                            });
+                          }}
+                        />
+                      </Tooltip>
+                    ),
                   ]}
                 >
                   <List.Item.Meta
@@ -814,7 +821,9 @@ const ViewDetailDocument = () => {
                         </Typography.Text>
                       </Space>
                     }
-                    description={`Ngày tạo: ${item.createdDate}`}
+                    description={`Ngày tạo: ${dayjs(item?.createdDate).format(
+                      "DD-MM-YYYY"
+                    )}`}
                   />
                 </List.Item>
               )}

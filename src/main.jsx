@@ -2,7 +2,6 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "styles/global.scss";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import DashboardPage from "pages/client/dashboard/dashboard";
 import ListUserPage from "pages/client/users/list.user";
 import ListInComingDocumentPage from "pages/client/documents/incoming.documents/list.incoming.document";
 import ListOutgoingDocumentPage from "pages/client/documents/outgoing.documents/list.outgoing.document";
@@ -31,7 +30,6 @@ import viVN from "antd/locale/vi_VN";
 import { App, ConfigProvider } from "antd";
 import ListAllDocumentPage from "pages/client/documents/all.documents/list.all.documents";
 import LayoutClient from "@/layout";
-import DraftDocument from "pages/client/documents/draft.document";
 import TaskDetailPage from "pages/client/tasks/task.detail";
 import DetailDocument from "pages/client/documents/detail.document";
 import { AppProvider } from "components/context/app.context";
@@ -46,6 +44,7 @@ import InitProgress from "pages/client/progresses/init.progress";
 import SendEmailPage from "./pages/client/send.email/send.email";
 
 import DigitalSignature from "./pages/client/digital.signatures/digital.signature";
+import VersionDocument from "@/pages/client/documents/version.document";
 
 
 const router = createBrowserRouter([
@@ -130,10 +129,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/draft-document",
+        path: "/version-document",
         element: (
           <ProtectedRoute>
-            <DraftDocument />
+            <VersionDocument />
           </ProtectedRoute>
         ),
       },
