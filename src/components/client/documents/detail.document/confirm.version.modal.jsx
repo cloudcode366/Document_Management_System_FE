@@ -7,6 +7,9 @@ import {
   Card,
   App,
   Divider,
+  Typography,
+  Alert,
+  Table,
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -15,7 +18,11 @@ import { useCurrentApp } from "@/components/context/app.context";
 import "./confirm.version.modal.scss";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { useNavigate } from "react-router-dom";
+import {
+  createHandleTaskActionAPI,
+  updateConfirmDocumentBySubmit,
+} from "@/services/api.service";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -26,32 +33,173 @@ const ConfirmVersionModal = (props) => {
   const {
     openConfirmModal,
     setOpenConfirmModal,
-    uploadedFile,
-
     documentId,
+    resDocument,
+    setResDocument,
+    fetchInfo,
+    pdfFile,
+    setPdfFile,
+    taskId,
   } = props;
+
   const [form] = Form.useForm();
-  const { notification, message } = App.useApp();
+  const { notification, message, modal } = App.useApp();
   const { user } = useCurrentApp();
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    form.setFieldsValue({});
-  }, [openConfirmModal, form, user]);
+    if (openConfirmModal) {
+      console.log(`>> Check pdf: `, pdfFile);
+      form.setFieldsValue({
+        documentName: resDocument.documentName,
+        documentTypeName: resDocument.documentTypeName,
+        documentContent: resDocument.documentContent,
+        numberOfDocument: resDocument.numberOfDocument,
+      });
+    }
+  }, [openConfirmModal, form, resDocument]);
+
+  const reallySubmit = async () => {
+    const values = await form.validateFields();
+    const res = await updateConfirmDocumentBySubmit(
+      documentId,
+      values.documentName,
+      values.documentTypeName,
+      resDocument.aiDocumentName,
+      resDocument.aiDocumentType,
+      values.documentContent,
+      values.numberOfDocument,
+      resDocument.isDifferent,
+      resDocument.fileBase64
+    );
+    if (res.data.statusCode === 200) {
+      const res2 = await createHandleTaskActionAPI(
+        taskId,
+        user.userId,
+        "SubmitDocument"
+      );
+      if (res2?.data?.statusCode === 200) {
+        notification.success({
+          message: "Đã hoàn tất tải văn bản lên hệ thống!",
+          description: "Văn bản đã tải lên hệ thống thành công.",
+        });
+        await fetchInfo();
+      } else {
+        notification.error({
+          message: "Hệ thống đang bận!",
+          description: "Xin vui lòng thử lại sau.",
+        });
+      }
+    } else {
+      notification.error({
+        message: "Đã có lỗi xảy ra!",
+        description: res.data.content,
+      });
+    }
+  };
 
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
+      if (resDocument.isDifferent) {
+        Modal.confirm({
+          title: (
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <ExclamationCircleOutlined
+                style={{ color: "#faad14", fontSize: 24 }}
+              />
+              <Typography.Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                Có sự khác biệt giữa thông tin lúc bạn khởi tạo luồng xử lý văn
+                bản và AI phát hiện
+              </Typography.Text>
+            </div>
+          ),
+          content: (
+            <div style={{ marginTop: 24 }}>
+              {/* Alert thông báo sự khác biệt */}
+              <Alert
+                message="Thông tin bạn nhập và thông tin AI phát hiện có sự khác biệt"
+                type="warning"
+                showIcon
+                style={{ marginBottom: 16 }}
+              />
 
-      // Sẽ throw nếu còn ô chưa thỏa mãn validate
-      const values = await form.validateFields();
+              {/* Bảng thông tin */}
+              <Table
+                rowKey={(record, index) => index}
+                dataSource={[
+                  {
+                    label: "Tên văn bản",
+                    userInput: resDocument.documentName,
+                    aiInput: resDocument.aiDocumentName,
+                  },
+                  {
+                    label: "Loại văn bản",
+                    userInput: resDocument.documentTypeName,
+                    aiInput: resDocument.aiDocumentType,
+                  },
+                ]}
+                columns={[
+                  {
+                    title: "Trường thông tin",
+                    dataIndex: "label",
+                    key: "label",
+                    render: (text) => <Typography.Text>{text}</Typography.Text>,
+                  },
+                  {
+                    title: "Bạn nhập",
+                    dataIndex: "userInput",
+                    key: "userInput",
+                    render: (text) => <Typography.Text>{text}</Typography.Text>,
+                  },
+                  {
+                    title: "AI phát hiện",
+                    dataIndex: "aiInput",
+                    key: "aiInput",
+                    render: (text) => <Typography.Text>{text}</Typography.Text>,
+                  },
+                ]}
+                pagination={false}
+                size="small"
+                bordered
+                rowClassName="table-row"
+                style={{ marginBottom: 24 }}
+              />
 
-      console.log(values.name, values.validTo, values.Deadline);
-      navigate(`/detail-document/${documentId}`);
+              {/* Cảnh báo */}
+              <Typography.Text
+                style={{
+                  color: "red",
+                  fontWeight: "600",
+                  fontSize: 16,
+                }}
+              >
+                Bạn có chắc chắn muốn tải lên văn bản hiện tại không?
+              </Typography.Text>
+            </div>
+          ),
+          okText: "Vẫn tải lên",
+          cancelText: "Xem lại",
+          width: "50vw",
+          okButtonProps: {
+            type: "primary",
+            danger: true,
+          },
+          onOk: async () => {
+            await reallySubmit();
+          },
+          onCancel: () => {
+            setIsLoading(false);
+          },
+
+          centered: true,
+          maskClosable: false,
+        });
+      } else {
+        await reallySubmit();
+      }
     } catch (err) {
       console.warn("Form chưa hợp lệ:", err);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -79,16 +227,10 @@ const ConfirmVersionModal = (props) => {
           },
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            height: "100%",
-          }}
-        >
+        <div style={{ display: "flex", flexDirection: "row", height: "100%" }}>
           {/* Bên trái: Xem file PDF */}
           <Card
-            title="Thông tin chi tiết"
+            title="Xem file văn bản"
             style={{
               flex: 1,
               display: "flex",
@@ -100,15 +242,10 @@ const ConfirmVersionModal = (props) => {
               width: "70%",
             }}
           >
-            <div
-              style={{
-                flex: 1,
-                overflow: "auto",
-              }}
-            >
-              {uploadedFile && (
+            <div style={{ flex: 1, overflow: "auto" }}>
+              {pdfFile && (
                 <PDFViewerWithToken
-                  url={uploadedFile}
+                  url={pdfFile}
                   token={localStorage.getItem(`access_token`)}
                 />
               )}
@@ -117,7 +254,7 @@ const ConfirmVersionModal = (props) => {
 
           {/* Bên phải: Form nhập thông tin */}
           <Card
-            title="Thông tin chi tiết"
+            title="Thông tin văn bản"
             style={{
               flex: 1,
               display: "flex",
@@ -128,47 +265,66 @@ const ConfirmVersionModal = (props) => {
               height: "100%",
             }}
           >
-            <div
-              style={{
-                flex: 1,
-                overflow: "auto",
-              }}
-            >
+            <div style={{ flex: 1, overflow: "auto" }}>
+              {resDocument.isDifferent && (
+                <div
+                  style={{
+                    backgroundColor: "#fff7e6",
+                    border: "1px solid #faad14",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    marginBottom: "16px",
+                    color: "#d48806",
+                    fontSize: "14px",
+                  }}
+                >
+                  ⚠️ AI phát hiện một vài thông tin của văn bản bạn vừa tải lên
+                  có sự khác biệt so với lúc bạn khởi tạo luồng xử lý văn bản
+                  này. Vui lòng kiểm tra kỹ trước khi xác nhận tải văn bản lên
+                  hệ thống.
+                </div>
+              )}
+
               <Form form={form} layout="vertical" className="form-large-text">
                 <Form.Item
                   label="Tên văn bản"
-                  name="Name"
+                  name="documentName"
                   rules={[
                     { required: true, message: "Vui lòng nhập tên văn bản!" },
                   ]}
+                  validateStatus={
+                    resDocument?.isDifferent ? "warning" : undefined
+                  }
+                  help={
+                    resDocument?.isDifferent
+                      ? `Tên AI nhận dạng: ${resDocument?.aiDocumentName}`
+                      : ""
+                  }
                 >
-                  <Input placeholder="Nhập tên văn bản" />
+                  <Input placeholder="Nhập tên văn bản" readOnly />
                 </Form.Item>
 
                 <Form.Item
                   label="Loại văn bản"
-                  name="DocumentTypeId"
+                  name="documentTypeName"
                   rules={[
                     { required: true, message: "Vui lòng chọn loại văn bản!" },
                   ]}
-                  hidden
-                >
-                  <Input placeholder="Loại văn bản" readOnly />
-                </Form.Item>
-
-                <Form.Item
-                  label="Loại văn bản"
-                  name="DocumentTypeName"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn loại văn bản!" },
-                  ]}
+                  validateStatus={
+                    resDocument?.isDifferent ? "warning" : undefined
+                  }
+                  help={
+                    resDocument?.isDifferent
+                      ? `Loại văn bản AI nhận dạng: ${resDocument?.aiDocumentType}`
+                      : ""
+                  }
                 >
                   <Input placeholder="Loại văn bản" readOnly />
                 </Form.Item>
 
                 <Form.Item
                   label="Số hiệu văn bản"
-                  name="NumberOfDocument"
+                  name="numberOfDocument"
                   rules={[
                     {
                       required: true,
@@ -181,7 +337,7 @@ const ConfirmVersionModal = (props) => {
 
                 <Form.Item
                   label="Nội dung"
-                  name="DocumentContent"
+                  name="documentContent"
                   rules={[
                     { required: true, message: "Vui lòng nhập nội dung!" },
                   ]}
@@ -211,234 +367,3 @@ const ConfirmVersionModal = (props) => {
 };
 
 export default ConfirmVersionModal;
-
-// import {
-//   Modal,
-//   Form,
-//   Input,
-//   Button,
-//   Card,
-//   App,
-//   Divider,
-//   Tooltip,
-// } from "antd";
-// import { useEffect, useState } from "react";
-// import PDFViewerWithToken from "@/components/pdf.viewer"; // Giả sử có component này
-// import { useCurrentApp } from "@/components/context/app.context"; // Giả sử có context này
-// import "./confirm.version.modal.scss";
-// import { useNavigate } from "react-router-dom";
-
-// const { TextArea } = Input;
-
-// const ConfirmInfoDocument = (props) => {
-//   const {
-//     openConfirmModal,
-//     setOpenConfirmModal,
-//     uploadedFile,
-//     documentId,
-//   } = props;
-//   const [form] = Form.useForm();
-//   const { notification, message } = App.useApp();
-//   const { user } = useCurrentApp();
-//   const [isLoading, setIsLoading] = useState(false);
-//   const navigate = useNavigate();
-
-//   // Mock data từ backend giả định trả về
-//   const mockBackendResponse = {
-//     documentNameFromBackend: "Quyết định số 123",
-//     documentNameFromAI: "Quyết định bổ nhiệm nhân sự",
-//     documentType: "Quyết định bổ nhiệm",
-//   };
-
-//   // State để theo dõi sự thay đổi của tên từ AI
-//   const [documentNameFromAI, setDocumentNameFromAI] = useState(mockBackendResponse.documentNameFromAI);
-//   const [isNameChanged, setIsNameChanged] = useState(false);
-
-//   useEffect(() => {
-//     if (openConfirmModal) {
-//       // Cập nhật dữ liệu vào form khi modal mở
-//       form.setFieldsValue({
-//         DocumentNameFromBackend: mockBackendResponse.documentNameFromBackend,
-//         DocumentNameFromAI: mockBackendResponse.documentNameFromAI,
-//         DocumentType: mockBackendResponse.documentType,
-//       });
-//     }
-//   }, [openConfirmModal, form]);
-
-//   // Hàm xử lý khi tên do AI thay đổi
-//   const handleAINameChange = (e) => {
-//     const newName = e.target.value;
-//     setDocumentNameFromAI(newName);
-
-//     // Kiểm tra nếu tên từ AI khác với tên backend
-//     if (newName !== mockBackendResponse.documentNameFromAI) {
-//       setIsNameChanged(true);
-//     } else {
-//       setIsNameChanged(false);
-//     }
-//   };
-
-//   const handleSubmit = async () => {
-//     try {
-//       setIsLoading(true);
-//       // Sẽ throw nếu còn ô chưa thỏa mãn validate
-//       const values = await form.validateFields();
-//       console.log(values); // Kiểm tra dữ liệu khi submit
-//       // Điều hướng hoặc thực hiện hành động sau khi submit
-//       navigate("/some-path");
-//     } catch (err) {
-//       console.warn("Form chưa hợp lệ:", err);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   const handleCloseConfirmInfoDocumentModal = () => {
-//     setOpenConfirmModal(false);
-//     form.resetFields();
-//     setIsLoading(false);
-//   };
-
-//   return (
-//     <div>
-//       <Modal
-//         open={openConfirmModal}
-//         onCancel={handleCloseConfirmInfoDocumentModal}
-//         footer={null}
-//         width="90vw"
-//         centered
-//         maskClosable={false}
-//         closable={false}
-//         bodyProps={{
-//           style: {
-//             maxHeight: "80vh",
-//             overflowY: "auto",
-//           },
-//         }}
-//       >
-//         <div
-//           style={{
-//             display: "flex",
-//             flexDirection: "row",
-//             height: "100%",
-//           }}
-//         >
-//           {/* Bên trái: Xem file PDF */}
-//           <Card
-//             title="Thông tin chi tiết"
-//             style={{
-//               flex: 1,
-//               display: "flex",
-//               flexDirection: "column",
-//               margin: 0,
-//               borderRadius: 0,
-//               borderLeft: "1px solid #f0f0f0",
-//               height: "100%",
-//               width: "70%",
-//             }}
-//           >
-//             <div
-//               style={{
-//                 flex: 1,
-//                 overflow: "auto",
-//               }}
-//             >
-//               {uploadedFile && (
-//                 <PDFViewerWithToken
-//                   url={uploadedFile}
-//                   token={localStorage.getItem(`access_token`)}
-//                 />
-//               )}
-//             </div>
-//           </Card>
-
-//           {/* Bên phải: Form nhập thông tin */}
-//           <Card
-//             title="Thông tin chi tiết"
-//             style={{
-//               flex: 1,
-//               display: "flex",
-//               flexDirection: "column",
-//               margin: 0,
-//               borderRadius: 0,
-//               borderLeft: "1px solid #f0f0f0",
-//               height: "100%",
-//             }}
-//           >
-//             <div
-//               style={{
-//                 flex: 1,
-//                 overflow: "auto",
-//               }}
-//             >
-//               <Form form={form} layout="vertical" className="form-large-text">
-//                 {/* Tên văn bản từ backend */}
-//                 <Form.Item
-//                   label="Tên văn bản (Backend)"
-//                   name="DocumentNameFromBackend"
-//                   rules={[{ required: true, message: "Vui lòng nhập tên văn bản từ backend!" }]}
-//                 >
-//                   <Input placeholder="Tên văn bản từ backend" readOnly />
-//                 </Form.Item>
-
-//                 {/* Tên văn bản từ AI */}
-//                 <Form.Item
-//                   label="Tên văn bản (AI)"
-//                   name="DocumentNameFromAI"
-//                   rules={[{ required: true, message: "Vui lòng nhập tên văn bản từ AI!" }]}
-//                   help={isNameChanged ? "Tên văn bản đã thay đổi so với thông tin AI quét." : ""}
-//                 >
-//                   <Input
-//                     placeholder="Tên văn bản từ AI"
-//                     value={documentNameFromAI}
-//                     onChange={handleAINameChange}
-//                   />
-//                 </Form.Item>
-
-//                 {/* Loại văn bản */}
-//                 <Form.Item
-//                   label="Loại văn bản"
-//                   name="DocumentType"
-//                   rules={[{ required: true, message: "Vui lòng chọn loại văn bản!" }]}
-//                 >
-//                   <Input placeholder="Loại văn bản" readOnly />
-//                 </Form.Item>
-
-//                 <Form.Item
-//                   label="Số hiệu văn bản"
-//                   name="NumberOfDocument"
-//                   rules={[{ required: true, message: "Vui lòng nhập số hiệu văn bản!" }]}
-//                 >
-//                   <Input placeholder="Nhập số hiệu văn bản" readOnly />
-//                 </Form.Item>
-
-//                 <Form.Item
-//                   label="Nội dung"
-//                   name="DocumentContent"
-//                   rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
-//                 >
-//                   <TextArea rows={5} placeholder="Nhập nội dung tóm tắt" />
-//                 </Form.Item>
-
-//                 <div style={{ marginTop: "auto" }}>
-//                   <Divider />
-//                   <Button
-//                     loading={isLoading}
-//                     type="primary"
-//                     onClick={handleSubmit}
-//                     block
-//                     size="large"
-//                   >
-//                     Xác nhận
-//                   </Button>
-//                 </div>
-//               </Form>
-//             </div>
-//           </Card>
-//         </div>
-//       </Modal>
-//     </div>
-//   );
-// };
-
-// export default ConfirmInfoDocument;

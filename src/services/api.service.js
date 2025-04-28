@@ -515,6 +515,7 @@ const createRejectDocumentActionAPI = (reason, taskId, userId) => {
   });
 };
 
+
 const grantPermissionAPI = (documentId, userIds) => {
   const urlBackend = "/api/UserDocPermission/create-grand-permission-for-document";
   return axios.post(urlBackend, {
@@ -542,6 +543,91 @@ const createSendEmailAPI = ({
     body,
     accessToken,
     documentId,
+
+const createSignInSignatureDigitalAPI = (userName, password) => {
+  const urlBackend = `/api/SignatureDIgitalApi/create-sign-in-signature-digital`;
+  return axios.post(urlBackend, { userName, password });
+};
+
+const createSignatureDigitalAPI = (
+  otpCode,
+  token,
+  llx,
+  lly,
+  urx,
+  ury,
+  pageNumber,
+  documentId
+) => {
+  const urlBackend = `/api/SignatureDIgitalApi/create-signature-digital`;
+  return axios.post(urlBackend, {
+    otpCode,
+    token,
+    llx,
+    lly,
+    urx,
+    ury,
+    pageNumber,
+    documentId,
+  });
+};
+
+const createDocumentByTemplateAPI = (
+  templateId,
+  workFlowId,
+  documentTypeId,
+  documentName,
+  deadline,
+  expireDate
+) => {
+  const urlBackend = `/api/Document/create-document-by-template`;
+  return axios.post(urlBackend, {
+    templateId,
+    workFlowId,
+    documentTypeId,
+    documentName,
+    deadline,
+    expireDate,
+  });
+};
+
+const createUploadDocumentForSubmitAPI = (DocumentId, File) => {
+  const URL_BACKEND = `/api/Document/create-upload-document-for-submit`;
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("DocumentId", DocumentId);
+  bodyFormData.append("File", File);
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
+const updateConfirmDocumentBySubmit = (
+  documentId,
+  documentName,
+  documentTypeName,
+  aiDocumentName,
+  aiDocumentType,
+  documentContent,
+  numberOfDocument,
+  isDifferent,
+  fileBase64
+) => {
+  const urlBackend = `/api/Document/update-confirm-document-by-submit`;
+  return axios.post(urlBackend, {
+    documentId,
+    documentName,
+    documentTypeName,
+    aiDocumentName,
+    aiDocumentType,
+    documentContent,
+    numberOfDocument,
+    isDifferent,
+    fileBase64,
+
   });
 };
 
@@ -605,4 +691,9 @@ export {
   viewMainWorkflowByScopeAPI,
   grantPermissionAPI,
   createSendEmailAPI
+  createSignInSignatureDigitalAPI,
+  createSignatureDigitalAPI,
+  createDocumentByTemplateAPI,
+  createUploadDocumentForSubmitAPI,
+  updateConfirmDocumentBySubmit,
 };
