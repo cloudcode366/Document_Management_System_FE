@@ -27,6 +27,7 @@ import {
 } from "@/services/api.service";
 import { convertRoleName } from "@/services/helper";
 import { useCurrentApp } from "@/components/context/app.context";
+import { BeatLoader } from "react-spinners";
 
 const { Dragger } = Upload;
 const { Option } = Select;
@@ -252,6 +253,45 @@ const CreateDocument = (props) => {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "16px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "18px",
+            color: "#364AD6",
+            textAlign: "center",
+            animation: "blink 1.5s infinite",
+          }}
+        >
+          AI đang hỗ trợ scan văn bản của bạn, xin vui lòng đợi trong giây lát
+        </div>
+        <BeatLoader size={25} color="#364AD6" />
+        <style>
+          {`
+            @keyframes blink {
+              0% { opacity: 1; }
+              50% { opacity: 0.6; }
+              100% { opacity: 1; }
+            }
+          `}
+        </style>
+      </div>
+    );
+  }
 
   return (
     <>

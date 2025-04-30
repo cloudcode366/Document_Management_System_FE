@@ -18,6 +18,8 @@ import {
   updateInsertNameSignatureImgAPI,
   updateSignatureImgAPI,
 } from "@/services/api.service";
+import { useCurrentApp } from "../context/app.context";
+import { BeatLoader } from "react-spinners";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -32,6 +34,7 @@ const UploadSignatureModal = () => {
   const [initialBlob, setInitialBlob] = useState(null);
   const [digitalBlob, setDigitalBlob] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
+  const { user } = useCurrentApp();
 
   const uploadToServer = async (file, name, type) => {
     try {
@@ -77,16 +80,32 @@ const UploadSignatureModal = () => {
 
     try {
       await updateSignatureImgAPI(normalFile, digitalFile);
-      message.success("Tải ảnh chữ ký lên hệ thống thành công!");
+      message.success("Xác nhận ảnh chữ ký lên hệ thống thành công!");
       setTimeout(() => {
-        window.location.reload(); // ✅ Reload lại trang sau khi gửi thành công
-      }, 1000); // chờ 1s cho message hiển thị xong
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error("Lỗi gửi chữ ký:", error);
       message.error("Có lỗi xảy ra khi xác nhận chữ ký.");
     }
     setIsSubmit(false);
   };
+
+  if (isSubmit) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <BeatLoader size={25} color="#364AD6" />
+      </div>
+    );
+  }
 
   return (
     <Modal
@@ -157,59 +176,64 @@ const UploadSignatureModal = () => {
             )}
           </Space>
         </Col>
+        {(user?.mainRole?.roleName === "Chief" ||
+          user?.subRole?.roleName === "Chief" ||
+          user?.mainRole?.roleName === "Leader" ||
+          user?.subRole?.roleName === "Leader") && (
+          <>
+            <Col span={2} style={{ textAlign: "center" }}>
+              <Divider type="vertical" style={{ height: "100%" }} />
+              <ColumnWidthOutlined style={{ fontSize: 24, color: "#999" }} />
+            </Col>
+            <Col span={11}>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Form.Item label="Tên ảnh ký điện tử">
+                  <Input
+                    placeholder="Nhập tên ảnh ký điện tử"
+                    value={digitalName}
+                    onChange={(e) => setDigitalName(e.target.value)}
+                  />
+                </Form.Item>
 
-        <Col span={2} style={{ textAlign: "center" }}>
-          <Divider type="vertical" style={{ height: "100%" }} />
-          <ColumnWidthOutlined style={{ fontSize: 24, color: "#999" }} />
-        </Col>
-
-        <Col span={11}>
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Form.Item label="Tên ảnh ký điện tử">
-              <Input
-                placeholder="Nhập tên ảnh ký điện tử"
-                value={digitalName}
-                onChange={(e) => setDigitalName(e.target.value)}
-              />
-            </Form.Item>
-
-            <Upload
-              accept="image/png"
-              showUploadList={false}
-              customRequest={({ file }) => {
-                if (!digitalName.trim()) {
-                  message.warning(
-                    "Vui lòng nhập tên ảnh ký điện tử trước khi upload."
-                  );
-                  return;
-                }
-                handleUpload(file, "digital");
-              }}
-              beforeUpload={(file) => {
-                const isPng = file.type === "image/png";
-                if (!isPng) {
-                  message.error("Chỉ chấp nhận ảnh định dạng PNG!");
-                }
-                return isPng || Upload.LIST_IGNORE;
-              }}
-            >
-              <Button icon={<UploadOutlined />} block loading={loading}>
-                Tải ảnh ký điện tử
-              </Button>
-            </Upload>
-            {digitalPreview && (
-              <Image
-                src={digitalPreview}
-                alt="Ảnh ký điện tử"
-                style={{
-                  borderRadius: 8,
-                  maxHeight: 150,
-                  objectFit: "contain",
-                }}
-              />
-            )}
-          </Space>
-        </Col>
+                <Upload
+                  accept="image/png"
+                  showUploadList={false}
+                  customRequest={({ file }) => {
+                    if (!digitalName.trim()) {
+                      message.warning(
+                        "Vui lòng nhập tên ảnh ký điện tử trước khi upload."
+                      );
+                      return;
+                    }
+                    handleUpload(file, "digital");
+                  }}
+                  beforeUpload={(file) => {
+                    const isPng = file.type === "image/png";
+                    if (!isPng) {
+                      message.error("Chỉ chấp nhận ảnh định dạng PNG!");
+                    }
+                    return isPng || Upload.LIST_IGNORE;
+                  }}
+                >
+                  <Button icon={<UploadOutlined />} block loading={loading}>
+                    Tải ảnh ký điện tử
+                  </Button>
+                </Upload>
+                {digitalPreview && (
+                  <Image
+                    src={digitalPreview}
+                    alt="Ảnh ký điện tử"
+                    style={{
+                      borderRadius: 8,
+                      maxHeight: 150,
+                      objectFit: "contain",
+                    }}
+                  />
+                )}
+              </Space>
+            </Col>
+          </>
+        )}
       </Row>
 
       <Button

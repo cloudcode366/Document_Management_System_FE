@@ -147,8 +147,6 @@ export const convertColorArchivedStatus = (status) => {
   }
 };
 
-
-
 export function convertTaskType(taskType) {
   switch (taskType) {
     case "Create":
@@ -163,8 +161,9 @@ export function convertTaskType(taskType) {
       return "Tải văn bản lên";
     case "CreateUpload":
       return "Khởi tạo và tải văn bản lên";
+    case "Submit":
+      return "Nộp văn bản";
     default:
       return "Không xác định";
   }
 }
-

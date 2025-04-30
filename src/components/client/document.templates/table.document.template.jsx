@@ -29,7 +29,7 @@ const TableDocumentTemplate = () => {
   const [openModalCreate, setOpenModalCreate] = useState(false);
   const [documentTypes, setDocumentTypes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isDeleteUser, setIsDeleteUser] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
   const { message } = App.useApp();
   const { user } = useCurrentApp();
 
@@ -174,7 +174,7 @@ const TableDocumentTemplate = () => {
                 // onConfirm={() => handleDeleteUser(entity._id)}
                 okText="Xác nhận"
                 cancelText="Hủy"
-                okButtonProps={{ loading: isDeleteUser }}
+                okButtonProps={{ loading: isDelete }}
               >
                 <DeleteTwoTone
                   twoToneColor="#ff4d4f"

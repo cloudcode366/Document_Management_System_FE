@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Modal, Form, Input, Row, Col, DatePicker, Image } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
+import { convertTaskType } from "@/services/helper";
 
 const DetailTaskModal = (props) => {
   const {
@@ -18,7 +19,7 @@ const DetailTaskModal = (props) => {
         description: selectedTask?.description,
         startDate: dayjs(selectedTask?.startDate).format("DD-MM-YYYY HH:mm"),
         endDate: dayjs(selectedTask?.endDate).format("DD-MM-YYYY HH:mm"),
-        taskType: selectedTask?.taskType,
+        taskType: convertTaskType(selectedTask?.taskType),
         fullName: selectedTask?.user.fullName,
       });
     }

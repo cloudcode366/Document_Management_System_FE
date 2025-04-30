@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import { updateTaskAPI, viewAllUserAPI } from "@/services/api.service";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { convertTaskType } from "@/services/helper";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -66,7 +67,7 @@ const EditTaskModal = (props) => {
           ? dayjs(selectedTask.startDate)
           : null,
         endDate: selectedTask?.endDate ? dayjs(selectedTask.endDate) : null,
-        taskType: selectedTask?.taskType,
+        taskType: convertTaskType(selectedTask?.taskType),
         userId: selectedTask?.user?.userId,
       });
     }
