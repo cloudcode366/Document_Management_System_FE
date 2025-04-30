@@ -157,7 +157,7 @@ const ConfirmInfoDocument = (props) => {
           setOpenConfirmModal(false);
           handleCloseCreateDocumentModal();
           setSignerList([]);
-          setDocumentId(data);
+          setDocumentId(data[1].documentId);
           setOpenCreateFirstTaskModal(true);
         } else {
           notification.error({
