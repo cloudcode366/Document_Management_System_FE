@@ -5,14 +5,9 @@ import {
   DatePicker,
   Button,
   Card,
-  Typography,
   Divider,
-  Space,
-  Empty,
-  Select,
   Tag,
-  notification,
-  message,
+  App,
 } from "antd";
 import { FilePdfOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -60,8 +55,10 @@ const ConfirmInfoDocument = (props) => {
     useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [documentId, setDocumentId] = useState(null);
+  const { message, notification } = App.useApp();
 
   useEffect(() => {
+    if (!openConfirmModal) return;
     if (selectedScope === "InComing") {
       const defaultSignerList = resDocument?.canChange?.signerName || [];
       setSignerList(defaultSignerList.map((name) => ({ name, isNew: false })));
@@ -99,7 +96,7 @@ const ConfirmInfoDocument = (props) => {
         WorkflowName: selectedWorkflow?.workflowName,
       });
     }
-  }, [openConfirmModal, resDocument, form, selectedScope, user]);
+  }, [openConfirmModal, resDocument, selectedScope, user, form]);
 
   const handleSubmit = async () => {
     try {
@@ -477,9 +474,9 @@ const ConfirmInfoDocument = (props) => {
                           gap: "8px",
                         }}
                       >
-                        {signerList.map((item) => (
+                        {signerList.map((item, index) => (
                           <Tag
-                            key={item.name}
+                            key={`${item.name}-${index}`}
                             color="blue"
                             closable={item.isNew}
                             onClose={() => handleRemoveSigner(item.name)}

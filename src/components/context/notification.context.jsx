@@ -64,9 +64,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  // Gọi khi đăng nhập thành công
   useEffect(() => {
-    console.log("Auth:", isAuthenticated, "User:", user);
     if (isAuthenticated && user?.userId) {
       console.log("User logged in, fetching notifications");
       fetchNotifications();

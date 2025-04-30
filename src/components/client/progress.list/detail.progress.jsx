@@ -1,5 +1,9 @@
 import { viewProcessDocumentDetailAPI } from "@/services/api.service";
-import { convertRoleName, convertScopeName } from "@/services/helper";
+import {
+  convertRoleName,
+  convertScopeName,
+  convertStatus,
+} from "@/services/helper";
 import {
   ArrowRightOutlined,
   ClockCircleOutlined,
@@ -407,7 +411,7 @@ const ViewDetailProgress = () => {
 
         <div style={{ marginTop: 8 }}>
           <Text style={{ fontWeight: "bold", color: "#333" }}>
-            {task.taskStatus}
+            {convertStatus(task.taskStatus)}
           </Text>
           <div style={{ display: "flex", alignItems: "center", marginTop: 4 }}>
             <Progress

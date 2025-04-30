@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import "pdfjs-dist/web/pdf_viewer.css";
 import "styles/pdf.viewer.scss";
-import { Button, Modal } from "antd";
+import { Button, Modal, Spin } from "antd";
 import {
   DownloadOutlined,
   LeftOutlined,
@@ -24,29 +24,37 @@ const ViewDetailTemplate = (props) => {
   const containerRef = useRef(null);
   const [pdfDoc, setPdfDoc] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [scale, setScale] = useState(1.5); // Mặc định zoom
+  const [scale, setScale] = useState(1.5);
   const [numPages, setNumPages] = useState(0);
-  const url = `${dataDetail?.url}&isPdf=true`;
   const token = localStorage.getItem("access_token");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Tải PDF
   useEffect(() => {
     const loadPDF = async () => {
-      if (!url || !token) return;
+      if (!dataDetail?.url || !token) return;
 
-      const loadingTask = pdfjsLib.getDocument({
-        url,
-        httpHeaders: { Authorization: `Bearer ${token}` },
-      });
+      setIsLoading(true);
+      try {
+        const url = `${dataDetail?.url}&isPdf=true`;
+        const loadingTask = pdfjsLib.getDocument({
+          url,
+          httpHeaders: { Authorization: `Bearer ${token}` },
+        });
 
-      const pdf = await loadingTask.promise;
-      setPdfDoc(pdf);
-      setNumPages(pdf.numPages);
-      setCurrentPage(1);
+        const pdf = await loadingTask.promise;
+        setPdfDoc(pdf);
+        setNumPages(pdf.numPages);
+        setCurrentPage(1);
+      } catch (error) {
+        console.error("Lỗi khi tải PDF:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadPDF();
-  }, [url, token]);
+  }, [dataDetail, token]);
 
   useEffect(() => {
     const renderPage = async () => {
@@ -130,7 +138,9 @@ const ViewDetailTemplate = (props) => {
         </div>
 
         {/* PDF Viewer */}
-        <div ref={containerRef} className="pdf-canvas-container" />
+        <Spin spinning={isLoading} tip="Đang tải mẫu văn bản...">
+          <div ref={containerRef} className="pdf-canvas-container" />
+        </Spin>
       </div>
     </Modal>
   );

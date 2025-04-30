@@ -248,6 +248,8 @@ const CreateWorkflow = ({
     const roles = workflowDetail.flows.flatMap((flow, idx, arr) =>
       idx === arr.length - 1 ? [flow.roleStart, flow.roleEnd] : [flow.roleStart]
     );
+    console.log(`Roles: `, roles[0]);
+    console.log(`RolesRes: `, roleRes);
 
     let rolesToSelect = [];
     if (scope === "OutGoing") {
@@ -264,7 +266,23 @@ const CreateWorkflow = ({
       );
     }
 
-    if (scope === "Division" || scope === "School") {
+    if (scope === "Division" && roles[0] === "Specialist") {
+      rolesToSelect = roleRes.filter(
+        (role) =>
+          role.roleName === "Specialist" || role.roleName === "Division Head"
+      );
+    }
+    if (scope === "Division" && roles[0] === "Clerical Assistant") {
+      rolesToSelect = roleRes.filter(
+        (role) =>
+          role.roleName === "Clerical Assistant" || role.roleName === "Chief"
+      );
+    }
+    if (scope === "Division" && roles[0] === "Leader") {
+      rolesToSelect = roleRes.filter((role) => role.roleName === "Leader");
+    }
+
+    if (scope === "School") {
       rolesToSelect = roleRes;
     }
 
@@ -292,7 +310,9 @@ const CreateWorkflow = ({
           {workflowRoles.map((role, idx) => (
             <React.Fragment key={idx}>
               {JSON.parse(workflowDetail.requiredRolesJson).includes(role) ||
-              (scope === "Division" && (idx === 0 || idx === 1)) ? (
+              (scope === "Division" && (idx === 0 || idx === 1)) ||
+              (scope === "InComing" &&
+                (idx === 0 || idx === 1 || idx === 2)) ? (
                 <Tooltip title="Vai trò bắt buộc, không thể xóa">
                   <LockOutlined
                     style={{ color: "gray", fontSize: 20, marginTop: "10px" }}

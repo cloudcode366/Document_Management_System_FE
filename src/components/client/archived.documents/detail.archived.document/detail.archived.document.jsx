@@ -36,6 +36,7 @@ import {
 import dayjs from "dayjs";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 import axios from "axios";
+import { useCurrentApp } from "@/components/context/app.context";
 
 const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
@@ -71,6 +72,7 @@ const ViewDetailArchivedDocument = () => {
   const [openShareModal, setOpenShareModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const { user } = useCurrentApp();
 
   const loginWithGoogle = () => {
     localStorage.setItem("documentId", documentId);
@@ -496,27 +498,30 @@ const ViewDetailArchivedDocument = () => {
                 </Button>
               </Col>
               <Col span={12}>
-                <Button
-                  icon={<MailOutlined style={{ color: "#fa8c16" }} />}
-                  block
-                  size="middle"
-                  onClick={handleOpenEmailModal}
-                  style={{
-                    height: 70,
-                    fontSize: 19,
-                    background: "#F4F5F6",
-                    border: "none",
-                    color: "#000",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    whiteSpace: "normal",
-                    textAlign: "center",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  Gửi Email
-                </Button>
+                {(user?.mainRole?.roleName === "Chief" ||
+                  user?.subRole?.roleName === "Chief") && (
+                  <Button
+                    icon={<MailOutlined style={{ color: "#fa8c16" }} />}
+                    block
+                    size="middle"
+                    onClick={handleOpenEmailModal}
+                    style={{
+                      height: 70,
+                      fontSize: 19,
+                      background: "#F4F5F6",
+                      border: "none",
+                      color: "#000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      whiteSpace: "normal",
+                      textAlign: "center",
+                      lineHeight: "1.2",
+                    }}
+                  >
+                    Gửi Email
+                  </Button>
+                )}
               </Col>
               <Col span={24}>
                 <Button
