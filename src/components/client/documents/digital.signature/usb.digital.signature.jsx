@@ -12,7 +12,7 @@ const USBDigitalSignatureModal = (props) => {
   const {
     openUSBDigitalSignatureModal,
     setOpenUSBDigitalSignatureModal,
-    USBReq,
+    USBReq, // đã bao gồm các field cần có là (token, documentId, llx, lly, urx, ury, page)
     setUSBReq,
     taskId,
   } = props;

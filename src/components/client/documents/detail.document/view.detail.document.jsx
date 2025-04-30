@@ -242,7 +242,7 @@ const ViewDetailDocument = () => {
     setIsSubmit(false);
   };
 
-  // Tải văn bản: Chưa kết nối API
+  // Tải văn bản
   if (
     document?.taskType === "Upload" &&
     document?.taskStatus === "InProgress"
@@ -280,7 +280,7 @@ const ViewDetailDocument = () => {
     );
   }
 
-  // Ký điện tử: Chưa xử lý
+  // Ký điện tử
   if (document?.taskType === "Sign" && document?.taskStatus === "InProgress") {
     buttons.push(
       <Button
