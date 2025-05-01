@@ -262,7 +262,7 @@ const TableUser = () => {
       sorter: true,
       hideInSearch: true,
       render(dom, entity, index, action, schema) {
-        return <>{dayjs(entity.createdAt).format("DD - MM - YYYY")}</>;
+        return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
       },
       width: "10%",
     },
