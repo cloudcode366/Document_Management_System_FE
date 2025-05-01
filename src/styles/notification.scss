@@ -36,10 +36,26 @@
   border-bottom: 1px solid #ddd;
 }
 
+// .notification-title {
+//   display: block;
+//   font-size: 16px;
+//   color: #121212;
+// }
+
 .notification-title {
-  display: block;
   font-size: 16px;
   color: #121212;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  a {
+    color: #1677ff;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
 }
 
 .notification-content {

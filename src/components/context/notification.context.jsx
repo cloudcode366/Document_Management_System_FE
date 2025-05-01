@@ -13,7 +13,7 @@ export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
-  const [connection, setConnection] = useState(null); // Kết nối SignalR
+  const [connection, setConnection] = useState(null);
 
   // Hàm load thông báo từ API
   const fetchNotifications = async (page = 1, limit = 10) => {
