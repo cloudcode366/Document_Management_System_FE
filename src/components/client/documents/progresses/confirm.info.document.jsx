@@ -157,7 +157,7 @@ const ConfirmInfoDocument = (props) => {
           setOpenConfirmModal(false);
           handleCloseCreateDocumentModal();
           setSignerList([]);
-          setDocumentId(data[1].documentId);
+          setDocumentId(data);
           setOpenCreateFirstTaskModal(true);
         } else {
           notification.error({
@@ -280,10 +280,16 @@ const ConfirmInfoDocument = (props) => {
                   name="Name"
                   rules={[
                     { required: true, message: "Vui lòng nhập tên văn bản!" },
+                    {
+                      pattern: `^[^<>:"/\\\\|?*&;#$%@!(){}\\[\\]]+$`, // dùng regex literal thì vẫn cần escape
+                      message:
+                        'Tên văn bản không được chứa các ký tự đặc biệt: < > : " / \\ | ? * & ; # $ % @ ! ( ) { } [ ]',
+                    },
                   ]}
                 >
                   <Input placeholder="Nhập tên văn bản" />
                 </Form.Item>
+
                 {selectedScope !== "InComing" && (
                   <>
                     <Form.Item
