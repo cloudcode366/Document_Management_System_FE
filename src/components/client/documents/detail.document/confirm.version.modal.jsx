@@ -291,6 +291,11 @@ const ConfirmVersionModal = (props) => {
                   name="documentName"
                   rules={[
                     { required: true, message: "Vui lòng nhập tên văn bản!" },
+                    {
+                      pattern: `^[^<>:"/\\\\|?*&;#$%@!(){}\\[\\]]+$`,
+                      message:
+                        'Tên văn bản không được chứa các ký tự đặc biệt: < > : " / \\ | ? * & ; # $ % @ ! ( ) { } [ ]',
+                    },
                   ]}
                   validateStatus={
                     resDocument?.isDifferent ? "warning" : undefined

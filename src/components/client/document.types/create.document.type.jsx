@@ -72,12 +72,17 @@ const CreateDocumentType = (props) => {
           <Row>
             <Col span={24}>
               <Form.Item
-                label="Tên văn bản"
+                label="Tên loại văn bản"
                 name="documentTypeName"
                 rules={[
                   {
                     required: true,
                     message: "Vui lòng nhập tên loại văn bản!",
+                  },
+                  {
+                    pattern: `^[^<>:"/\\\\|?*&;#$%@!(){}\\[\\]]+$`,
+                    message:
+                      'Tên loại văn bản không được chứa các ký tự đặc biệt: < > : " / \\ | ? * & ; # $ % @ ! ( ) { } [ ]',
                   },
                 ]}
               >
