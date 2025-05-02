@@ -44,12 +44,18 @@ const LoginESignModal = (props) => {
         values.userName,
         values.password
       );
-
-      message.success("Xác thực tài khoản thành công! Đã gửi OTP tới email.");
-      setLoginInfo({ userName: values.userName, password: values.password });
-      setToken(res.data.content);
-      setCurrentStep(2);
-      setCounter(180); // Bắt đầu đếm ngược 60s
+      if (res?.data?.statusCode === 200) {
+        message.success("Xác thực tài khoản thành công! Đã gửi OTP tới email.");
+        setLoginInfo({ userName: values.userName, password: values.password });
+        setToken(res.data.content);
+        setCurrentStep(2);
+        setCounter(180); // Bắt đầu đếm ngược 60s
+      } else {
+        notification.error({
+          message: "Đã có lỗi xảy ra!",
+          description: `${res?.data?.content} Vui lòng kiểm tra lại tên đăng nhập và mật khẩu!`,
+        });
+      }
     } catch (error) {
       message.error(
         error?.response?.data ||
@@ -96,8 +102,8 @@ const LoginESignModal = (props) => {
           navigate(`/detail-progress/${documentId}`);
         } else {
           notification.error({
-            message: "Hệ thống đang bận!",
-            description: "Xin vui lòng thử lại sau giây lát.",
+            message: "Đã có lỗi xảy ra!",
+            description: res?.data?.content,
           });
         }
         navigate(`/detail-document/${documentId}`);
@@ -108,10 +114,21 @@ const LoginESignModal = (props) => {
         setOtpValues(["", "", "", "", "", ""]);
         setLoginInfo({});
         setCounter(0);
+      } else {
+        let msgError = "";
+        if (res?.data?.content === "OTP not found") {
+          msgError += "Mã OTP không hợp lệ! Vui lòng kiểm tra lại mã OTP!";
+        }
+        notification.error({
+          message: "Đã có lỗi xảy ra!",
+          description: msgError,
+        });
       }
     } catch (error) {
       message.error(
-        error?.response?.data || error?.message || "Xác thực OTP thất bại!"
+        error?.response?.data?.content ||
+          error?.message ||
+          "Xác thực OTP thất bại!"
       );
     } finally {
       setIsSubmit(false);
@@ -147,11 +164,21 @@ const LoginESignModal = (props) => {
   const handleResendOtp = async () => {
     try {
       // await resendOtpAPI(loginInfo.userName);
-
-      message.success("Đã gửi lại OTP!");
-      setOtpValues(["", "", "", "", "", ""]);
-      setCounter(60);
-      otpInputs.current[0]?.focus();
+      const res = await createSignInSignatureDigitalAPI(
+        loginInfo.userName,
+        loginInfo.password
+      );
+      if (res?.data?.statusCode === 200) {
+        message.success("Xác thực tài khoản thành công! Đã gửi OTP tới email.");
+        setToken(res.data.content);
+        setCurrentStep(2);
+        setCounter(180);
+      } else {
+        notification.error({
+          message: "Đã có lỗi xảy ra!",
+          description: `${res?.data?.content} Vui lòng kiểm tra lại tên đăng nhập và mật khẩu!`,
+        });
+      }
     } catch (error) {
       message.error(
         error?.response?.data || error?.message || "Gửi lại OTP thất bại!"

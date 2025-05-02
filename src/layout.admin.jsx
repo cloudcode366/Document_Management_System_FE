@@ -24,59 +24,43 @@ import useNotification from "antd/es/notification/useNotification";
 dayjs.extend(relativeTime);
 
 const NotificationDropdown = () => {
-  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { notifications, totalUnread, markAsRead } = useNotification();
+  const { notifications } = useNotification();
 
-  const handleClickNotification = (notification) => {
-    if (!notification.read) {
-      markAsRead(notification.id);
-    }
-    if (notification.link) {
-      navigate(notification.link);
-    }
-  };
-
-  const notificationItems = notifications?.map((item) => ({
-    key: item.id,
-    label: (
-      <div
-        onClick={() => handleClickNotification(item)}
-        style={{
-          padding: "10px",
-          backgroundColor: item.read ? "#fff" : "#e6f7ff",
-          borderBottom: "1px solid #f0f0f0",
-          whiteSpace: "normal",
-          maxWidth: "300px",
-        }}
-      >
-        <div style={{ fontWeight: item.read ? "normal" : "bold" }}>
-          {item.title || "Không có tiêu đề"}
-        </div>
-        <div style={{ fontSize: "12px", color: "#999" }}>
-          {dayjs(item.createdAt).fromNow()}
-        </div>
-      </div>
-    ),
-  }));
+  const hasUnread = notifications?.some((n) => !n.isRead);
 
   return (
-    <div
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      onClick={() => navigate("/notification")}
-      style={{ cursor: "pointer" }}
-    >
-      <Dropdown
-        open={open}
-        menu={{ items: notificationItems }}
-        placement="bottomRight"
-        overlayClassName="notification-dropdown"
+    <div onClick={() => navigate("/admin")} style={{ cursor: "pointer" }}>
+      <Badge
+        count={
+          hasUnread ? (
+            <div
+              style={{
+                width: 15,
+                height: 15,
+                borderRadius: "50%",
+                backgroundColor: "red",
+                color: "white",
+                fontWeight: "bold",
+                fontSize: 15,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 0 0 2px white",
+              }}
+            >
+              !
+            </div>
+          ) : null
+        }
+        offset={[-5, 5]}
+        style={{
+          backgroundColor: "transparent",
+          boxShadow: "none",
+        }}
       >
-        <Badge count={totalUnread} size="small">
-          <BellOutlined style={{ fontSize: "18px" }} />
-        </Badge>
-      </Dropdown>
+        <BellOutlined style={{ fontSize: 24 }} />
+      </Badge>
     </div>
   );
 };
@@ -281,7 +265,7 @@ const LayoutAdmin = () => {
                 style={{ display: "flex", alignItems: "center", gap: "20px" }}
               >
                 <QuestionCircleOutlined
-                  style={{ fontSize: "16px", cursor: "pointer" }}
+                  style={{ fontSize: 20, cursor: "pointer" }}
                   onClick={() => navigate("/admin/user-guide")}
                 />
 

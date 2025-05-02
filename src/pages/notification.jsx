@@ -1,115 +1,48 @@
 import React, { useEffect, useState } from "react";
 import { Card, Typography, Button, Badge } from "antd";
 import "@/styles/notification.scss";
-import { useCurrentApp } from "@/components/context/app.context";
-import {
-  viewNotificationsByUserId,
-  updateMarkNotificationAsRead,
-} from "@/services/api.service";
+import { useNotification } from "@/components/context/notification.context";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
 const NotificationPage = () => {
-  const { user } = useCurrentApp();
+  const navigate = useNavigate();
+  const {
+    notifications,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    totalUnread,
+  } = useNotification();
 
-  const [notifications, setNotifications] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [totalUnread, setTotalUnread] = useState(0);
-  const navigate = useNavigate();
   const LIMIT = 10;
 
-  const fetchNotifications = async (pageNumber = 1, limit = LIMIT) => {
-    if (!user?.userId) return;
-    setIsLoading(true);
-
-    try {
-      const res = await viewNotificationsByUserId(
-        user.userId,
-        pageNumber,
-        limit
-      );
-      if (res.data.statusCode === 200) {
-        const list = res.data.content || [];
-
-        // Reset hoặc nối thêm vào danh sách
-        if (pageNumber === 1) {
-          setNotifications(list);
-        } else {
-          setNotifications((prev) => [...prev, ...list]);
-        }
-
-        if (list.length < limit) {
-          setHasMore(false);
-        }
-      }
-    } catch (err) {
-      console.error("Lỗi khi gọi API viewNotificationsByUserId:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchNotifications(1);
+    loadNotifications(1);
   }, []);
 
-  useEffect(() => {
-    // Cập nhật totalUnread mỗi khi notifications thay đổi
-    const unreadCount = notifications.filter((item) => !item.isRead).length;
-    setTotalUnread(unreadCount);
-  }, [notifications]);
+  const loadNotifications = async (pageNumber) => {
+    setIsLoading(true);
+    const hasMoreData = await fetchNotifications(pageNumber, LIMIT);
+    setIsLoading(false);
+    setHasMore(hasMoreData);
+    setPage(pageNumber);
+  };
 
   const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchNotifications(nextPage);
+    loadNotifications(page + 1);
   };
 
-  const handleMarkAsRead = async (notificationId) => {
-    try {
-      const res = await updateMarkNotificationAsRead(notificationId);
-      if (res.data.statusCode === 200) {
-        // Cập nhật lại trạng thái thông báo là đã đọc
-        setNotifications((prevNotifications) => {
-          const updatedNotifications = prevNotifications.map((notification) =>
-            notification.id === notificationId
-              ? { ...notification, isRead: true }
-              : notification
-          );
-          // Tính lại totalUnread ngay sau khi cập nhật notifications
-          const unreadCount = updatedNotifications.filter(
-            (item) => !item.isRead
-          ).length;
-          setTotalUnread(unreadCount); // Cập nhật lại totalUnread ngay
-          return updatedNotifications;
-        });
-      }
-    } catch (err) {
-      console.error("Lỗi khi đánh dấu đã đọc:", err);
+  const handleNotificationClick = async (item) => {
+    if (!item.isRead) {
+      await markAsRead(item.id);
     }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      const unreadNotifications = notifications.filter((item) => !item.isRead);
-      for (const notification of unreadNotifications) {
-        await updateMarkNotificationAsRead(notification.id);
-      }
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      setTotalUnread(0); // Sau khi tất cả đều đã đọc, cập nhật lại totalUnread
-    } catch (err) {
-      console.error("Lỗi khi đánh dấu tất cả đã đọc:", err);
-    }
-  };
-
-  const handleRedirectToTaskDetail = (redirectUrl) => {
-    // Chỉnh sửa lại đường dẫn để thay task thành task-detail
-    const updatedUrl = redirectUrl.replace("/task/", "/task-detail/");
-    navigate(updatedUrl); // Điều hướng đến URL đã chỉnh sửa
+    navigate(item.redirectUrl.replace("/task/", "/task-detail/"));
   };
 
   return (
@@ -124,33 +57,28 @@ const NotificationPage = () => {
         >
           <Title level={2}>
             Thông báo{" "}
-            <Badge count={totalUnread} style={{ backgroundColor: "#52c41a" }} />
+            <Badge count={totalUnread} style={{ backgroundColor: "#FF4D4F" }} />
           </Title>
           <Button
             type="primary"
-            onClick={handleMarkAllAsRead}
+            onClick={markAllAsRead}
             disabled={totalUnread === 0}
-            style={{ marginBottom: "20px" }}
+            style={{ marginBottom: 20 }}
           >
             Đánh dấu tất cả là đã đọc
           </Button>
         </div>
+
         <ul className="notification-list">
           {notifications.map((item) => (
-            <li
-              key={item.id}
-              onClick={() => {
-                if (!item.isRead) handleMarkAsRead(item.id);
-                handleRedirectToTaskDetail(item.redirectUrl);
-              }}
-            >
+            <li key={item.id} onClick={() => handleNotificationClick(item)}>
               <Text strong className="notification-title">
                 {dayjs(item.createdAt).format("DD-MM-YYYY HH:mm")}:{" "}
                 <a href={item.link} className="notification-link">
                   {item.title}
-                </a>{" "}
+                </a>
                 {!item.isRead && (
-                  <Badge status="processing" style={{ marginLeft: 8 }} />
+                  <Badge status="warning" className="custom-warning-badge" />
                 )}
               </Text>
               <Text className="notification-content">{item.content}</Text>
