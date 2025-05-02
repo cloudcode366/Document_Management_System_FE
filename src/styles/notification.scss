@@ -82,3 +82,10 @@
   background-color: #0073e6;
   border: 1px solid;
 }
+
+.custom-warning-badge .ant-badge-status-dot {
+  width: 10px !important;
+  height: 10px !important;
+  box-shadow: 0 0 0 2px white;
+  margin-left: 5px;
+}
