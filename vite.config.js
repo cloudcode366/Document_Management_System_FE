@@ -12,6 +12,7 @@ export default defineConfig({
       pages: path.resolve("src/pages"),
       styles: path.resolve("src/styles"),
       services: path.resolve("src/services"),
+      Scripts: path.resolve("src/Scripts"),
     },
   },
   server: {
