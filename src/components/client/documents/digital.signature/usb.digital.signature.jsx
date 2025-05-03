@@ -58,7 +58,7 @@ const USBDigitalSignatureModal = ({
 
       // Khởi tạo kết nối SignalR
       const connection = window.jQuery.hubConnection(
-        "http://localhost:3979/signalr"
+        "http://localhost:3979/signalr/hubs"
       );
       const proxy = connection.createHubProxy("simpleHub");
 

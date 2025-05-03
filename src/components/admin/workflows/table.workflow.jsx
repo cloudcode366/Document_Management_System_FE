@@ -65,17 +65,28 @@ const TableWorkflow = () => {
         return convertScopeName(entity.scope);
       },
     },
-    // {
-    //   title: "Ngày tạo",
-    //   dataIndex: "createdAt",
-    //   valueType: "date",
-    //   // sorter: true,
-    //   hideInSearch: true,
-    //   width: "15%",
-    //   render(dom, entity, index, action, schema) {
-    //     return <>{dayjs(entity.createdAt).format("DD-MM-YYYY")}</>;
-    //   },
-    // },
+    {
+      title: "Phạm vi",
+      dataIndex: "scope",
+      hideInTable: true,
+      valueType: "select",
+      request: async () => {
+        return [
+          { label: "Văn bản đi", value: "OutGoing" },
+          { label: "Văn bản đến", value: "InComing" },
+          { label: "Nội bộ phòng ban", value: "Division" },
+          { label: "Nội bộ toàn trường", value: "School" },
+        ];
+      },
+      fieldProps: {
+        placeholder: "Vui lòng chọn vai trò",
+        showSearch: true,
+      },
+      formItemProps: {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
+      },
+    },
     {
       title: "Trạng thái",
       dataIndex: "isDeleted",
@@ -206,6 +217,9 @@ const TableWorkflow = () => {
           if (params) {
             if (params.workflowName) {
               query += `workflowName=${params.workflowName}`;
+            }
+            if (params.scope) {
+              query += `&scope=${params.scope}`;
             }
             query += `&page=${params.current}&limit=${params.pageSize}`;
           }
