@@ -25,7 +25,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["react-pdf", "pdfjs-dist"],
+    include: ["react-pdf", "pdfjs-dist", "jquery", "signalr"],
   },
   assetsInclude: ["**/*.pdf"],
 });

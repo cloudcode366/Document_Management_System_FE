@@ -165,7 +165,7 @@ const DigitalSignatureComponent = () => {
       ury: intUpperRightY,
       page: pageNumber,
     });
-    setOpenLoginESignModal(true);
+    setOpenUSBDigitalSignatureModal(true);
   };
 
   const handleESign = async () => {
@@ -430,65 +430,71 @@ const DigitalSignatureComponent = () => {
               marginTop: "30px",
             }}
           >
-            <Button
-              icon={<UsbOutlined style={{ color: "#1890ff" }} />}
-              block
-              size="middle"
-              style={{
-                height: 40,
-                fontSize: 16,
-                background: "#e6f4ff",
-                border: "1px solid #91d5ff",
-                fontWeight: 600,
-                transition: "all 0.3s ease",
-                width: "20%",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#d1e9ff";
-                e.currentTarget.style.border = "1px solid #69c0ff";
-                e.currentTarget.style.color = "#096dd9";
-                e.currentTarget.style.transform = "scale(1.05)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#e6f4ff";
-                e.currentTarget.style.border = "1px solid #91d5ff";
-                e.currentTarget.style.color = "#1890ff";
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-              onClick={handleSignUSB}
-            >
-              Ký điện tử bằng USB
-            </Button>
-            <Button
-              icon={<SignatureOutlined style={{ color: "#08979c" }} />}
-              block
-              size="middle"
-              style={{
-                height: 40,
-                fontSize: 16,
-                background: "#e6fffb",
-                border: "1px solid #87e8de",
-                color: "#08979c",
-                fontWeight: 600,
-                transition: "all 0.3s ease",
-                width: "20%",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#b5f5ec";
-                e.currentTarget.style.border = "1px solid #5cdbd3";
-                e.currentTarget.style.color = "#006d75";
-                e.currentTarget.style.transform = "scale(1.05)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#e6fffb";
-                e.currentTarget.style.border = "1px solid #87e8de";
-                e.currentTarget.style.color = "#08979c";
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-              onClick={handleESign}
-            >
-              Ký điện tử bằng e-Sign
-            </Button>
+            {(user?.mainRole?.roleName === "Leader" ||
+              user?.subRole?.roleName === "Leader") && (
+              <Button
+                icon={<SignatureOutlined style={{ color: "#08979c" }} />}
+                block
+                size="middle"
+                style={{
+                  height: 40,
+                  fontSize: 16,
+                  background: "#e6fffb",
+                  border: "1px solid #87e8de",
+                  color: "#08979c",
+                  fontWeight: 600,
+                  transition: "all 0.3s ease",
+                  width: "20%",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#b5f5ec";
+                  e.currentTarget.style.border = "1px solid #5cdbd3";
+                  e.currentTarget.style.color = "#006d75";
+                  e.currentTarget.style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#e6fffb";
+                  e.currentTarget.style.border = "1px solid #87e8de";
+                  e.currentTarget.style.color = "#08979c";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+                onClick={handleESign}
+              >
+                Ký điện tử bằng e-Sign
+              </Button>
+            )}
+            {(user?.mainRole?.roleName === "Chief" ||
+              user?.subRole?.roleName === "Chief") && (
+              <Button
+                icon={<UsbOutlined style={{ color: "#1890ff" }} />}
+                block
+                size="middle"
+                style={{
+                  height: 40,
+                  fontSize: 16,
+                  background: "#e6f4ff",
+                  border: "1px solid #91d5ff",
+                  fontWeight: 600,
+                  transition: "all 0.3s ease",
+                  width: "20%",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#d1e9ff";
+                  e.currentTarget.style.border = "1px solid #69c0ff";
+                  e.currentTarget.style.color = "#096dd9";
+                  e.currentTarget.style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#e6f4ff";
+                  e.currentTarget.style.border = "1px solid #91d5ff";
+                  e.currentTarget.style.color = "#1890ff";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+                onClick={handleSignUSB}
+              >
+                Ký điện tử bằng USB
+              </Button>
+            )}
           </div>
         </Card>
       </div>
@@ -506,6 +512,7 @@ const DigitalSignatureComponent = () => {
         USBReq={USBReq}
         setUSBReq={setUSBReq}
         taskId={taskId}
+        documentId={documentId}
       />
     </div>
   );

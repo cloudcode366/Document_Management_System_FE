@@ -1,55 +1,74 @@
-import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+// import $ from "jquery";
+// import "signalr";
 
-const url = "http://localhost:5000/signatureHub"; // URL của Windows Service
+// const DEFAULT_URL = "http://localhost:8080/signalr";
 
-const connection = new HubConnectionBuilder()
-  .withUrl(url)
-  .configureLogging(LogLevel.Information)
-  .build();
+// let connection = null;
+// let proxy = null;
 
-// Khởi tạo kết nối
-export const startConnection = async () => {
-  try {
-    if (connection.state === "Disconnected") {
-      await connection.start();
-      console.log("SignalR Connected!");
-    }
-  } catch (err) {
-    console.error("SignalR Connection Error: ", err);
-    // Thử kết nối lại sau 5 giây
-    setTimeout(startConnection, 5000);
-  }
-};
+// export const startConnection = (userName = "user", customUrl = DEFAULT_URL) => {
+//   return new Promise((resolve, reject) => {
+//     if (connection) {
+//       console.warn("⚠️ SignalR connection already exists.");
+//       return resolve();
+//     }
 
-// Nhận thông báo trạng thái
-export const onReceiveMessage = (callback) => {
-  connection.on("ReceiveMessage", (message) => {
-    callback(message);
-  });
-};
+//     connection = $.hubConnection(customUrl);
+//     proxy = connection.createHubProxy("hubs");
 
-// Nhận kết quả ký số
-export const onReceiveSignatureResult = (callback) => {
-  connection.on("ReceiveSignatureResult", (documentId, result) => {
-    callback(documentId, result);
-  });
-};
+//     // Đăng ký sự kiện
+//     proxy.on("ReceiveSignatureResult", (data) => {
+//       if (typeof onSignatureResultCallback === "function") {
+//         onSignatureResultCallback(data);
+//       }
+//     });
 
-// Gửi vị trí chữ ký
-export const sendSignaturePosition = async (reqSignature) => {
-  try {
-    await connection.invoke(reqSignature);
-  } catch (err) {
-    console.error("Send Signature Position Error: ", err);
-  }
-};
+//     proxy.on("ReceiveMessage", (message) => {
+//       if (typeof onMessageCallback === "function") {
+//         onMessageCallback(message);
+//       }
+//     });
 
-// Đóng kết nối (nếu cần)
-export const stopConnection = async () => {
-  try {
-    await connection.stop();
-    console.log("SignalR Disconnected!");
-  } catch (err) {
-    console.error("Stop Connection Error: ", err);
-  }
-};
+//     connection
+//       .start()
+//       .done(() => {
+//         console.log("✅ Legacy SignalR connected.");
+//         resolve();
+//       })
+//       .fail((err) => {
+//         console.error("❌ Legacy SignalR Connection Error:", err);
+//         reject(err);
+//       });
+//   });
+// };
+
+// export const stopConnection = () => {
+//   if (connection) {
+//     connection.stop();
+//     console.log("🛑 Legacy SignalR Disconnected");
+//     connection = null;
+//     proxy = null;
+//   }
+// };
+
+// let onSignatureResultCallback = null;
+// let onMessageCallback = null;
+
+// export const onReceiveSignatureResult = (callback) => {
+//   onSignatureResultCallback = callback;
+// };
+
+// export const onReceiveMessage = (callback) => {
+//   onMessageCallback = callback;
+// };
+
+// export const sendSignaturePosition = (signatureRequest) => {
+//   if (!proxy) {
+//     console.error("❌ Cannot send: SignalR proxy not ready.");
+//     return;
+//   }
+
+//   proxy.invoke("SendSignaturePosition", signatureRequest).fail((err) => {
+//     console.error("❌ SendSignaturePosition Error:", err);
+//   });
+// };
