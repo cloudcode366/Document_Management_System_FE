@@ -201,6 +201,13 @@ const CreateWorkflow = ({
   };
 
   const handleRemoveRole = (idx) => {
+    if (workflowRoles.length <= 2) {
+      message.error(
+        "Không thể xóa vì một luồng xử lý phải có ít nhất 2 vai trò!"
+      );
+      return;
+    }
+
     const updatedRoles = [...workflowRoles];
     console.log(`>>> Check idx: `, idx);
     updatedRoles.splice(idx, 1);
@@ -225,13 +232,6 @@ const CreateWorkflow = ({
       message.error("Không thể xóa role này vì không có flow tương ứng!");
       return;
     }
-
-    // Nếu hợp lệ thì tiếp tục
-    const filteredFlows = flows.filter(
-      (flow) =>
-        updatedRoles.includes(flow.roleStart) &&
-        updatedRoles.includes(flow.roleEnd)
-    );
 
     setWorkflowRoles(updatedRoles);
     const updatedFlows = generateFlowsFromRoles(updatedRoles);
@@ -310,7 +310,6 @@ const CreateWorkflow = ({
           {workflowRoles.map((role, idx) => (
             <React.Fragment key={idx}>
               {JSON.parse(workflowDetail.requiredRolesJson).includes(role) ||
-              (scope === "Division" && (idx === 0 || idx === 1)) ||
               (scope === "InComing" &&
                 (idx === 0 || idx === 1 || idx === 2)) ? (
                 <Tooltip title="Vai trò bắt buộc, không thể xóa">

@@ -158,14 +158,14 @@ const TableAllArchivedDocument = () => {
               setMeta({
                 page: res.data?.meatadataDto.page,
                 limit: res.data?.meatadataDto.limit,
-                total: res.data?.size,
+                total: res.data?.meatadataDto.total,
               });
             }
             return {
               data: res.data?.content,
               page: res.data?.meatadataDto.page,
               success: true,
-              total: res.data?.size,
+              total: res.data?.meatadataDto.total,
             };
           }}
           rowKey={"id"}

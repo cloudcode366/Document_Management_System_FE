@@ -99,7 +99,7 @@ const LoginESignModal = (props) => {
             message: "Chuyển giao văn bản thành công!",
             description: "Văn bản đã được chuyển giao thành công.",
           });
-          navigate(`/detail-progress/${documentId}`);
+          navigate(`/detail-document/${documentId}`);
         } else {
           notification.error({
             message: "Đã có lỗi xảy ra!",

@@ -1,110 +1,252 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Spin, message } from "antd";
-import {
-  onReceiveMessage,
-  onReceiveSignatureResult,
-  sendSignaturePosition,
-  startConnection,
-  stopConnection,
-} from "@/services/signature.service";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { App, Modal, Spin } from "antd";
+import { useNavigate } from "react-router-dom";
 
-const USBDigitalSignatureModal = (props) => {
-  const {
-    openUSBDigitalSignatureModal,
-    setOpenUSBDigitalSignatureModal,
-    USBReq, // đã bao gồm các field cần có là (token, documentId, llx, lly, urx, ury, page)
-    setUSBReq,
-    taskId,
-  } = props;
+import "@/Scripts/jquery-3.4.1.min.js";
+import "@/Scripts/jquery.signalR-2.4.1.min.js";
+import { createHandleTaskActionAPI } from "@/services/api.service";
+import { useCurrentApp } from "@/components/context/app.context";
 
+// Đảm bảo jQuery được gán vào window
+const $ = (window.jQuery = window.$);
+
+const USBDigitalSignatureModal = ({
+  openUSBDigitalSignatureModal,
+  setOpenUSBDigitalSignatureModal,
+  USBReq,
+  setUSBReq,
+  taskId,
+  documentId,
+}) => {
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
   const [signatureResult, setSignatureResult] = useState(null);
+  const navigate = useNavigate();
+  const connectionRef = useRef(null);
+  const mountedRef = useRef(false);
+  const { user } = useCurrentApp();
+  const { notification, message } = App.useApp();
 
-  useEffect(() => {
-    if (openUSBDigitalSignatureModal) {
-      startConnection(); // Khởi tạo kết nối SignalR
+  const appendMessage = useCallback((text) => {
+    setMessages((prev) => [...prev, { id: Date.now(), text }]);
+  }, []);
 
-      // Nhận thông báo trạng thái
-      onReceiveMessage((msg) => {
-        setMessages((prev) => [...prev, { id: Date.now(), text: msg }]);
-      });
+  const initializeSignalR = useCallback(async () => {
+    try {
+      if (!window.jQuery) {
+        throw new Error("jQuery không sẵn sàng.");
+      }
+      appendMessage("jQuery đã sẵn sàng.");
 
-      // Nhận kết quả ký số
-      onReceiveSignatureResult((receivedTaskId, result) => {
-        setLoading(false); // Tắt loading
-        setSignatureResult(result); // Lưu kết quả
-        // setUSBReq({ ...USBReq, result }); // Gửi kết quả về component cha qua setUSBReq
+      // Kiểm tra SignalR
+      if (!window.jQuery.hubConnection) {
+        throw new Error("SignalR client không được tải đúng cách.");
+      }
 
-        // Hiển thị thông báo Ant Design
-        if (result.Status === "Success") {
-          message.success(`Ký thành công tài liệu ${receivedTaskId}!`);
-        } else {
-          message.error(`Ký thất bại: ${result.ErrorMessage}`);
+      // Tải hub proxy từ server
+      const script = document.createElement("script");
+      script.src = "http://localhost:3979/signalr/hubs";
+      script.async = true;
+      document.body.appendChild(script);
+      script.onload = () => appendMessage("Đã tải hub proxy thành công.");
+      script.onerror = () => {
+        throw new Error("Không thể tải hub proxy.");
+      };
+
+      // Chờ một chút để đảm bảo hub proxy được tải
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Khởi tạo kết nối SignalR
+      const connection = window.jQuery.hubConnection(
+        "http://localhost:3979/signalr"
+      );
+      const proxy = connection.createHubProxy("simpleHub");
+
+      connectionRef.current = { connection, proxy };
+
+      // Đăng ký sự kiện từ server
+      proxy.on("addMessage", (name, message) => {
+        if (mountedRef.current) {
+          appendMessage(`[Server] ${name}: ${message}`);
+          // Xử lý kết quả ký từ thông điệp
+          handleSignatureResultFromMessage(message);
         }
       });
 
-      // Gửi vị trí chữ ký
-      handleSendSignaturePosition();
+      // Xử lý lỗi kết nối
+      connection.error((err) => {
+        if (mountedRef.current) {
+          appendMessage(`❌ Lỗi kết nối SignalR: ${err}`);
+          message.error("Lỗi kết nối với ứng dụng ký.");
+          setLoading(false);
+        }
+      });
 
-      return () => {
-        stopConnection(); // Ngắt kết nối khi modal đóng
-      };
-    }
-  }, [openUSBDigitalSignatureModal, taskId, USBReq, setUSBReq]);
+      // Xử lý ngắt kết nối
+      connection.disconnected(() => {
+        if (mountedRef.current) {
+          appendMessage("❌ Đã ngắt kết nối SignalR.");
+        }
+      });
 
-  const handleSendSignaturePosition = async () => {
-    setLoading(true);
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), text: "Sending signature position..." },
-    ]);
-    try {
-      if (!USBReq || (USBReq.x === 0 && USBReq.y === 0)) {
-        throw new Error("Invalid signature position");
-      }
-      await sendSignaturePosition(USBReq);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          text: "Signature position sent. Waiting for response...",
-        },
-      ]);
+      // Bắt đầu kết nối
+      await connection
+        .start()
+        .done(() => {
+          appendMessage("✅ Kết nối SignalR thành công.");
+          proxy.invoke("setUserName", "user");
+        })
+        .fail((err) => {
+          throw new Error(`Không thể kết nối SignalR: ${err}`);
+        });
     } catch (err) {
+      appendMessage(`❌ Lỗi khởi tạo SignalR: ${err.message}`);
+      message.error("Không thể khởi tạo kết nối.");
       setLoading(false);
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now(), text: `Error: ${err.message}` },
-      ]);
-      message.error("Lỗi khi kết nối với server");
-      console.error("Error:", err);
+      throw err;
     }
-  };
+  }, [appendMessage]);
+
+  const stopConnection = useCallback(() => {
+    if (connectionRef.current) {
+      connectionRef.current.connection.stop();
+      appendMessage("Đã ngắt kết nối SignalR.");
+      connectionRef.current = null;
+    }
+  }, [appendMessage]);
+
+  const sendSignatureRequest = useCallback(
+    (usbReqData) => {
+      if (!connectionRef.current) {
+        throw new Error("Không có kết nối SignalR.");
+      }
+      return connectionRef.current.proxy
+        .invoke("send", usbReqData)
+        .done(() => {
+          appendMessage("Đã gửi yêu cầu ký đến ứng dụng desktop.");
+        })
+        .fail((err) => {
+          throw new Error(`Gửi yêu cầu ký thất bại: ${err}`);
+        });
+    },
+    [appendMessage]
+  );
+
+  const handleSignatureResultFromMessage = useCallback(
+    async (message) => {
+      // Kiểm tra xem message có phải là kết quả ký không
+      let parsedResult;
+      try {
+        parsedResult = JSON.parse(message);
+      } catch (e) {
+        appendMessage(
+          "Không thể chuyển đổi vị trí chữ ký từ object thành dạng string."
+        );
+        return;
+      }
+
+      setLoading(false);
+      setSignatureResult(parsedResult);
+
+      if (parsedResult?.StatusCode === 200) {
+        appendMessage("✅ Ký thành công.");
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        const res = await createHandleTaskActionAPI(
+          taskId,
+          user.userId,
+          "SubmitDocument"
+        );
+        if (res?.data?.statusCode === 200) {
+          navigate(`/detail-document/${documentId}`);
+          setOpenUSBDigitalSignatureModal(false);
+          setUSBReq(null);
+        } else {
+          notification.error({
+            message: "Đã có lỗi xảy ra!",
+            description: res?.data?.content,
+          });
+        }
+      } else {
+        const msg = parsedResult?.Message || "Không rõ lý do";
+        appendMessage(`❌ Ký thất bại: ${msg}`);
+        message.error(`Ký thất bại: ${msg}`);
+      }
+    },
+    [
+      USBReq,
+      navigate,
+      appendMessage,
+      setOpenUSBDigitalSignatureModal,
+      setUSBReq,
+    ]
+  );
+
+  const handleSendSignature = useCallback(async () => {
+    if (!USBReq) {
+      appendMessage("❌ Lỗi: Dữ liệu ký không hợp lệ.");
+      message.error("Dữ liệu ký không hợp lệ.");
+      return;
+    }
+
+    setLoading(true);
+    appendMessage("Đang gửi yêu cầu ký...");
+
+    try {
+      await sendSignatureRequest(JSON.stringify(USBReq));
+      appendMessage("Đang chờ kết quả từ ứng dụng ký...");
+    } catch (err) {
+      appendMessage(`❌ Lỗi: ${err.message}`);
+      message.error("Gửi yêu cầu ký thất bại.");
+      setLoading(false);
+    }
+  }, [USBReq, appendMessage, sendSignatureRequest]);
+
+  useEffect(() => {
+    if (!openUSBDigitalSignatureModal) return;
+
+    mountedRef.current = true;
+
+    const init = async () => {
+      try {
+        await initializeSignalR();
+        await handleSendSignature();
+      } catch (err) {
+        setLoading(false);
+      }
+    };
+
+    init();
+
+    return () => {
+      mountedRef.current = false;
+      stopConnection();
+      setMessages([]);
+      setSignatureResult(null);
+    };
+  }, [
+    openUSBDigitalSignatureModal,
+    handleSendSignature,
+    initializeSignalR,
+    stopConnection,
+  ]);
 
   return (
     <Modal
-      title="USB Digital Signature Process"
+      title="Quá trình ký số USB"
       open={openUSBDigitalSignatureModal}
       onCancel={() => setOpenUSBDigitalSignatureModal(false)}
       footer={null}
       width={600}
+      maskClosable={false}
     >
       <div style={{ padding: 20 }}>
-        <div style={{ marginBottom: 16 }}>
-          <p>
-            <strong>Signature Position:</strong>
-          </p>
-          <p>
-            X: {USBReq?.x || 0}, Y: {USBReq?.y || 0}, Page: {USBReq?.page || 1}
-          </p>
-        </div>
         {loading && (
           <div style={{ textAlign: "center", marginBottom: 16 }}>
             <Spin size="large" />
             <p>Đang xử lý...</p>
           </div>
         )}
+
         <div
           style={{
             border: "1px solid #d9d9d9",
@@ -115,7 +257,7 @@ const USBDigitalSignatureModal = (props) => {
           }}
         >
           <p>
-            <strong>Messages:</strong>
+            <strong>Thông báo:</strong>
           </p>
           {messages.length > 0 ? (
             <ul style={{ listStyle: "none", padding: 0 }}>
@@ -124,7 +266,7 @@ const USBDigitalSignatureModal = (props) => {
                   key={msg.id}
                   style={{
                     marginBottom: 8,
-                    color: msg.text.includes("Error") ? "red" : "black",
+                    color: msg.text.includes("❌") ? "red" : "black",
                   }}
                 >
                   {msg.text}
@@ -132,36 +274,19 @@ const USBDigitalSignatureModal = (props) => {
               ))}
             </ul>
           ) : (
-            <p>No messages yet.</p>
+            <p>Chưa có thông báo.</p>
           )}
         </div>
+
         {signatureResult && (
           <div style={{ border: "1px solid #d9d9d9", padding: 16 }}>
             <p>
               <strong>Kết quả ký:</strong>
             </p>
-            {signatureResult.Status === "Success" ? (
-              <div>
-                <p style={{ color: "green" }}>
-                  ✅ Ký thành công tài liệu: {signatureResult.TaskId}
-                </p>
-                {signatureResult.SignedFileUrl && (
-                  <a
-                    href={signatureResult.SignedFileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#1890ff" }}
-                  >
-                    Tải file đã ký
-                  </a>
-                )}
-              </div>
-            ) : (
-              <div>
-                <p style={{ color: "red" }}>
-                  ❌ Ký thất bại: {signatureResult.ErrorMessage}
-                </p>
-              </div>
+            {signatureResult.StatusCode === 200 && (
+              <p style={{ color: "green" }}>
+                ✅ Ký thành công tài liệu: {USBReq?.documentId}
+              </p>
             )}
           </div>
         )}
