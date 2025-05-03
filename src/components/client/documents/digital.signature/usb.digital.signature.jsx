@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { App, Modal, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
-import "Scripts/jquery-3.4.1.min.js";
-import "Scripts/jquery.signalR-2.4.1.min.js";
+import "/Scripts/jquery-3.4.1.min.js";
+import "/Scripts/jquery.signalR-2.4.1.min.js";
 import { createHandleTaskActionAPI } from "@/services/api.service";
 import { useCurrentApp } from "@/components/context/app.context";
 
