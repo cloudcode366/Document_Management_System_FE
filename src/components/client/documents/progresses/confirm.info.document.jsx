@@ -24,6 +24,7 @@ import {
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import CreateFirstTask from "./create.first.task";
+import { useNavigate } from "react-router-dom";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -51,11 +52,9 @@ const ConfirmInfoDocument = (props) => {
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [defaultSigner, setDefaultSigner] = useState([]);
-  const [openCreateFirstTaskModal, setOpenCreateFirstTaskModal] =
-    useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [documentId, setDocumentId] = useState(null);
   const { message, notification } = App.useApp();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!openConfirmModal) return;
@@ -127,8 +126,7 @@ const ConfirmInfoDocument = (props) => {
           setOpenConfirmModal(false);
           handleCloseCreateDocumentModal();
           setSignerList([]);
-          setDocumentId(data[1].documentId);
-          setOpenCreateFirstTaskModal(true);
+          navigate(`/create-first-task/${data[1].documentId}`);
         } else {
           notification.error({
             message: "Đã có lỗi xảy ra, vui lòng thử lại sau",
@@ -157,8 +155,7 @@ const ConfirmInfoDocument = (props) => {
           setOpenConfirmModal(false);
           handleCloseCreateDocumentModal();
           setSignerList([]);
-          setDocumentId(data);
-          setOpenCreateFirstTaskModal(true);
+          navigate(`/create-first-task/${data}`);
         } else {
           notification.error({
             message: "Đã có lỗi xảy ra, vui lòng thử lại sau",
@@ -197,7 +194,6 @@ const ConfirmInfoDocument = (props) => {
     setInputValue("");
     setDefaultSigner([]);
     setIsLoading(false);
-    setDocumentId(null);
   };
 
   return (
@@ -370,27 +366,6 @@ const ConfirmInfoDocument = (props) => {
                 )}
 
                 <Form.Item
-                  label="Ngày hết hiệu lực"
-                  name="validTo"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng chọn ngày hết hiệu lực!",
-                    },
-                  ]}
-                >
-                  <DatePicker
-                    format="DD-MM-YYYY HH:mm"
-                    showTime={{ format: "HH:mm" }}
-                    style={{ width: "100%" }}
-                    placeholder="Vui lòng chọn ngày hết hiệu lực"
-                    disabledDate={(current) =>
-                      current && current < dayjs().endOf("day")
-                    }
-                  />
-                </Form.Item>
-
-                <Form.Item
                   label="Ngày hết hạn"
                   name="Deadline"
                   rules={[
@@ -406,8 +381,80 @@ const ConfirmInfoDocument = (props) => {
                     style={{ width: "100%" }}
                     placeholder="Vui lòng chọn ngày hết hạn"
                     disabledDate={(current) =>
-                      current && current < dayjs().endOf("day")
+                      current && current < dayjs().startOf("day")
                     }
+                    disabledTime={(current) => {
+                      const now = dayjs();
+                      if (!current || current.isAfter(now, "day")) return {};
+                      return {
+                        disabledHours: () => [...Array(now.hour()).keys()],
+                        disabledMinutes: (selectedHour) =>
+                          selectedHour === now.hour()
+                            ? [...Array(now.minute()).keys()]
+                            : [],
+                      };
+                    }}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Ngày hết hiệu lực"
+                  name="validTo"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn ngày hết hiệu lực!",
+                    },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        const start = getFieldValue("Deadline");
+                        if (!value || !start || value.isAfter(start)) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(
+                          new Error(
+                            "Thời gian hết hiệu lực phải sau thời gian hết hạn xử lý!"
+                          )
+                        );
+                      },
+                    }),
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn ngày hết hiệu lực"
+                    disabledDate={(current) =>
+                      current && current < dayjs().startOf("day")
+                    }
+                    disabledTime={(current) => {
+                      const now = dayjs();
+                      const start = form.getFieldValue("Deadline");
+
+                      if (!current) return {};
+
+                      // Nếu ngày sau hôm nay và sau ngày bắt đầu => không giới hạn giờ phút
+                      if (
+                        current.isAfter(now, "day") &&
+                        (!start || current.isAfter(start, "day"))
+                      ) {
+                        return {};
+                      }
+
+                      const refTime =
+                        start && current.isSame(start, "day") ? start : now;
+
+                      return {
+                        disabledHours: () => [...Array(refTime.hour()).keys()],
+                        disabledMinutes: (selectedHour) => {
+                          if (selectedHour === refTime.hour()) {
+                            return [...Array(refTime.minute() + 1).keys()];
+                          }
+                          return [];
+                        },
+                      };
+                    }}
                   />
                 </Form.Item>
 
@@ -544,12 +591,6 @@ const ConfirmInfoDocument = (props) => {
           </Card>
         </div>
       </Modal>
-      <CreateFirstTask
-        openCreateFirstTaskModal={openCreateFirstTaskModal}
-        setOpenCreateFirstTaskModal={setOpenCreateFirstTaskModal}
-        documentId={documentId}
-        setDocumentId={setDocumentId}
-      />
     </div>
   );
 };

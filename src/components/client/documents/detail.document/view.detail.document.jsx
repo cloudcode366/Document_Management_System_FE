@@ -792,7 +792,7 @@ const ViewDetailDocument = () => {
               renderItem={(item) => (
                 <List.Item
                   actions={[
-                    !item.finalVersion && (
+                    !item.isFinal && (
                       <Tooltip title="Xem chi tiết" key="view">
                         <EyeOutlined
                           style={{ fontSize: 18, color: "#1890ff" }}

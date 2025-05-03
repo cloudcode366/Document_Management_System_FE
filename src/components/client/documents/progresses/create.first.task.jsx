@@ -15,24 +15,17 @@ import dayjs from "dayjs";
 import { createFirstTaskAPI } from "@/services/api.service";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useCurrentApp } from "@/components/context/app.context";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const { TextArea } = Input;
-const { Option } = Select;
 
-const CreateFirstTask = (props) => {
-  const {
-    openCreateFirstTaskModal,
-    setOpenCreateFirstTaskModal,
-    documentId,
-    setDocumentId,
-  } = props;
+const CreateFirstTask = () => {
+  const { documentId } = useParams();
   const [form] = Form.useForm();
-  const [users, setUsers] = useState([]);
   const { message, notification } = App.useApp();
   const [isSubmit, setIsSubmit] = useState(false);
   const { user } = useCurrentApp();
@@ -42,7 +35,7 @@ const CreateFirstTask = (props) => {
     setIsSubmit(true);
     const { title, description } = values;
 
-    const startDate = dayjs(values.startDate).tz("Asia/Ho_Chi_Minh").format(); // Định dạng lại theo múi giờ Việt Nam
+    const startDate = dayjs(values.startDate).tz("Asia/Ho_Chi_Minh").format();
     const endDate = dayjs(values.endDate).tz("Asia/Ho_Chi_Minh").format();
     const taskType = "CreateUpload";
     console.log(
@@ -65,9 +58,6 @@ const CreateFirstTask = (props) => {
     );
     if (res && res.data && res.data.statusCode === 201) {
       message.success("Tạo nhiệm vụ đầu tiên thành công");
-      setOpenCreateFirstTaskModal(false);
-      setUsers([]);
-      setDocumentId(null);
       form.resetFields();
       navigate(`/init-progress/${documentId}`);
     } else {
@@ -96,166 +86,172 @@ const CreateFirstTask = (props) => {
   };
 
   return (
-    <Modal
-      open={openCreateFirstTaskModal}
-      footer={null}
-      centered
-      width={800}
-      closable={false}
-      maskClosable={false}
-      onCancel={() => {}}
-    >
-      <h2 style={{ marginBottom: 0 }}>Tạo nhiệm vụ đầu tiên</h2>
-      <p style={{ marginBottom: 24, color: "#999" }}>
-        Khởi tạo nhiệm vụ đầu tiên
-      </p>
-
+    <div style={{ height: "100vh" }}>
       <div
         style={{
-          background: "#fff",
-          padding: 24,
-          borderRadius: 12,
-          boxShadow: "0 0 10px rgba(0,0,0,0.05)",
+          backgroundColor: "#ffffff",
+          padding: "20px",
+          boxShadow: `0px 4px 10px rgba(0, 0, 0, 0.1)`,
+          borderRadius: "10px",
+          marginTop: "20px",
+          height: "calc(100vh - 40px)",
+          overflowY: "auto",
         }}
       >
-        <Form form={form} layout="vertical" initialValues={{}}>
-          <Form.Item
-            label="Tên nhiệm vụ"
-            name="title"
-            rules={[{ required: true, message: "Vui lòng nhập tên nhiệm vụ!" }]}
-          >
-            <Input placeholder="Nhập tên nhiệm vụ" />
-          </Form.Item>
+        <h2 style={{ marginBottom: 0 }}>Tạo nhiệm vụ đầu tiên</h2>
+        <p style={{ marginBottom: 24, color: "#999" }}>
+          Khởi tạo nhiệm vụ đầu tiên
+        </p>
 
-          <Form.Item
-            label="Mô tả"
-            name="description"
-            rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
-          >
-            <TextArea placeholder="Nhập mô tả" rows={3} />
-          </Form.Item>
-
-          <Row gutter={[16, 16]}>
-            <Col span={12}>
-              <Form.Item
-                label="Thời gian bắt đầu"
-                name="startDate"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn thời gian bắt đầu!",
-                  },
-                ]}
-              >
-                <DatePicker
-                  format="DD-MM-YYYY HH:mm"
-                  showTime={{ format: "HH:mm" }}
-                  style={{ width: "100%" }}
-                  placeholder="Chọn thời gian bắt đầu"
-                  disabledDate={(current) =>
-                    current && current < dayjs().startOf("day")
-                  }
-                  disabledTime={(current) => {
-                    const now = dayjs();
-                    if (!current || current.isAfter(now, "day")) return {};
-                    return {
-                      disabledHours: () => [...Array(now.hour()).keys()],
-                      disabledMinutes: (selectedHour) =>
-                        selectedHour === now.hour()
-                          ? [...Array(now.minute()).keys()]
-                          : [],
-                    };
-                  }}
-                />
-              </Form.Item>
-            </Col>
-
-            <Col span={12}>
-              <Form.Item
-                label="Thời gian kết thúc"
-                name="endDate"
-                dependencies={["startDate"]}
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng chọn thời gian kết thúc!",
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      const start = getFieldValue("startDate");
-                      if (!value || !start || value.isAfter(start)) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(
-                        new Error(
-                          "Thời gian kết thúc phải sau thời gian bắt đầu!"
-                        )
-                      );
-                    },
-                  }),
-                ]}
-              >
-                <DatePicker
-                  format="DD-MM-YYYY HH:mm"
-                  showTime={{ format: "HH:mm" }}
-                  style={{ width: "100%" }}
-                  placeholder="Chọn thời gian kết thúc"
-                  disabledDate={(current) =>
-                    current && current < dayjs().startOf("day")
-                  }
-                  disabledTime={(current) => {
-                    const now = dayjs();
-                    const start = form.getFieldValue("startDate");
-
-                    if (!current) return {};
-
-                    // Nếu ngày sau hôm nay và sau ngày bắt đầu => không giới hạn giờ phút
-                    if (
-                      current.isAfter(now, "day") &&
-                      (!start || current.isAfter(start, "day"))
-                    ) {
-                      return {};
-                    }
-
-                    const refTime =
-                      start && current.isSame(start, "day") ? start : now;
-
-                    return {
-                      disabledHours: () => [...Array(refTime.hour()).keys()],
-                      disabledMinutes: (selectedHour) => {
-                        if (selectedHour === refTime.hour()) {
-                          return [...Array(refTime.minute() + 1).keys()];
-                        }
-                        return [];
-                      },
-                    };
-                  }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <div style={{ textAlign: "right", marginTop: 16 }}>
-            <Button
-              type="primary"
-              onClick={async () => {
-                try {
-                  const values = await form.validateFields();
-                  await handleSave(values);
-                } catch (error) {
-                  console.log("Validation failed:", error);
-                }
-              }}
-              size="large"
-              style={{ backgroundColor: "#FC8330" }}
-              loading={isSubmit}
+        <div
+          style={{
+            background: "#fff",
+            padding: 24,
+            borderRadius: 12,
+            boxShadow: "0 0 10px rgba(0,0,0,0.05)",
+          }}
+        >
+          <Form form={form} layout="vertical" initialValues={{}}>
+            <Form.Item
+              label="Tên nhiệm vụ"
+              name="title"
+              rules={[
+                { required: true, message: "Vui lòng nhập tên nhiệm vụ!" },
+              ]}
             >
-              Tạo nhiệm vụ đầu tiên
-            </Button>
-          </div>
-        </Form>
+              <Input placeholder="Nhập tên nhiệm vụ" />
+            </Form.Item>
+
+            <Form.Item
+              label="Mô tả"
+              name="description"
+              rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+            >
+              <TextArea placeholder="Nhập mô tả" rows={3} />
+            </Form.Item>
+
+            <Row gutter={[16, 16]}>
+              <Col span={12}>
+                <Form.Item
+                  label="Thời gian bắt đầu"
+                  name="startDate"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn thời gian bắt đầu!",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Chọn thời gian bắt đầu"
+                    disabledDate={(current) =>
+                      current && current < dayjs().startOf("day")
+                    }
+                    disabledTime={(current) => {
+                      const now = dayjs();
+                      if (!current || current.isAfter(now, "day")) return {};
+                      return {
+                        disabledHours: () => [...Array(now.hour()).keys()],
+                        disabledMinutes: (selectedHour) =>
+                          selectedHour === now.hour()
+                            ? [...Array(now.minute()).keys()]
+                            : [],
+                      };
+                    }}
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label="Thời gian kết thúc"
+                  name="endDate"
+                  dependencies={["startDate"]}
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn thời gian kết thúc!",
+                    },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        const start = getFieldValue("startDate");
+                        if (!value || !start || value.isAfter(start)) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(
+                          new Error(
+                            "Thời gian kết thúc phải sau thời gian bắt đầu!"
+                          )
+                        );
+                      },
+                    }),
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Chọn thời gian kết thúc"
+                    disabledDate={(current) =>
+                      current && current < dayjs().startOf("day")
+                    }
+                    disabledTime={(current) => {
+                      const now = dayjs();
+                      const start = form.getFieldValue("startDate");
+
+                      if (!current) return {};
+
+                      // Nếu ngày sau hôm nay và sau ngày bắt đầu => không giới hạn giờ phút
+                      if (
+                        current.isAfter(now, "day") &&
+                        (!start || current.isAfter(start, "day"))
+                      ) {
+                        return {};
+                      }
+
+                      const refTime =
+                        start && current.isSame(start, "day") ? start : now;
+
+                      return {
+                        disabledHours: () => [...Array(refTime.hour()).keys()],
+                        disabledMinutes: (selectedHour) => {
+                          if (selectedHour === refTime.hour()) {
+                            return [...Array(refTime.minute() + 1).keys()];
+                          }
+                          return [];
+                        },
+                      };
+                    }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <div style={{ textAlign: "right", marginTop: 16 }}>
+              <Button
+                type="primary"
+                onClick={async () => {
+                  try {
+                    const values = await form.validateFields();
+                    await handleSave(values);
+                  } catch (error) {
+                    console.log("Validation failed:", error);
+                  }
+                }}
+                size="large"
+                style={{ backgroundColor: "#FC8330" }}
+                loading={isSubmit}
+              >
+                Tạo nhiệm vụ đầu tiên
+              </Button>
+            </div>
+          </Form>
+        </div>
       </div>
-    </Modal>
+    </div>
   );
 };
 

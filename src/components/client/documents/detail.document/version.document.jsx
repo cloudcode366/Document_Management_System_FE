@@ -158,14 +158,14 @@ const ViewVersionDocument = () => {
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Người tạo:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.createdBy}
+                {version?.createdBy}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày tạo:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.dateReceived &&
-                  dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
+                {version?.createdDate &&
+                  dayjs(version?.createdDate).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
@@ -192,12 +192,12 @@ const ViewVersionDocument = () => {
                   }}
                 >
                   {/* Người ký đầu tiên */}
-                  <span>{document?.digitalSignatures?.[0]?.signerName}</span>
+                  <span>{version?.digitalSignatures?.[0]?.signerName}</span>
                 </div>
               </div>
 
               {/* Các tên còn lại */}
-              {document?.digitalSignatures?.slice(1).map((sig, index) => (
+              {version?.digitalSignatures?.slice(1).map((sig, index) => (
                 <div
                   key={index}
                   style={{
@@ -215,20 +215,19 @@ const ViewVersionDocument = () => {
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Người từ chối:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.dateIssued &&
-                  dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
+                {version?.rejectedBy}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Ngày bị từ chối:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
+                {dayjs(version?.rejectedDate).format("DD-MM-YYYY HH:mm")}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Lý do:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
+                {version?.reason}
               </span>
             </div>
 
