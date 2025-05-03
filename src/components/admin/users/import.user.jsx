@@ -382,7 +382,7 @@ const ImportUser = ({
           </Button>
         ) : (
           <Button type="primary" loading={isSubmit} onClick={handlePreview}>
-            Xem trước dữ liệu
+            Tiếp tục
           </Button>
         )
       }
