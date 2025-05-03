@@ -1,9 +1,17 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { copy } from "vite-plugin-copy";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    copy({
+      targets: [
+        { src: "Scripts/*", dest: "dist/Scripts" }, // Sao chép thư mục Scripts
+      ],
+    }),
+  ],
   resolve: {
     alias: {
       "@": path.resolve("src"), // Alias cho thư mục gốc "src/"

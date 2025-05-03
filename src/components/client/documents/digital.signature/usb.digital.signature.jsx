@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { App, Modal, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
-import "/Scripts/jquery-3.4.1.min.js";
-import "/Scripts/jquery.signalR-2.4.1.min.js";
 import { createHandleTaskActionAPI } from "@/services/api.service";
 import { useCurrentApp } from "@/components/context/app.context";
 
-// Đảm bảo jQuery được gán vào window
+import "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js";
+import "https://cdnjs.cloudflare.com/ajax/libs/signalr.js/2.4.2/jquery.signalR.min.js";
 const $ = (window.jQuery = window.$);
 
 const USBDigitalSignatureModal = ({
