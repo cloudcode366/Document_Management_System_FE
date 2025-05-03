@@ -539,6 +539,24 @@ const ViewDetailProgress = () => {
                 Khởi tạo nhiệm vụ
               </Button>
             )}
+          {!taskId && (
+            <Button
+              type="primary"
+              onClick={() => {
+                navigate(`/create-first-task/${documentId}`);
+              }}
+              style={{
+                backgroundColor: "#FC8330",
+                borderColor: "#FC8330",
+                marginTop: 20,
+                marginBottom: 40,
+              }}
+              loading={isSubmit}
+              icon={<RightCircleFilled />}
+            >
+              Khởi tạo nhiệm vụ
+            </Button>
+          )}
         </div>
 
         <div style={{ margin: "20px 10px 0 10px" }}>
