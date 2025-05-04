@@ -544,7 +544,7 @@ const ViewInitProgress = () => {
     setIsSubmit(true);
     if (
       (user?.mainRole?.roleName === "Chief" ||
-        user?.subRole?.roleName === "Chief") &&
+        user?.subRole?.roleName?.endsWith("_Chief")) &&
       processDetail?.workflowRequest?.scope === "InComing"
     ) {
       const res = await createHandleTaskActionAPI(

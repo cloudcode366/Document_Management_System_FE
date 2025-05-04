@@ -499,7 +499,7 @@ const ViewDetailArchivedDocument = () => {
               </Col>
               <Col span={12}>
                 {(user?.mainRole?.roleName === "Chief" ||
-                  user?.subRole?.roleName === "Chief") && (
+                  user?.subRole?.roleName?.endsWith("_Chief")) && (
                   <Button
                     icon={<MailOutlined style={{ color: "#fa8c16" }} />}
                     block

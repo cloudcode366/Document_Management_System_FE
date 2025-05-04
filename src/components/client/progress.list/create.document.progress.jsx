@@ -9,7 +9,6 @@ import {
   Upload,
   Select,
   Radio,
-  notification,
   Typography,
   Row,
   Col,
@@ -17,8 +16,6 @@ import {
   Button,
 } from "antd";
 import React, { useState } from "react";
-import ConfirmInfoDocument from "@/components/client/documents/progresses/confirm.info.document";
-import templatePDF from "assets/files/template.pdf";
 import {
   createUploadDocumentAPI,
   viewAllTemplatesAPI,
@@ -28,12 +25,13 @@ import {
 import { convertRoleName } from "@/services/helper";
 import { useCurrentApp } from "@/components/context/app.context";
 import { BeatLoader } from "react-spinners";
+import ConfirmInfoDocumentProgress from "./confirm.info.document.progress";
 
 const { Dragger } = Upload;
 const { Option } = Select;
 const { Text } = Typography;
 
-const CreateDocument = (props) => {
+const CreateDocumentProgress = (props) => {
   const { openModalCreate, setOpenModalCreate, refreshTable } = props;
   const { message, notification } = App.useApp();
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -282,12 +280,12 @@ const CreateDocument = (props) => {
         <BeatLoader size={25} color="#364AD6" />
         <style>
           {`
-            @keyframes blink {
-              0% { opacity: 1; }
-              50% { opacity: 0.6; }
-              100% { opacity: 1; }
-            }
-          `}
+              @keyframes blink {
+                0% { opacity: 1; }
+                50% { opacity: 0.6; }
+                100% { opacity: 1; }
+              }
+            `}
         </style>
       </div>
     );
@@ -448,7 +446,7 @@ const CreateDocument = (props) => {
         )}
       </Modal>
 
-      <ConfirmInfoDocument
+      <ConfirmInfoDocumentProgress
         openConfirmModal={openConfirmModal}
         setOpenConfirmModal={setOpenConfirmModal}
         refreshTable={refreshTable}
@@ -465,4 +463,4 @@ const CreateDocument = (props) => {
   );
 };
 
-export default CreateDocument;
+export default CreateDocumentProgress;

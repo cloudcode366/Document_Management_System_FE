@@ -431,10 +431,9 @@ const DigitalSignatureComponent = () => {
             }}
           >
             {(user?.mainRole?.roleName === "Leader" ||
-              user?.subRole?.roleName === "Leader") && (
+              user?.subRole?.roleName?.endsWith("_Leader")) && (
               <Button
                 icon={<SignatureOutlined style={{ color: "#08979c" }} />}
-                block
                 size="middle"
                 style={{
                   height: 40,
@@ -444,7 +443,12 @@ const DigitalSignatureComponent = () => {
                   color: "#08979c",
                   fontWeight: 600,
                   transition: "all 0.3s ease",
-                  width: "20%",
+                  padding: "0 12px",
+                  minWidth: 150,
+                  maxWidth: "100%",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "#b5f5ec";
@@ -464,10 +468,9 @@ const DigitalSignatureComponent = () => {
               </Button>
             )}
             {(user?.mainRole?.roleName === "Chief" ||
-              user?.subRole?.roleName === "Chief") && (
+              user?.subRole?.roleName?.endsWith("_Chief")) && (
               <Button
                 icon={<UsbOutlined style={{ color: "#1890ff" }} />}
-                block
                 size="middle"
                 style={{
                   height: 40,
@@ -476,7 +479,12 @@ const DigitalSignatureComponent = () => {
                   border: "1px solid #91d5ff",
                   fontWeight: 600,
                   transition: "all 0.3s ease",
-                  width: "20%",
+                  padding: "0 12px",
+                  maxWidth: "100%",
+                  minWidth: "150px",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "#d1e9ff";

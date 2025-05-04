@@ -84,7 +84,7 @@ const ListDocumentType = () => {
 
   if (
     user?.mainRole?.roleName === "Chief" ||
-    user?.subRole?.roleName === "Chief"
+    user?.subRole?.roleName?.endsWith("_Chief")
   ) {
     columns.push({
       title: "Thao tác",
@@ -211,7 +211,7 @@ const ListDocumentType = () => {
         }
         toolBarRender={() =>
           user?.mainRole?.roleName === "Chief" ||
-          user?.subRole?.roleName === "Chief"
+          user?.subRole?.roleName?.endsWith("_Chief")
             ? [
                 <Button
                   key="buttonAddNew"

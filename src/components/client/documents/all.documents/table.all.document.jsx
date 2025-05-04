@@ -10,8 +10,6 @@ import { viewDocumentsByTabForUserAPI } from "@/services/api.service";
 import { convertScopeName } from "@/services/helper";
 import DrawerAllDocument from "./drawer.all.document";
 
-const { TabPane } = Tabs;
-
 const tagColor = {
   "Văn bản đến": "#FC8330",
   "Văn bản đi": "#18B0FF",
