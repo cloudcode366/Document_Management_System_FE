@@ -177,9 +177,9 @@ const UploadSignatureModal = () => {
           </Space>
         </Col>
         {(user?.mainRole?.roleName === "Chief" ||
-          user?.subRole?.roleName === "Chief" ||
+          user?.subRole?.roleName?.endsWith("_Chief") ||
           user?.mainRole?.roleName === "Leader" ||
-          user?.subRole?.roleName === "Leader") && (
+          user?.subRole?.roleName?.endsWith("_Leader")) && (
           <>
             <Col span={2} style={{ textAlign: "center" }}>
               <Divider type="vertical" style={{ height: "100%" }} />

@@ -16,7 +16,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 import { useCurrentApp } from "@/components/context/app.context";
 import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
-import "./confirm.info.document.scss";
+import "./confirm.info.document.progress.scss";
 import {
   createDocumentByTemplateAPI,
   createInComingDocumentAPI,
@@ -32,7 +32,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 const { TextArea } = Input;
 
-const ConfirmInfoDocument = (props) => {
+const ConfirmInfoDocumentProgress = (props) => {
   const {
     openConfirmModal,
     setOpenConfirmModal,
@@ -593,4 +593,4 @@ const ConfirmInfoDocument = (props) => {
   );
 };
 
-export default ConfirmInfoDocument;
+export default ConfirmInfoDocumentProgress;

@@ -1,15 +1,16 @@
 import { convertProcessingStatus, convertScopeName } from "@/services/helper";
 
 import { ProTable } from "@ant-design/pro-components";
-import { Badge, Tag, Tooltip } from "antd";
+import { Badge, Button, Tag, Tooltip } from "antd";
 import { useRef, useState } from "react";
 import dayjs from "dayjs";
 import "styles/loading.scss";
 import { useNavigate } from "react-router-dom";
 import { viewMySelfDocumentAPI } from "@/services/api.service";
 import "./table.progress.scss";
-import { PaperClipOutlined } from "@ant-design/icons";
+import { PaperClipOutlined, PlusOutlined } from "@ant-design/icons";
 import DrawerProgressDocument from "./drawer.progress";
+import CreateDocumentProgress from "./create.document.progress";
 
 const statusColor = {
   InProgress: "#3A91F5", // xanh dương
@@ -33,6 +34,7 @@ const TableProgress = () => {
     page: 1,
   });
 
+  const [openModalCreate, setOpenModalCreate] = useState(false);
   const [openViewDetail, setOpenViewDetail] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   let clickTimer = null;
@@ -177,6 +179,18 @@ const TableProgress = () => {
         headerTitle={
           <span style={{ fontWeight: "bold" }}>Danh sách văn bản khởi tạo</span>
         }
+        toolBarRender={() => [
+          <Button
+            key="buttonAddNew"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setOpenModalCreate(true);
+            }}
+            type="primary"
+          >
+            Khởi tạo văn bản
+          </Button>,
+        ]}
         onRow={(record) => ({
           title: "Bấm một lần để xem nhanh, hai lần để mở chi tiết",
           onClick: () => {
@@ -192,6 +206,11 @@ const TableProgress = () => {
             navigate(`/detail-progress/${record.id}`);
           },
         })}
+      />
+      <CreateDocumentProgress
+        openModalCreate={openModalCreate}
+        setOpenModalCreate={setOpenModalCreate}
+        refreshTable={refreshTable}
       />
       <DrawerProgressDocument
         openViewDetail={openViewDetail}
