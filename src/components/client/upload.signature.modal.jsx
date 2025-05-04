@@ -12,6 +12,7 @@ import {
   Form,
   Input,
   Divider,
+  Radio,
 } from "antd";
 import { ColumnWidthOutlined, UploadOutlined } from "@ant-design/icons";
 import {
@@ -35,6 +36,7 @@ const UploadSignatureModal = () => {
   const [digitalBlob, setDigitalBlob] = useState(null);
   const [isSubmit, setIsSubmit] = useState(false);
   const { user } = useCurrentApp();
+  const [isUSB, setIsUSB] = useState(false);
 
   const uploadToServer = async (file, name, type) => {
     try {
@@ -114,25 +116,44 @@ const UploadSignatureModal = () => {
       footer={null}
       loading={isSubmit}
       centered
-      width="60vw"
+      width="50vw"
     >
       <div style={{ textAlign: "center", marginBottom: 24 }}>
         <Title level={4}>
-          Vui lòng cung cấp ảnh ký nháy và ảnh ký điện tử được tách nền lên hệ
-          thống
+          Vui lòng cung cấp các ảnh chữ ký được tách nền lên hệ thống
         </Title>
-        <Paragraph type="danger" style={{ marginTop: -8 }}>
+        <Paragraph type="danger" style={{ marginTop: -8, fontSize: 16 }}>
           Nếu là lần đầu đăng nhập, bạn phải tải ảnh chữ ký nháy đã được tách
           nền lên hệ thống trước khi tiếp tục trải nghiệm!
         </Paragraph>
       </div>
 
-      <Row gutter={24} align="middle">
-        <Col span={11}>
+      <Row
+        gutter={24}
+        align="middle"
+        justify={
+          user?.mainRole?.roleName !== "Chief" &&
+          !user?.subRole?.roleName?.endsWith("_Chief") &&
+          user?.mainRole?.roleName !== "Leader" &&
+          !user?.subRole?.roleName?.endsWith("_Leader")
+            ? "center"
+            : "start"
+        }
+      >
+        <Col
+          span={
+            user?.mainRole?.roleName !== "Chief" &&
+            !user?.subRole?.roleName?.endsWith("_Chief") &&
+            user?.mainRole?.roleName !== "Leader" &&
+            !user?.subRole?.roleName?.endsWith("_Leader")
+              ? 24
+              : 12
+          }
+        >
           <Space direction="vertical" style={{ width: "100%" }}>
-            <Form.Item label="Tên đại diện ảnh ký nháy">
+            <Form.Item label="Tên đại diện ảnh chữ ký nháy">
               <Input
-                placeholder="Nhập tên đại diện ảnh ký nháy"
+                placeholder="Nhập tên đại diện ảnh chữ ký nháy"
                 value={initialName}
                 onChange={(e) => setInitialName(e.target.value)}
               />
@@ -159,7 +180,7 @@ const UploadSignatureModal = () => {
               }}
             >
               <Button icon={<UploadOutlined />} block loading={loading}>
-                Tải ảnh ký nháy
+                Tải ảnh chữ ký nháy
               </Button>
             </Upload>
 
@@ -181,18 +202,23 @@ const UploadSignatureModal = () => {
           user?.mainRole?.roleName === "Leader" ||
           user?.subRole?.roleName?.endsWith("_Leader")) && (
           <>
-            <Col span={2} style={{ textAlign: "center" }}>
-              <Divider type="vertical" style={{ height: "100%" }} />
-              <ColumnWidthOutlined style={{ fontSize: 24, color: "#999" }} />
-            </Col>
-            <Col span={11}>
+            <Col span={12}>
               <Space direction="vertical" style={{ width: "100%" }}>
-                <Form.Item label="Tên ảnh ký điện tử">
+                <Form.Item label="Tên đại diện ảnh chữ ký điện tử">
                   <Input
-                    placeholder="Nhập tên ảnh ký điện tử"
+                    placeholder="Nhập tên ảnh chữ ký điện tử"
                     value={digitalName}
                     onChange={(e) => setDigitalName(e.target.value)}
                   />
+                </Form.Item>
+                <Form.Item label="Phương thức ký">
+                  <Radio.Group
+                    value={isUSB ? "USB" : "API"}
+                    onChange={(e) => setIsUSB(e.target.value === "USB")}
+                  >
+                    <Radio value="API">Ký Online</Radio>
+                    <Radio value="USB">Ký bằng USB Token</Radio>
+                  </Radio.Group>
                 </Form.Item>
 
                 <Upload
@@ -216,7 +242,7 @@ const UploadSignatureModal = () => {
                   }}
                 >
                   <Button icon={<UploadOutlined />} block loading={loading}>
-                    Tải ảnh ký điện tử
+                    Tải ảnh chữ ký điện tử
                   </Button>
                 </Upload>
                 {digitalPreview && (
@@ -235,17 +261,20 @@ const UploadSignatureModal = () => {
           </>
         )}
       </Row>
-
-      <Button
-        type="primary"
-        block
-        onClick={handleFinalSubmit}
-        loading={isSubmit}
-        style={{ marginTop: 32 }}
-        disabled={!initialPreview && !digitalPreview}
-      >
-        Xác nhận
-      </Button>
+      <Row gutter={24} align="middle" justify="center">
+        <Col span={10}>
+          <Button
+            type="primary"
+            block
+            onClick={handleFinalSubmit}
+            loading={isSubmit}
+            style={{ marginTop: 32 }}
+            disabled={!initialPreview && !digitalPreview}
+          >
+            Xác nhận
+          </Button>
+        </Col>
+      </Row>
     </Modal>
   );
 };

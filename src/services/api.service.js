@@ -327,9 +327,16 @@ const viewMySelfDocumentAPI = (query) => {
   return axios.get(urlBackend);
 };
 
-const getAllArchivedDocuments = (query) => {
-  const urlBackend = `/api/ArchiveDocument/view-all-documents?${query}`;
-  return axios.get(urlBackend);
+const getAllArchivedDocuments = (
+  page,
+  pageSize,
+  name,
+  scope,
+  createdDate,
+  status
+) => {
+  const urlBackend = `/api/ArchiveDocument/view-all-documents?page=${page}&pageSize=${pageSize}`;
+  return axios.post(urlBackend, { name, scope, createdDate, status });
 };
 
 const viewProcessDocumentDetailAPI = (documentId) => {
@@ -515,15 +522,14 @@ const createRejectDocumentActionAPI = (reason, taskId, userId) => {
   });
 };
 
-
 const grantPermissionAPI = (documentId, userIds) => {
-  const urlBackend = "/api/UserDocPermission/create-grand-permission-for-document";
+  const urlBackend =
+    "/api/UserDocPermission/create-grand-permission-for-document";
   return axios.post(urlBackend, {
     documentId,
     userIds,
   });
 };
-
 
 const createSendEmailAPI = ({
   receiverEmail,
@@ -629,7 +635,6 @@ const updateConfirmDocumentBySubmit = (
     numberOfDocument,
     isDifferent,
     fileBase64,
-
   });
 };
 

@@ -15,7 +15,7 @@ const SendEmailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [emailForm, setEmailForm] = useState({
-    to: "",
+    to: [],
     cc: [],
     bcc: [],
     subject: "",
@@ -77,21 +77,21 @@ const SendEmailPage = () => {
 
   // Hàm xử lý khi thay đổi giá trị
   const handleEmailChange = (field, value) => {
-    if (field === "to") {
-      const errorMessage = isValidEmail(value)
-        ? ""
-        : "Email không đúng định dạng";
-      setEmailForm({ ...emailForm, [field]: value });
-      setErrors({ ...errors, [field]: errorMessage });
-    } else {
-      const fieldNames = { cc: "CC", bcc: "BCC" };
-      const { validEmails, errorMessage } = validateAndFilterEmails(
-        value,
-        fieldNames[field]
-      );
-      setEmailForm({ ...emailForm, [field]: validEmails });
-      setErrors({ ...errors, [field]: errorMessage });
-    }
+    // if (field === "to") {
+    //   const errorMessage = isValidEmail(value)
+    //     ? ""
+    //     : "Email không đúng định dạng";
+    //   setEmailForm({ ...emailForm, [field]: value });
+    //   setErrors({ ...errors, [field]: errorMessage });
+    // } else {
+    const fieldNames = { to: "to", cc: "CC", bcc: "BCC" };
+    const { validEmails, errorMessage } = validateAndFilterEmails(
+      value,
+      fieldNames[field]
+    );
+    setEmailForm({ ...emailForm, [field]: validEmails });
+    setErrors({ ...errors, [field]: errorMessage });
+    // }
   };
 
   // Hàm kiểm tra các trường bắt buộc
@@ -179,7 +179,7 @@ const SendEmailPage = () => {
 
   const handleCancel = () => {
     setEmailForm({
-      to: "",
+      to: [],
       cc: [],
       bcc: [],
       subject: "",
@@ -192,7 +192,7 @@ const SendEmailPage = () => {
       subject: "",
       content: "",
     });
-    navigate(-1);
+    navigate("/archived-document");
   };
 
   return (
@@ -253,11 +253,20 @@ const SendEmailPage = () => {
                 {errors.to}
               </div>
             )}
-            <Input
+            {/* <Input
               placeholder="Nhập email người nhận"
               value={emailForm.to}
               onChange={(e) => handleEmailChange("to", e.target.value)}
               style={{ width: "100%", borderRadius: 4 }}
+            /> */}
+            <Select
+              mode="tags"
+              placeholder="Nhập email người nhận"
+              value={emailForm.to}
+              onChange={(value) => handleEmailChange("to", value)}
+              style={{ width: "100%" }}
+              tokenSeparators={[","]}
+              showSearch
             />
           </div>
 

@@ -146,14 +146,14 @@ const TableAllArchivedDocument = () => {
           scroll={{ y: "calc(100vh - 350px)" }}
           cardBordered
           request={async (params) => {
-            let query = "";
-            if (params) {
-              if (params.Name) {
-                query += `docName=${params.Name}&`;
-              }
-              query += `page=${params.current}&pageSize=${params.pageSize}`;
-            }
-            const res = await getAllArchivedDocuments(query);
+            const res = await getAllArchivedDocuments(
+              params.current,
+              params.pageSize,
+              params.Name,
+              params.scope,
+              params.createdDate,
+              params.status
+            );
             if (res.data) {
               setMeta({
                 page: res.data?.meatadataDto.page,
