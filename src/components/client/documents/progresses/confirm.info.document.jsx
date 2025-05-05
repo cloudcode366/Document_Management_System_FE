@@ -196,400 +196,368 @@ const ConfirmInfoDocument = (props) => {
   };
 
   return (
-    <div>
-      <Modal
-        open={openConfirmModal}
-        onCancel={handleCloseConfirmInfoDocumentModal}
-        footer={null}
-        width="90vw"
-        centered
-        maskClosable={false}
-        modalRender={(node) => (
-          <div style={{ maxHeight: "80vh", overflowY: "auto" }}>{node}</div>
-        )}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            height: "100%",
-          }}
-        >
-          {/* Bên trái: Xem file PDF */}
-          <Card
-            title="Thông tin chi tiết"
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              margin: 0,
-              borderRadius: 0,
-              borderLeft: "1px solid #f0f0f0",
-              height: "100%",
-              width: "70%",
-            }}
-          >
-            <div
-              style={{
-                flex: 1,
-                overflow: "auto",
-              }}
-            >
-              {selectedScope === "InComing" ? (
-                <PDFViewerWithToken
-                  url={resDocument?.canChange?.url}
-                  token={localStorage.getItem(`access_token`)}
-                />
-              ) : (
-                <PDFViewerWithToken
-                  url={`${selectedTemplate?.url}&isPdf=true`}
-                  token={localStorage.getItem(`access_token`)}
-                />
-              )}
-            </div>
-          </Card>
+    <Modal
+      open={openConfirmModal}
+      title="Vui lòng xác nhận thông tin văn bản"
+      width="90%"
+      centered
+      maskClosable={false}
+      footer={null}
+      onCancel={handleCloseConfirmInfoDocumentModal}
+      className="confirm-info-modal"
+    >
+      <div className="confirm-info-content">
+        <div className="left-panel">
+          {selectedScope === "InComing" ? (
+            <PDFViewerWithToken
+              url={resDocument?.canChange?.url}
+              token={localStorage.getItem(`access_token`)}
+            />
+          ) : (
+            <PDFViewerWithToken
+              url={`${selectedTemplate?.url}&isPdf=true`}
+              token={localStorage.getItem(`access_token`)}
+            />
+          )}
+        </div>
+        <div className="right-panel">
+          <Card title="Thông tin văn bản" className="confirm-card">
+            <Form form={form} layout="vertical" className="form-large-text">
+              <Form.Item
+                label="Tên văn bản"
+                name="Name"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên văn bản!" },
+                  {
+                    pattern: `^[^<>:"/\\\\|?*&;#$%@!(){}\\[\\]]+$`, // dùng regex literal thì vẫn cần escape
+                    message:
+                      'Tên văn bản không được chứa các ký tự đặc biệt: < > : " / \\ | ? * & ; # $ % @ ! ( ) { } [ ]',
+                  },
+                ]}
+              >
+                <Input placeholder="Nhập tên văn bản" />
+              </Form.Item>
 
-          {/* Bên phải: Form nhập thông tin */}
-          <Card
-            title="Thông tin chi tiết"
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              margin: 0,
-              borderRadius: 0,
-              borderLeft: "1px solid #f0f0f0",
-              height: "100%",
-            }}
-          >
-            <div
-              style={{
-                flex: 1,
-                overflow: "auto",
-              }}
-            >
-              <Form form={form} layout="vertical" className="form-large-text">
-                <Form.Item
-                  label="Tên văn bản"
-                  name="Name"
-                  rules={[
-                    { required: true, message: "Vui lòng nhập tên văn bản!" },
-                    {
-                      pattern: `^[^<>:"/\\\\|?*&;#$%@!(){}\\[\\]]+$`, // dùng regex literal thì vẫn cần escape
-                      message:
-                        'Tên văn bản không được chứa các ký tự đặc biệt: < > : " / \\ | ? * & ; # $ % @ ! ( ) { } [ ]',
-                    },
-                  ]}
-                >
-                  <Input placeholder="Nhập tên văn bản" />
-                </Form.Item>
-
-                {selectedScope !== "InComing" && (
-                  <>
-                    <Form.Item
-                      label="Mẫu văn bản"
-                      name="templateName"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Vui lòng chọn mẫu văn bản!",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Chọn mẫu văn bản" readOnly />
-                    </Form.Item>
-                  </>
-                )}
-                {selectedScope === "InComing" && (
-                  <>
-                    <Form.Item
-                      label="Người gửi"
-                      name="Sender"
-                      rules={[
-                        { required: true, message: "Vui lòng nhập người gửi!" },
-                      ]}
-                    >
-                      <Input placeholder="Tên người gửi" />
-                    </Form.Item>
-                    <Form.Item
-                      label="Người nhận"
-                      name="Receiver"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Vui lòng nhập người nhận!",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Tên người nhận" />
-                    </Form.Item>
-                    <Form.Item
-                      label="Ngày nhận"
-                      name="DateReceived"
-                      rules={[
-                        { required: true, message: "Vui lòng chọn ngày nhận!" },
-                      ]}
-                    >
-                      <DatePicker
-                        format="DD-MM-YYYY HH:mm"
-                        showTime={{ format: "HH:mm" }}
-                        style={{ width: "100%" }}
-                        placeholder="Vui lòng chọn ngày nhận"
-                        disabledDate={(current) =>
-                          current && current > dayjs().endOf("day")
-                        }
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Ngày ban hành"
-                      name="validFrom"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Vui lòng chọn ngày ban hành!",
-                        },
-                      ]}
-                    >
-                      <DatePicker
-                        format="DD-MM-YYYY HH:mm"
-                        showTime={{ format: "HH:mm" }}
-                        style={{ width: "100%" }}
-                        placeholder="Vui lòng chọn ngày ban hành"
-                        disabledDate={(current) =>
-                          current && current > dayjs().endOf("day")
-                        } // Không cho chọn ngày trong tương lai
-                      />
-                    </Form.Item>
-                  </>
-                )}
-
-                <Form.Item
-                  label="Ngày hết hạn"
-                  name="Deadline"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng chọn ngày hết hạn xử lý!",
-                    },
-                  ]}
-                >
-                  <DatePicker
-                    format="DD-MM-YYYY HH:mm"
-                    showTime={{ format: "HH:mm" }}
-                    style={{ width: "100%" }}
-                    placeholder="Vui lòng chọn ngày hết hạn"
-                    disabledDate={(current) =>
-                      current && current < dayjs().startOf("day")
-                    }
-                    disabledTime={(current) => {
-                      const now = dayjs();
-                      if (!current || current.isAfter(now, "day")) return {};
-                      return {
-                        disabledHours: () => [...Array(now.hour()).keys()],
-                        disabledMinutes: (selectedHour) =>
-                          selectedHour === now.hour()
-                            ? [...Array(now.minute()).keys()]
-                            : [],
-                      };
-                    }}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label="Ngày hết hiệu lực"
-                  name="validTo"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng chọn ngày hết hiệu lực!",
-                    },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        const start = getFieldValue("Deadline");
-                        if (!value || !start || value.isAfter(start)) {
-                          return Promise.resolve();
-                        }
-                        return Promise.reject(
-                          new Error(
-                            "Thời gian hết hiệu lực phải sau thời gian hết hạn xử lý!"
-                          )
-                        );
+              {selectedScope !== "InComing" && (
+                <>
+                  <Form.Item
+                    label="Mẫu văn bản"
+                    name="templateName"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn mẫu văn bản!",
                       },
-                    }),
-                  ]}
-                >
-                  <DatePicker
-                    format="DD-MM-YYYY HH:mm"
-                    showTime={{ format: "HH:mm" }}
-                    style={{ width: "100%" }}
-                    placeholder="Vui lòng chọn ngày hết hiệu lực"
-                    disabledDate={(current) =>
-                      current && current < dayjs().startOf("day")
-                    }
-                    disabledTime={(current) => {
-                      const now = dayjs();
-                      const start = form.getFieldValue("Deadline");
-
-                      if (!current) return {};
-
-                      // Nếu ngày sau hôm nay và sau ngày bắt đầu => không giới hạn giờ phút
-                      if (
-                        current.isAfter(now, "day") &&
-                        (!start || current.isAfter(start, "day"))
-                      ) {
-                        return {};
-                      }
-
-                      const refTime =
-                        start && current.isSame(start, "day") ? start : now;
-
-                      return {
-                        disabledHours: () => [...Array(refTime.hour()).keys()],
-                        disabledMinutes: (selectedHour) => {
-                          if (selectedHour === refTime.hour()) {
-                            return [...Array(refTime.minute() + 1).keys()];
-                          }
-                          return [];
-                        },
-                      };
-                    }}
-                  />
-                </Form.Item>
-
-                {selectedScope === "InComing" && (
-                  <>
-                    <Form.Item
-                      label="Số hiệu văn bản"
-                      name="NumberOfDocument"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Vui lòng nhập số hiệu văn bản!",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Nhập số hiệu văn bản" readOnly />
-                    </Form.Item>
-                  </>
-                )}
-
-                <Form.Item
-                  label="Loại văn bản"
-                  name="DocumentTypeId"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn loại văn bản!" },
-                  ]}
-                  hidden
-                >
-                  <Input placeholder="Loại văn bản" readOnly />
-                </Form.Item>
-
-                <Form.Item
-                  label="Loại văn bản"
-                  name="DocumentTypeName"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn loại văn bản!" },
-                  ]}
-                >
-                  <Input placeholder="Loại văn bản" readOnly />
-                </Form.Item>
-
-                <Form.Item
-                  label="Luồng xử lý"
-                  name="WorkflowId"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn luồng xử lý!" },
-                  ]}
-                  hidden
-                >
-                  <Input placeholder="Luồng xử lý" readOnly />
-                </Form.Item>
-
-                <Form.Item
-                  label="Luồng xử lý"
-                  name="WorkflowName"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn luồng xử lý!" },
-                  ]}
-                >
-                  <Input placeholder="Luồng xử lý" readOnly />
-                </Form.Item>
-
-                {selectedScope === "InComing" && (
-                  <>
-                    <Form.Item label="Người ký" name="signerNames">
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "8px",
-                        }}
-                      >
-                        {signerList.map((item, index) => (
-                          <Tag
-                            key={`${item.name}-${index}`}
-                            color="blue"
-                            closable={item.isNew}
-                            onClose={() => handleRemoveSigner(item.name)}
-                            style={{ display: "flex", alignItems: "center" }}
-                          >
-                            {item.name}
-                          </Tag>
-                        ))}
-                        {inputVisible ? (
-                          <Input
-                            size="small"
-                            style={{ width: 160 }}
-                            value={inputValue}
-                            autoFocus
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onBlur={handleAddSigner}
-                            onPressEnter={handleAddSigner}
-                          />
-                        ) : (
-                          <Tag
-                            onClick={() => setInputVisible(true)}
-                            style={{
-                              background: "#fff",
-                              borderStyle: "dashed",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <PlusOutlined /> Thêm
-                          </Tag>
-                        )}
-                      </div>
-                    </Form.Item>
-                    <Form.Item
-                      label="Nội dung"
-                      name="DocumentContent"
-                      rules={[
-                        { required: true, message: "Vui lòng nhập nội dung!" },
-                      ]}
-                    >
-                      <TextArea rows={5} placeholder="Nhập nội dung tóm tắt" />
-                    </Form.Item>
-                  </>
-                )}
-
-                <div style={{ marginTop: "auto" }}>
-                  <Divider />
-                  <Button
-                    loading={isLoading}
-                    type="primary"
-                    onClick={handleSubmit}
-                    block
-                    size="large"
+                    ]}
                   >
-                    Xác nhận
-                  </Button>
-                </div>
-              </Form>
-            </div>
+                    <Input placeholder="Chọn mẫu văn bản" readOnly />
+                  </Form.Item>
+                </>
+              )}
+              {selectedScope === "InComing" && (
+                <>
+                  <Form.Item
+                    label="Người gửi"
+                    name="Sender"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập người gửi!",
+                      },
+                    ]}
+                  >
+                    <Input placeholder="Tên người gửi" />
+                  </Form.Item>
+                  <Form.Item
+                    label="Người nhận"
+                    name="Receiver"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập người nhận!",
+                      },
+                    ]}
+                  >
+                    <Input placeholder="Tên người nhận" />
+                  </Form.Item>
+                  <Form.Item
+                    label="Ngày nhận"
+                    name="DateReceived"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn ngày nhận!",
+                      },
+                    ]}
+                  >
+                    <DatePicker
+                      format="DD-MM-YYYY HH:mm"
+                      showTime={{ format: "HH:mm" }}
+                      style={{ width: "100%" }}
+                      placeholder="Vui lòng chọn ngày nhận"
+                      disabledDate={(current) =>
+                        current && current > dayjs().endOf("day")
+                      }
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Ngày ban hành"
+                    name="validFrom"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn ngày ban hành!",
+                      },
+                    ]}
+                  >
+                    <DatePicker
+                      format="DD-MM-YYYY HH:mm"
+                      showTime={{ format: "HH:mm" }}
+                      style={{ width: "100%" }}
+                      placeholder="Vui lòng chọn ngày ban hành"
+                      disabledDate={(current) =>
+                        current && current > dayjs().endOf("day")
+                      } // Không cho chọn ngày trong tương lai
+                    />
+                  </Form.Item>
+                </>
+              )}
+
+              <Form.Item
+                label="Hạn xử lý"
+                name="Deadline"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn Hạn xử lý xử lý!",
+                  },
+                ]}
+              >
+                <DatePicker
+                  format="DD-MM-YYYY HH:mm"
+                  showTime={{ format: "HH:mm" }}
+                  style={{ width: "100%" }}
+                  placeholder="Vui lòng chọn hạn xử lý"
+                  disabledDate={(current) =>
+                    current && current < dayjs().startOf("day")
+                  }
+                  disabledTime={(current) => {
+                    const now = dayjs();
+                    if (!current || current.isAfter(now, "day")) return {};
+                    return {
+                      disabledHours: () => [...Array(now.hour()).keys()],
+                      disabledMinutes: (selectedHour) =>
+                        selectedHour === now.hour()
+                          ? [...Array(now.minute()).keys()]
+                          : [],
+                    };
+                  }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Ngày hết hiệu lực"
+                name="validTo"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn ngày hết hiệu lực!",
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      const start = getFieldValue("Deadline");
+                      if (!value || !start || value.isAfter(start)) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error(
+                          "Thời gian hết hiệu lực phải sau thời gian hết hạn xử lý!"
+                        )
+                      );
+                    },
+                  }),
+                ]}
+              >
+                <DatePicker
+                  format="DD-MM-YYYY HH:mm"
+                  showTime={{ format: "HH:mm" }}
+                  style={{ width: "100%" }}
+                  placeholder="Vui lòng chọn ngày hết hiệu lực"
+                  disabledDate={(current) =>
+                    current && current < dayjs().startOf("day")
+                  }
+                  disabledTime={(current) => {
+                    const now = dayjs();
+                    const start = form.getFieldValue("Deadline");
+
+                    if (!current) return {};
+
+                    // Nếu ngày sau hôm nay và sau ngày bắt đầu => không giới hạn giờ phút
+                    if (
+                      current.isAfter(now, "day") &&
+                      (!start || current.isAfter(start, "day"))
+                    ) {
+                      return {};
+                    }
+
+                    const refTime =
+                      start && current.isSame(start, "day") ? start : now;
+
+                    return {
+                      disabledHours: () => [...Array(refTime.hour()).keys()],
+                      disabledMinutes: (selectedHour) => {
+                        if (selectedHour === refTime.hour()) {
+                          return [...Array(refTime.minute() + 1).keys()];
+                        }
+                        return [];
+                      },
+                    };
+                  }}
+                />
+              </Form.Item>
+
+              {selectedScope === "InComing" && (
+                <>
+                  <Form.Item
+                    label="Số hiệu văn bản"
+                    name="NumberOfDocument"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập số hiệu văn bản!",
+                      },
+                    ]}
+                  >
+                    <Input placeholder="Nhập số hiệu văn bản" />
+                  </Form.Item>
+                </>
+              )}
+
+              <Form.Item
+                label="Loại văn bản"
+                name="DocumentTypeId"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn loại văn bản!",
+                  },
+                ]}
+                hidden
+              >
+                <Input placeholder="Loại văn bản" readOnly />
+              </Form.Item>
+
+              <Form.Item
+                label="Loại văn bản"
+                name="DocumentTypeName"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn loại văn bản!",
+                  },
+                ]}
+              >
+                <Input placeholder="Loại văn bản" readOnly />
+              </Form.Item>
+
+              <Form.Item
+                label="Luồng xử lý"
+                name="WorkflowId"
+                rules={[
+                  { required: true, message: "Vui lòng chọn luồng xử lý!" },
+                ]}
+                hidden
+              >
+                <Input placeholder="Luồng xử lý" readOnly />
+              </Form.Item>
+
+              <Form.Item
+                label="Luồng xử lý"
+                name="WorkflowName"
+                rules={[
+                  { required: true, message: "Vui lòng chọn luồng xử lý!" },
+                ]}
+              >
+                <Input placeholder="Luồng xử lý" readOnly />
+              </Form.Item>
+
+              {selectedScope === "InComing" && (
+                <>
+                  <Form.Item label="Người ký" name="signerNames">
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "8px",
+                      }}
+                    >
+                      {signerList.map((item, index) => (
+                        <Tag
+                          key={`${item.name}-${index}`}
+                          color="blue"
+                          closable={item.isNew}
+                          onClose={() => handleRemoveSigner(item.name)}
+                          style={{ display: "flex", alignItems: "center" }}
+                        >
+                          {item.name}
+                        </Tag>
+                      ))}
+                      {inputVisible ? (
+                        <Input
+                          size="small"
+                          style={{ width: 160 }}
+                          value={inputValue}
+                          autoFocus
+                          onChange={(e) => setInputValue(e.target.value)}
+                          onBlur={handleAddSigner}
+                          onPressEnter={handleAddSigner}
+                        />
+                      ) : (
+                        <Tag
+                          onClick={() => setInputVisible(true)}
+                          style={{
+                            background: "#fff",
+                            borderStyle: "dashed",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <PlusOutlined /> Thêm
+                        </Tag>
+                      )}
+                    </div>
+                  </Form.Item>
+                  <Form.Item
+                    label="Nội dung"
+                    name="DocumentContent"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập nội dung!",
+                      },
+                    ]}
+                  >
+                    <TextArea rows={5} placeholder="Nhập nội dung tóm tắt" />
+                  </Form.Item>
+                </>
+              )}
+
+              <div style={{ marginTop: "auto" }}>
+                <Divider />
+                <Button
+                  loading={isLoading}
+                  type="primary"
+                  onClick={handleSubmit}
+                  block
+                  size="large"
+                >
+                  Xác nhận
+                </Button>
+              </div>
+            </Form>
           </Card>
         </div>
-      </Modal>
-    </div>
+      </div>
+    </Modal>
   );
 };
 

@@ -101,6 +101,9 @@ const AddTaskModal = (props) => {
       if (errorMessage === "Only one task can be created at a time") {
         errorMessage = "Chỉ có thể tạo một nhiệm vụ tại một thời điểm";
       }
+      if (errorMessage === "Task in previous step not found") {
+        errorMessage = "Không tìm thấy nhiệm vụ trong bước trước đó";
+      }
       notification.error({
         message: "Đã có lỗi xảy ra",
         description: errorMessage,

@@ -364,12 +364,12 @@ const ConfirmInfoDocumentProgress = (props) => {
                 )}
 
                 <Form.Item
-                  label="Ngày hết hạn"
+                  label="Hạn xử lý"
                   name="Deadline"
                   rules={[
                     {
                       required: true,
-                      message: "Vui lòng chọn ngày hết hạn xử lý!",
+                      message: "Vui lòng chọn Hạn xử lý xử lý!",
                     },
                   ]}
                 >
@@ -377,7 +377,7 @@ const ConfirmInfoDocumentProgress = (props) => {
                     format="DD-MM-YYYY HH:mm"
                     showTime={{ format: "HH:mm" }}
                     style={{ width: "100%" }}
-                    placeholder="Vui lòng chọn ngày hết hạn"
+                    placeholder="Vui lòng chọn Hạn xử lý"
                     disabledDate={(current) =>
                       current && current < dayjs().startOf("day")
                     }

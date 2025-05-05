@@ -141,7 +141,7 @@ const DrawerProgressDocument = (props) => {
               </p>
             </div>
             <div style={{ marginBottom: "20px" }}>
-              <strong style={{ marginLeft: "10px" }}>Ngày hết hạn</strong>
+              <strong style={{ marginLeft: "10px" }}>Hạn xử lý</strong>
               <br />
               <p style={{ marginLeft: "10px" }}>
                 {dayjs(selectedRecord?.deadline).format("DD-MM-YYYY HH:mm")}
