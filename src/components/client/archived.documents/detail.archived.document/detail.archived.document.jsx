@@ -34,9 +34,9 @@ import {
   viewArchivedDocumentDetailAPI,
 } from "@/services/api.service";
 import dayjs from "dayjs";
-import PDFViewerWithToken from "@/components/pdf.viewer";
 import axios from "axios";
 import { useCurrentApp } from "@/components/context/app.context";
+import ArchivedPDFViewerWithToken from "@/components/archived.pdf.viewer";
 
 const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
@@ -323,9 +323,10 @@ const ViewDetailArchivedDocument = () => {
           }}
         >
           <div style={{ height: "100%", overflowY: "auto" }}>
-            <PDFViewerWithToken
+            <ArchivedPDFViewerWithToken
               url={document?.versions?.[0]?.url}
               token={localStorage.getItem(`access_token`)}
+              documentName={document?.documentName}
             />
 
             <div style={{ padding: 16 }}>

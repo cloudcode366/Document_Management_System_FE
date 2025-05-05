@@ -553,6 +553,7 @@ const ViewDetailDocument = () => {
             <PDFViewerWithToken
               url={document?.finalVersion?.url}
               token={localStorage.getItem(`access_token`)}
+              documentName={document?.documentName}
             />
 
             {/* Signature section */}
@@ -800,6 +801,8 @@ const ViewDetailDocument = () => {
                             navigate("/version-document", {
                               state: {
                                 version: item,
+                                documentName: document?.documentName,
+                                createdBy: document?.createdBy,
                               },
                             });
                           }}

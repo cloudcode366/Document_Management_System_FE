@@ -212,11 +212,13 @@ const ConfirmInfoDocument = (props) => {
             <PDFViewerWithToken
               url={resDocument?.canChange?.url}
               token={localStorage.getItem(`access_token`)}
+              documentName={resDocument?.canChange?.Name}
             />
           ) : (
             <PDFViewerWithToken
               url={`${selectedTemplate?.url}&isPdf=true`}
               token={localStorage.getItem(`access_token`)}
+              documentName={resDocument?.canChange?.Name}
             />
           )}
         </div>
