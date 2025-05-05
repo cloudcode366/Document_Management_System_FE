@@ -699,7 +699,7 @@ const ViewDetailDocument = () => {
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Ngày hết hạn:</span>
+              <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
                 {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
               </span>

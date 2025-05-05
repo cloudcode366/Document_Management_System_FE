@@ -93,7 +93,7 @@ const TableProgress = () => {
       hideInSearch: true,
     },
     {
-      title: "Ngày hết hạn",
+      title: "Hạn xử lý",
       dataIndex: "deadline",
       width: "20%",
       render: (text) => dayjs(text).format("DD-MM-YYYY HH:mm"),
