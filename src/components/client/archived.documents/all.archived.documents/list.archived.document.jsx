@@ -6,11 +6,7 @@ import dayjs from "dayjs";
 import "./table.archived.document.scss";
 import { useNavigate } from "react-router-dom";
 import { getAllArchivedDocuments } from "@/services/api.service";
-import {
-  convertArchivedStatus,
-  convertColorArchivedStatus,
-  convertScopeName,
-} from "@/services/helper";
+import { convertArchivedStatus, convertScopeName } from "@/services/helper";
 import DrawerArchivedDocument from "./drawer.archived.document";
 
 const tagColor = {
@@ -21,9 +17,9 @@ const tagColor = {
 };
 
 const statusColor = {
-  Sent: "#2BDBBB", // xanh ngọc
-  Archived: "#82E06E", // xanh lá
-  Withdrawn: "#FF6B6B", // đỏ
+  Sent: "#2BDBBB",
+  Archived: "#82E06E",
+  Withdrawn: "#FF6B6B",
 };
 
 const TableAllArchivedDocument = () => {
@@ -79,10 +75,68 @@ const TableAllArchivedDocument = () => {
         placeholder: "Vui lòng nhập tên",
       },
       formItemProps: {
-        labelCol: { span: 8 },
-        wrapperCol: { span: 20 },
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
       },
     },
+    {
+      title: "Phạm vi",
+      dataIndex: "scope",
+      hideInTable: true,
+      valueType: "select",
+      request: async () => {
+        return [
+          { label: "Văn bản đến", value: "InComing" },
+          { label: "Văn bản đi", value: "OutGoing" },
+          { label: "Nội bộ phòng ban", value: "Division" },
+          { label: "Nội bộ toàn trường", value: "School" },
+        ];
+      },
+      fieldProps: {
+        placeholder: "Vui lòng chọn phạm vi",
+        showSearch: true,
+      },
+      formItemProps: {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
+      },
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      hideInTable: true,
+      valueType: "select",
+      request: async () => {
+        return [
+          { label: "Đã lưu", value: "Archived" },
+          { label: "Đã gửi", value: "Sent" },
+          { label: "Bị thu hồi", value: "Withdrawn" },
+        ];
+      },
+      fieldProps: {
+        placeholder: "Vui lòng chọn trạng thái",
+        showSearch: true,
+      },
+      formItemProps: {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
+      },
+    },
+    {
+      title: "Ngày lưu",
+      dataIndex: "createdAtRange",
+      valueType: "dateRange",
+      hideInTable: true,
+      formItemProps: {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
+      },
+      fieldProps: {
+        // format: "DD-MM-YYYY",
+        placeholder: ["Từ ngày", "Đến ngày"],
+      },
+    },
+
     {
       title: "Loại văn bản",
       dataIndex: "type",
@@ -98,6 +152,8 @@ const TableAllArchivedDocument = () => {
     {
       title: "Ngày lưu",
       dataIndex: "createdDate",
+      sorter: true,
+      valueType: "date",
       width: "15%",
       hideInSearch: true,
       render: (_, row) => {
@@ -143,16 +199,35 @@ const TableAllArchivedDocument = () => {
             display: "flex",
             flexDirection: "column",
           }}
-          scroll={{ y: "calc(100vh - 350px)" }}
+          scroll={{ y: "calc(100vh - 400px)" }}
           cardBordered
-          request={async (params) => {
+          request={async (params, sort) => {
+            const filters = Object.fromEntries(
+              Object.entries(params).filter(
+                ([key, value]) =>
+                  value !== undefined &&
+                  value !== null &&
+                  value !== "" &&
+                  key !== "current" &&
+                  key !== "pageSize" &&
+                  key !== "createdAtRange"
+              )
+            );
+
+            if (params.createdAtRange && params.createdAtRange.length === 2) {
+              filters.startCreatedDate = params.createdAtRange[0];
+              filters.endCreatedDate = params.createdAtRange[1];
+            }
+
+            if (sort && sort.createdDate) {
+              const sortByCreatedDate =
+                sort.createdDate === "ascend" ? "Ascending" : "Descending";
+              filters.sortByCreatedDate = sortByCreatedDate;
+            }
             const res = await getAllArchivedDocuments(
               params.current,
               params.pageSize,
-              params.Name,
-              params.scope,
-              params.createdDate,
-              params.status
+              filters 
             );
             if (res.data) {
               setMeta({

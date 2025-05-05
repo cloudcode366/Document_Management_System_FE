@@ -56,7 +56,7 @@ const TableDocumentTemplate = () => {
 
   const columns = [
     {
-      title: "Tên mẫu văn bản",
+      title: "Mẫu văn bản",
       dataIndex: "name",
       copyable: true,
       fieldProps: {
@@ -117,7 +117,9 @@ const TableDocumentTemplate = () => {
       width: "15%",
       render(dom, entity, index, action, schema) {
         return (
-          <div style={{ display: "flex", justifyContent: "center", gap: 20 }}>
+          <div
+            style={{ display: "flex", justifyContent: "flex-start", gap: 20 }}
+          >
             <Tooltip title="Xem mẫu văn bản này">
               <EyeOutlined
                 style={{ cursor: "pointer", color: "#52c41a", fontSize: 18 }}
@@ -165,23 +167,25 @@ const TableDocumentTemplate = () => {
                 }}
               />
             </Tooltip>
-
-            <Tooltip title="Xóa mẫu văn bản này">
-              <Popconfirm
-                placement="leftTop"
-                title="Xác nhận xóa mẫu"
-                description="Bạn có chắc chắn muốn xóa mẫu văn bản này?"
-                // onConfirm={() => handleDeleteUser(entity._id)}
-                okText="Xác nhận"
-                cancelText="Hủy"
-                okButtonProps={{ loading: isDelete }}
-              >
-                <DeleteTwoTone
-                  twoToneColor="#ff4d4f"
-                  style={{ cursor: "pointer", fontSize: 18 }}
-                />
-              </Popconfirm>
-            </Tooltip>
+            {(user?.mainRole?.roleName === "Chief" ||
+              user?.subRole?.roleName?.endsWith("_Chief")) && (
+              <Tooltip title="Xóa mẫu văn bản này">
+                <Popconfirm
+                  placement="leftTop"
+                  title="Xác nhận xóa mẫu"
+                  description="Bạn có chắc chắn muốn xóa mẫu văn bản này?"
+                  // onConfirm={() => handleDeleteUser(entity._id)}
+                  okText="Xác nhận"
+                  cancelText="Hủy"
+                  okButtonProps={{ loading: isDelete }}
+                >
+                  <DeleteTwoTone
+                    twoToneColor="#ff4d4f"
+                    style={{ cursor: "pointer", fontSize: 18 }}
+                  />
+                </Popconfirm>
+              </Tooltip>
+            )}
           </div>
         );
       },

@@ -45,7 +45,7 @@ const TableProgress = () => {
     {
       title: "Tên văn bản",
       dataIndex: "name",
-      width: "40%",
+      width: "30%",
       copyable: true,
       ellipsis: {
         showTitle: false,
@@ -86,16 +86,81 @@ const TableProgress = () => {
       },
     },
     {
+      title: "Phạm vi",
+      dataIndex: "scope",
+      hideInTable: true,
+      valueType: "select",
+      request: async () => {
+        return [
+          { label: "Văn bản đến", value: "InComing" },
+          { label: "Văn bản đi", value: "OutGoing" },
+          { label: "Nội bộ phòng ban", value: "Division" },
+          { label: "Nội bộ toàn trường", value: "School" },
+        ];
+      },
+      fieldProps: {
+        placeholder: "Vui lòng chọn phạm vi",
+        showSearch: true,
+      },
+      formItemProps: {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
+      },
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      hideInTable: true,
+      valueType: "select",
+      request: async () => {
+        return [
+          { label: "Đang xử lý", value: "InProgress" },
+          { label: "Đã hoàn thành", value: "Completed" },
+          { label: "Đã lưu", value: "Archived" },
+          { label: "Bị từ chối", value: "Rejected" },
+        ];
+      },
+      fieldProps: {
+        placeholder: "Vui lòng chọn trạng thái",
+        showSearch: true,
+      },
+      formItemProps: {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
+      },
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "createdAtRange",
+      valueType: "dateRange",
+      hideInTable: true,
+      formItemProps: {
+        labelCol: { span: 7 },
+        wrapperCol: { span: 24 },
+      },
+      fieldProps: {
+        // format: "DD-MM-YYYY",
+        placeholder: ["Từ ngày", "Đến ngày"],
+      },
+    },
+    {
+      title: "Loại văn bản",
+      dataIndex: "type",
+      width: "15%",
+      hideInSearch: true,
+    },
+    {
       title: "Ngày tạo",
       dataIndex: "createDate",
-      width: "20%",
+      sorter: true,
+      width: "15%",
       render: (text) => dayjs(text).format("DD-MM-YYYY HH:mm"),
       hideInSearch: true,
     },
     {
       title: "Hạn xử lý",
       dataIndex: "deadline",
-      width: "20%",
+      width: "15%",
       render: (text) => dayjs(text).format("DD-MM-YYYY HH:mm"),
       hideInSearch: true,
     },
@@ -103,7 +168,7 @@ const TableProgress = () => {
     {
       title: "Trạng thái",
       dataIndex: "status",
-      width: "20%",
+      width: "15%",
       render: (_, row) => (
         <Badge
           color={statusColor[row.status]}
@@ -143,15 +208,33 @@ const TableProgress = () => {
         actionRef={actionRef}
         cardBordered
         request={async (params, sort, filter) => {
-          let query = "";
-          if (params) {
-            if (params.name) {
-              query += `searchText=${params.name}`;
-            }
-            query += `&page=${params.current}&pageSize=${params.pageSize}`;
+          const filters = Object.fromEntries(
+            Object.entries(params).filter(
+              ([key, value]) =>
+                value !== undefined &&
+                value !== null &&
+                value !== "" &&
+                key !== "current" &&
+                key !== "pageSize" &&
+                key !== "createdAtRange"
+            )
+          );
+
+          if (params.createdAtRange && params.createdAtRange.length === 2) {
+            filters.startCreatedDate = params.createdAtRange[0];
+            filters.endCreatedDate = params.createdAtRange[1];
           }
 
-          const res = await viewMySelfDocumentAPI(query);
+          if (sort && sort.createDate) {
+            const sortByCreatedDate =
+              sort.createDate === "ascend" ? "Ascending" : "Descending";
+            filters.sortByCreatedDate = sortByCreatedDate;
+          }
+          const res = await viewMySelfDocumentAPI(
+            params.current,
+            params.pageSize,
+            filters
+          );
           if (res.data) {
             setMeta({
               page: res.data?.meatadataDto.page,

@@ -468,7 +468,6 @@ const TableUser = () => {
         actionRef={actionRef}
         cardBordered
         request={async (params, sort, filter) => {
-          console.log(`>>> Check params users:`, params);
           const filters = Object.fromEntries(
             Object.entries(params).filter(
               ([key, value]) =>
@@ -481,13 +480,12 @@ const TableUser = () => {
 
           const sortParams = Object.keys(sort).length
             ? {
-                sortBy: Object.keys(sort)[0],
-                sortDirection:
-                  sort[Object.keys(sort)[0]] === "ascend" ? "asc" : "desc",
+                field: Object.keys(sort)[0],
+                order: sort[Object.keys(sort)[0]] === "ascend" ? "asc" : "desc",
               }
             : {
-                sortBy: "createdAt",
-                sortDirection: "desc",
+                field: "createdAt",
+                order: "desc",
               };
 
           const page = params?.current ?? 1;
