@@ -14,7 +14,7 @@ import {
 // Cấu hình worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-const PDFViewerWithToken = ({ url, token, documentName }) => {
+const ArchivedPDFViewerWithToken = ({ url, token, documentName }) => {
   const containerRef = useRef(null);
   const [pdfDoc, setPdfDoc] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -149,4 +149,4 @@ const PDFViewerWithToken = ({ url, token, documentName }) => {
   );
 };
 
-export default PDFViewerWithToken;
+export default ArchivedPDFViewerWithToken;

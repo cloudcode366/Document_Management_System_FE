@@ -47,7 +47,7 @@ const { Title, Paragraph } = Typography;
 
 const ViewVersionDocument = () => {
   const location = useLocation();
-  const { version } = location.state || {};
+  const { version, documentName, createdBy } = location.state || {};
   const navigate = useNavigate();
 
   return (
@@ -75,6 +75,7 @@ const ViewVersionDocument = () => {
             <PDFViewerWithToken
               url={version?.url}
               token={localStorage.getItem(`access_token`)}
+              documentName={documentName}
             />
 
             {/* Signature section */}
@@ -158,7 +159,7 @@ const ViewVersionDocument = () => {
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Người tạo:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
-                {version?.createdBy}
+                {createdBy}
               </span>
             </div>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>

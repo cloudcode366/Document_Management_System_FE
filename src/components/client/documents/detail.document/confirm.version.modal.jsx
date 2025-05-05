@@ -214,58 +214,27 @@ const ConfirmVersionModal = (props) => {
     <div>
       <Modal
         open={openConfirmModal}
-        onCancel={handleCloseConfirmInfoDocumentModal}
-        footer={null}
-        width="90vw"
+        title="Vui lòng xác nhận thông tin phiên bản"
+        width="90%"
         centered
         maskClosable={false}
-        closable={false}
-        bodyProps={{
-          style: {
-            maxHeight: "80vh",
-            overflowY: "auto",
-          },
-        }}
+        footer={null}
+        onCancel={handleCloseConfirmInfoDocumentModal}
+        className="confirm-info-modal"
       >
-        <div style={{ display: "flex", flexDirection: "row", height: "100%" }}>
-          {/* Bên trái: Xem file PDF */}
-          <Card
-            title="Xem file văn bản"
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              margin: 0,
-              borderRadius: 0,
-              borderLeft: "1px solid #f0f0f0",
-              height: "100%",
-              width: "70%",
-            }}
-          >
-            <div style={{ flex: 1, overflow: "auto" }}>
-              {pdfFile && (
-                <PDFViewerWithToken
-                  url={pdfFile}
-                  token={localStorage.getItem(`access_token`)}
-                />
-              )}
-            </div>
-          </Card>
-
+        <div className="confirm-info-content">
+          <div className="left-panel">
+            {pdfFile && (
+              <PDFViewerWithToken
+                url={pdfFile}
+                token={localStorage.getItem(`access_token`)}
+                documentName={resDocument?.documentName}
+              />
+            )}
+          </div>
           {/* Bên phải: Form nhập thông tin */}
-          <Card
-            title="Thông tin văn bản"
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              margin: 0,
-              borderRadius: 0,
-              borderLeft: "1px solid #f0f0f0",
-              height: "100%",
-            }}
-          >
-            <div style={{ flex: 1, overflow: "auto" }}>
+          <div className="right-panel">
+            <Card title="Thông tin văn bản" className="confirm-card">
               {resDocument.isDifferent && (
                 <div
                   style={{
@@ -275,7 +244,7 @@ const ConfirmVersionModal = (props) => {
                     borderRadius: "8px",
                     marginBottom: "16px",
                     color: "#d48806",
-                    fontSize: "14px",
+                    fontSize: "16px",
                   }}
                 >
                   ⚠️ AI phát hiện một vài thông tin của văn bản bạn vừa tải lên
@@ -363,8 +332,8 @@ const ConfirmVersionModal = (props) => {
                   </Button>
                 </div>
               </Form>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </Modal>
     </div>
