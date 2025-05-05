@@ -146,7 +146,7 @@ const UploadSignatureModal = () => {
             !user?.subRole?.roleName?.endsWith("_Chief") &&
             user?.mainRole?.roleName !== "Leader" &&
             !user?.subRole?.roleName?.endsWith("_Leader")
-              ? 24
+              ? 18
               : 12
           }
         >

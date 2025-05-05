@@ -322,21 +322,14 @@ const createInComingDocumentAPI = (req) => {
   return axios.post(urlBackend, req);
 };
 
-const viewMySelfDocumentAPI = (query) => {
-  const urlBackend = `/api/Document/view-my-self-document?${query}`;
-  return axios.get(urlBackend);
+const viewMySelfDocumentAPI = (page, pageSize, filters) => {
+  const urlBackend = `/api/Document/view-my-self-document?page=${page}&pageSize=${pageSize}`;
+  return axios.post(urlBackend, { ...filters });
 };
 
-const getAllArchivedDocuments = (
-  page,
-  pageSize,
-  name,
-  scope,
-  createdDate,
-  status
-) => {
+const getAllArchivedDocuments = (page, pageSize, filters) => {
   const urlBackend = `/api/ArchiveDocument/view-all-documents?page=${page}&pageSize=${pageSize}`;
-  return axios.post(urlBackend, { name, scope, createdDate, status });
+  return axios.post(urlBackend, { ...filters });
 };
 
 const viewProcessDocumentDetailAPI = (documentId) => {

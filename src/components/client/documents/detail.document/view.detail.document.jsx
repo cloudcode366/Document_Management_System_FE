@@ -634,6 +634,12 @@ const ViewDetailDocument = () => {
             ></Divider>
             <Title level={5}>Tổng quan văn bản</Title>
             <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+              <span style={{ color: "#5f6368" }}>Mã văn bản:</span>
+              <span style={{ float: "right", fontWeight: 500 }}>
+                {document?.documentId}
+              </span>
+            </div>
+            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
               <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
               <span style={{ float: "right", fontWeight: 500 }}>
                 {document?.numberOfDocument}

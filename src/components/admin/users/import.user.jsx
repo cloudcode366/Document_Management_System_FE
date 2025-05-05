@@ -103,6 +103,7 @@ const ImportUser = ({
   };
 
   const handleFinalSubmit = async () => {
+    setIsSubmit(true);
     try {
       const payload = usersFromExcel.map((user) => ({
         ...user,
@@ -124,6 +125,7 @@ const ImportUser = ({
         description: err?.message,
       });
     }
+    setIsSubmit(false);
   };
 
   const validateRow = (row, index) => {
@@ -377,6 +379,7 @@ const ImportUser = ({
             type="primary"
             onClick={handleFinalSubmit}
             disabled={hasValidationErrors() || usersFromExcel.length === 0}
+            loading={isSubmit}
           >
             Xác nhận tạo
           </Button>
