@@ -1,9 +1,106 @@
-.custom-card {
-  .ant-card-body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-    padding: 15px 0px 15px 15px;
-  }
+// .hide-scrollbar {
+//   scrollbar-width: none; /* Firefox */
+//   -ms-overflow-style: none; /* IE, Edge */
+// }
+
+// .hide-scrollbar::-webkit-scrollbar {
+//   display: none; /* Chrome, Safari, Edge */
+// }
+
+// .view-detail-document {
+//   display: flex;
+//   height: 100%;
+
+//   .left-panel {
+//     flex: 7;
+//     margin-top: 20px;
+//     padding-right: 12px;
+//     overflow-y: auto;
+//     height: 100vh;
+//   }
+
+//   .right-panel {
+//     flex: 3;
+//     margin-top: 20px;
+//     overflow-y: auto;
+//     height: 100vh;
+//   }
+// }
+
+html,
+body,
+#root {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+.view-detail-document {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.view-detail-document * {
+  box-sizing: border-box;
+}
+
+.left-panel {
+  flex: 7;
+  padding: 20px 12px 20px 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.left-panel .content-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-height: 100%;
+  padding-bottom: 20px;
+}
+
+.left-panel .pdf-viewer-container,
+.left-panel iframe,
+.left-panel canvas {
+  width: 100%;
+  height: auto;
+  min-height: 70%; /* Đảm bảo PDF chiếm không gian đủ lớn */
+}
+
+.signature-container {
+  margin-top: 16px;
+  width: 100%;
+  height: auto;
+  padding-bottom: 20px; /* Thêm khoảng trống để chữ ký không bị sát mép */
+}
+
+.right-panel {
+  flex: 3;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.right-panel .custom-card {
+  height: 100%;
+  overflow-y: auto; /* Cuộn bên trong Card */
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #fff;
+}
+
+.right-panel .content-wrapper {
+  padding: 16px;
+  min-height: 100%;
 }

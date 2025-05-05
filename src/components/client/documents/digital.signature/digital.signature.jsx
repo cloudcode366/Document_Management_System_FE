@@ -71,10 +71,10 @@ const DigitalSignatureComponent = () => {
     const res = await viewDetailDocumentAPI(documentId);
     if (res?.data?.statusCode === 200) {
       const data = res.data.content;
-      const digitalSignatures = data.signatures.filter(
+      const digitalSignatures = data.digitalSignatures?.filter(
         (signature) => signature.isDigital === true
       );
-      const initalSignatures = data.signatures.filter(
+      const initalSignatures = data.digitalSignatures?.filter(
         (signature) => signature.isDigital === false
       );
       const finalVersion = data.versions.find(
