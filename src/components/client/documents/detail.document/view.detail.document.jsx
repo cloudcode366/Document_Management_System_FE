@@ -17,15 +17,12 @@ import {
 import {
   FileTextOutlined,
   EyeOutlined,
-  PlusOutlined,
   ArrowLeftOutlined,
   ExportOutlined,
   EditOutlined,
   CloseOutlined,
   CheckOutlined,
-  SaveOutlined,
   SolutionOutlined,
-  DownloadOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -41,10 +38,9 @@ import {
   viewDetailDocumentAPI,
 } from "@/services/api.service";
 import dayjs from "dayjs";
-import { Document, Page, pdfjs } from "react-pdf";
+import { pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 import CreateVersionModal from "./create.version.modal";
-import { version } from "nprogress";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -106,10 +102,10 @@ const ViewDetailDocument = () => {
     const res = await viewDetailDocumentAPI(documentId);
     if (res?.data?.statusCode === 200) {
       const data = res.data.content;
-      const digitalSignatures = data.signatures.filter(
+      const digitalSignatures = data.digitalSignatures.filter(
         (signature) => signature.isDigital === true
       );
-      const initalSignatures = data.signatures.filter(
+      const initalSignatures = data.digitalSignatures.filter(
         (signature) => signature.isDigital === false
       );
       const finalVersion = data.versions.find(
@@ -320,7 +316,7 @@ const ViewDetailDocument = () => {
     );
   }
 
-  // Nộp văn bản: đã xử lý
+  // Nộp văn bản
   if (
     document?.taskType === "Submit" &&
     document?.taskStatus === "InProgress"
@@ -357,7 +353,7 @@ const ViewDetailDocument = () => {
     );
   }
 
-  // Từ chối: đã xử lý
+  // Từ chối
   if (
     document?.taskType === "Browse" &&
     document?.taskStatus === "InProgress"
@@ -396,7 +392,7 @@ const ViewDetailDocument = () => {
     );
   }
 
-  // Duyệt văn bản: đã xử lý
+  // Duyệt văn bản
   if (
     document?.taskType === "Browse" &&
     document?.taskStatus === "InProgress"
@@ -435,7 +431,7 @@ const ViewDetailDocument = () => {
     );
   }
 
-  // Khởi tạo nhiệm vụ: đã xử lý
+  // Khởi tạo nhiệm vụ
   if (
     document?.taskType === "Create" &&
     document?.taskStatus === "InProgress"
@@ -475,7 +471,7 @@ const ViewDetailDocument = () => {
     );
   }
 
-  // Đã xem văn bản: đã xử lý
+  // Đã xem văn bản
   if (document?.taskType === "View" && document?.taskStatus === "InProgress") {
     buttons.push(
       <Button
@@ -528,36 +524,416 @@ const ViewDetailDocument = () => {
     );
   }
 
+  // return (
+  //   <div style={{ height: "100vh" }}>
+  //     <div
+  //       style={{
+  //         display: "flex",
+  //         gap: 16,
+  //         padding: 16,
+  //         minHeight: "90vh",
+  //         flexDirection: "row",
+  //         flexWrap: "wrap",
+  //       }}
+  //     >
+  //       {/* Left Panel: PDF Viewer */}
+  //       <Card
+  //         style={{
+  //           flex: 1,
+  //           minWidth: 300,
+  //           height: "88vh",
+  //           overflowY: "auto",
+  //         }}
+  //       >
+  //         <div style={{ height: "100%", overflowY: "auto" }}>
+  //           <PDFViewerWithToken
+  //             url={document?.finalVersion?.url}
+  //             token={localStorage.getItem(`access_token`)}
+  //             documentName={document?.documentName}
+  //           />
+
+  //           {/* Signature section */}
+  //           <SignatureContainer>
+  //             <div style={{ display: "inline-block", marginRight: 12 }}>
+  //               <SignatureBox
+  //                 name="Lê Phan Hoài Nam"
+  //                 time="16:05 - 20/03/2025"
+  //                 signatureImage={signatureImg}
+  //               />
+  //             </div>
+  //             <div style={{ display: "inline-block", marginRight: 12 }}>
+  //               <SignatureBox
+  //                 name="Hà Công Hiếu"
+  //                 time="16:05 - 21/03/2025"
+  //                 signatureImage={signatureImg}
+  //               />
+  //             </div>
+  //             <div style={{ display: "inline-block", marginRight: 12 }}>
+  //               <SignatureBox
+  //                 name="Ngô Huỳnh Tấn Lộc"
+  //                 time="16:05 - 22/03/2025"
+  //                 signatureImage={signatureImg}
+  //               />
+  //             </div>
+  //             <div style={{ display: "inline-block", marginRight: 12 }}>
+  //               <SignatureBox
+  //                 name="Tạ Gia Nhật Minh"
+  //                 time="16:05 - 23/04/2025"
+  //                 signatureImage={signatureImg}
+  //               />
+  //             </div>
+  //           </SignatureContainer>
+  //         </div>
+  //       </Card>
+
+  //       {/* Right Panel: Detail Info */}
+  //       <Card
+  //         className="custom-card"
+  //         style={{
+  //           height: "88vh",
+  //           display: "flex",
+  //           flexDirection: "column",
+  //           width: 400,
+  //           minWidth: 300,
+  //         }}
+  //       >
+  //         <Title
+  //           level={5}
+  //           style={{
+  //             borderBottom: "1px solid #80868b",
+  //             paddingBottom: "10px",
+  //             paddingRight: "5px",
+  //           }}
+  //         >
+  //           Thông tin chi tiết
+  //         </Title>
+  //         <div
+  //           style={{
+  //             flex: 1,
+  //             overflowY: "auto",
+  //             paddingRight: 8,
+  //           }}
+  //         >
+  //           <Title
+  //             level={4}
+  //             style={{
+  //               paddingTop: "20px",
+  //             }}
+  //           >
+  //             {document?.documentName}
+  //           </Title>
+  //           <Divider
+  //             variant="solid"
+  //             style={{
+  //               borderColor: "#80868b",
+  //             }}
+  //           ></Divider>
+  //           <Title level={5}>Tổng quan văn bản</Title>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Mã văn bản:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {document?.documentId}
+  //             </span>
+  //           </div>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {document?.numberOfDocument}
+  //             </span>
+  //           </div>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {document?.documentTypeName}
+  //             </span>
+  //           </div>
+  //           <div
+  //             style={{
+  //               fontSize: "14px",
+  //               marginBottom: "8px",
+  //               display: "flex",
+  //               flexWrap: "wrap",
+  //               justifyContent: "space-between",
+  //             }}
+  //           >
+  //             <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
+  //             <span
+  //               style={{
+  //                 fontWeight: 500,
+  //                 textAlign: "right",
+  //                 maxWidth: "50%",
+  //                 wordBreak: "break-word",
+  //               }}
+  //             >
+  //               {document?.workflowName}
+  //             </span>
+  //           </div>
+
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Người gửi:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {document?.sender}
+  //             </span>
+  //           </div>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Người tạo:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {document?.createdBy}
+  //             </span>
+  //           </div>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {document?.dateReceived &&
+  //                 dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
+  //             </span>
+  //           </div>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {document?.dateIssued &&
+  //                 dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
+  //             </span>
+  //           </div>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
+  //             </span>
+  //           </div>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
+  //             <span style={{ float: "right", fontWeight: 500 }}>
+  //               {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
+  //             </span>
+  //           </div>
+  //           <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+  //             <div
+  //               style={{
+  //                 display: "flex",
+  //                 justifyContent: "space-between",
+  //                 alignItems: "flex-start",
+  //                 gap: "12px",
+  //               }}
+  //             >
+  //               <span style={{ color: "#5f6368", whiteSpace: "nowrap" }}>
+  //                 Người ký:
+  //               </span>
+
+  //               <div
+  //                 style={{
+  //                   flex: 1,
+  //                   textAlign: "right",
+  //                   wordBreak: "break-word",
+  //                   fontWeight: 500,
+  //                   display: "inline-block",
+  //                   maxWidth: "50%",
+  //                 }}
+  //               >
+  //                 {/* Người ký đầu tiên */}
+  //                 <span>{document?.digitalSignatures?.[0]?.signerName}</span>
+  //               </div>
+  //             </div>
+
+  //             {/* Các tên còn lại */}
+  //             {document?.digitalSignatures?.slice(1).map((sig, index) => (
+  //               <div
+  //                 key={index}
+  //                 style={{
+  //                   textAlign: "right",
+  //                   fontWeight: 500,
+  //                   wordBreak: "break-word",
+  //                   marginTop: 4,
+  //                   maxWidth: "70%",
+  //                 }}
+  //               >
+  //                 {sig.signerName}
+  //               </div>
+  //             ))}
+  //           </div>
+
+  //           <Divider
+  //             variant="solid"
+  //             style={{
+  //               borderColor: "#80868b",
+  //             }}
+  //           ></Divider>
+  //           <Title level={5}>Nội dung</Title>
+  //           <Paragraph style={{ fontSize: 14 }}>
+  //             {document?.documentContent}
+  //           </Paragraph>
+  //           <Divider
+  //             variant="solid"
+  //             style={{
+  //               borderColor: "#80868b",
+  //             }}
+  //           ></Divider>
+
+  //           <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
+  //             Danh sách các phiên bản
+  //           </Typography.Text>
+
+  //           <List
+  //             itemLayout="horizontal"
+  //             dataSource={document?.versions}
+  //             renderItem={(item) => (
+  //               <List.Item
+  //                 actions={[
+  //                   !item.isFinal && (
+  //                     <Tooltip title="Xem chi tiết" key="view">
+  //                       <EyeOutlined
+  //                         style={{ fontSize: 18, color: "#1890ff" }}
+  //                         onClick={() => {
+  //                           navigate("/version-document", {
+  //                             state: {
+  //                               version: item,
+  //                               documentName: document?.documentName,
+  //                               createdBy: document?.createdBy,
+  //                             },
+  //                           });
+  //                         }}
+  //                       />
+  //                     </Tooltip>
+  //                   ),
+  //                 ]}
+  //               >
+  //                 <List.Item.Meta
+  //                   avatar={
+  //                     <FileTextOutlined
+  //                       style={{ fontSize: 20, color: "#8c8c8c" }}
+  //                     />
+  //                   }
+  //                   title={
+  //                     <Space>
+  //                       <Typography.Text>
+  //                         Phiên bản thứ {item.versionNumber}
+  //                       </Typography.Text>
+  //                     </Space>
+  //                   }
+  //                   description={`Ngày tạo: ${dayjs(item?.createdDate).format(
+  //                     "DD-MM-YYYY"
+  //                   )}`}
+  //                 />
+  //               </List.Item>
+  //             )}
+  //           />
+  //           <Divider
+  //             variant="solid"
+  //             style={{
+  //               borderColor: "#80868b",
+  //             }}
+  //           ></Divider>
+
+  //           <ActionButtonsGroup buttons={buttons} />
+
+  //           <div
+  //             style={{
+  //               position: "absolute",
+  //               top: 10,
+  //               right: 16,
+  //             }}
+  //           >
+  //             <Button
+  //               type="primary"
+  //               ghost
+  //               icon={<ArrowLeftOutlined />}
+  //               onClick={() => navigate("/")}
+  //             >
+  //               Quay lại
+  //             </Button>
+  //           </div>
+  //         </div>
+  //       </Card>
+  //     </div>
+  //     <Modal
+  //       title="Xác nhận duyệt văn bản"
+  //       open={openApproveConfirmModal}
+  //       onOk={handleApproveDocument}
+  //       onCancel={() => setOpenApproveConfirmModal(false)}
+  //       okText="Xác nhận"
+  //       cancelText="Hủy"
+  //       centered
+  //       maskClosable={false}
+  //     >
+  //       <p>Bạn có chắc chắn muốn duyệt văn bản này không?</p>
+  //     </Modal>
+
+  //     <Modal
+  //       title="Xác nhận từ chối văn bản"
+  //       open={openRejectConfirmModal}
+  //       onOk={handleRejectDocument}
+  //       onCancel={() => {
+  //         setOpenRejectConfirmModal(false);
+  //         rejectForm.resetFields();
+  //       }}
+  //       okText="Từ chối"
+  //       cancelText="Hủy"
+  //       centered
+  //       maskClosable={false}
+  //     >
+  //       <Form form={rejectForm} layout="vertical">
+  //         <Form.Item
+  //           name="reason"
+  //           label="Lý do từ chối"
+  //           rules={[
+  //             { required: true, message: "Vui lòng nhập lý do từ chối!" },
+  //           ]}
+  //         >
+  //           <Input.TextArea
+  //             rows={4}
+  //             placeholder="Nhập lý do từ chối văn bản..."
+  //           />
+  //         </Form.Item>
+  //       </Form>
+  //     </Modal>
+
+  //     <Modal
+  //       title="Xác nhận đã xem văn bản"
+  //       open={openViewConfirmModal}
+  //       onOk={handleViewDocument}
+  //       onCancel={() => setOpenViewConfirmModal(false)}
+  //       okText="Xác nhận"
+  //       cancelText="Hủy"
+  //       centered
+  //       maskClosable={false}
+  //     >
+  //       <p>Bạn có chắc chắn xác nhận đã xem văn bản này không?</p>
+  //     </Modal>
+
+  //     <Modal
+  //       title="Xác nhận nộp văn bản"
+  //       open={openSubmitConfirmModal}
+  //       onOk={handleSubmitDocument}
+  //       onCancel={() => setOpenSubmitConfirmModal(false)}
+  //       okText="Xác nhận"
+  //       cancelText="Hủy"
+  //       centered
+  //       maskClosable={false}
+  //     >
+  //       <p>Bạn có chắc chắn xác nhận nộp văn bản này không?</p>
+  //     </Modal>
+
+  //     <CreateVersionModal
+  //       openCreateVersionModal={openCreateVersionModal}
+  //       setOpenCreateVersionModal={setOpenCreateVersionModal}
+  //       documentId={documentId}
+  //       fetchInfo={fetchInfo}
+  //       taskId={document?.taskId}
+  //     />
+  //   </div>
+  // );
+
   return (
-    <div style={{ height: "100vh" }}>
-      <div
-        style={{
-          display: "flex",
-          gap: 16,
-          padding: 16,
-          minHeight: "90vh",
-          flexDirection: "row",
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Left Panel: PDF Viewer */}
-        <Card
-          style={{
-            flex: 1,
-            minWidth: 300,
-            height: "88vh",
-            overflowY: "auto",
-          }}
-        >
-          <div style={{ height: "100%", overflowY: "auto" }}>
+    <div>
+      <div className="view-detail-document">
+        <div className="hide-scrollbar left-panel">
+          <div className="content-wrapper">
             <PDFViewerWithToken
               url={document?.finalVersion?.url}
               token={localStorage.getItem(`access_token`)}
               documentName={document?.documentName}
             />
-
-            {/* Signature section */}
-            <SignatureContainer>
+            <SignatureContainer className="signature-container">
               <div style={{ display: "inline-block", marginRight: 12 }}>
                 <SignatureBox
                   name="Lê Phan Hoài Nam"
@@ -588,282 +964,262 @@ const ViewDetailDocument = () => {
               </div>
             </SignatureContainer>
           </div>
-        </Card>
+        </div>
 
-        {/* Right Panel: Detail Info */}
-        <Card
-          className="custom-card"
-          style={{
-            height: "88vh",
-            display: "flex",
-            flexDirection: "column",
-            width: 400,
-            minWidth: 300,
-          }}
-        >
-          <Title
-            level={5}
-            style={{
-              borderBottom: "1px solid #80868b",
-              paddingBottom: "10px",
-              paddingRight: "5px",
-            }}
-          >
-            Thông tin chi tiết
-          </Title>
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              paddingRight: 8,
-            }}
-          >
-            <Title
-              level={4}
-              style={{
-                paddingTop: "20px",
-              }}
-            >
-              {document?.documentName}
-            </Title>
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            ></Divider>
-            <Title level={5}>Tổng quan văn bản</Title>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Mã văn bản:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.documentId}
-              </span>
-            </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.numberOfDocument}
-              </span>
-            </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.documentTypeName}
-              </span>
-            </div>
-            <div
-              style={{
-                fontSize: "14px",
-                marginBottom: "8px",
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "space-between",
-              }}
-            >
-              <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
-              <span
+        <div className="right-panel">
+          <Card className="custom-card hide-scrollbar">
+            <div className="content-wrapper">
+              <Title
+                level={5}
                 style={{
-                  fontWeight: 500,
-                  textAlign: "right",
-                  maxWidth: "50%",
-                  wordBreak: "break-word",
+                  borderBottom: "1px solid #80868b",
+                  paddingBottom: "10px",
+                  paddingRight: "5px",
                 }}
               >
-                {document?.workflowName}
-              </span>
-            </div>
-
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Người gửi:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.sender}
-              </span>
-            </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Người tạo:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.createdBy}
-              </span>
-            </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.dateReceived &&
-                  dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
-              </span>
-            </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {document?.dateIssued &&
-                  dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
-              </span>
-            </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
-              </span>
-            </div>
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
-              <span style={{ float: "right", fontWeight: 500 }}>
-                {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
-              </span>
-            </div>
-            {/* <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#5f6368" }}>Người ký:</span>
-                <span style={{ fontWeight: 500, marginBottom: 4 }}>
-                  {document?.digitalSignatures?.[0]?.signerName}
-                </span>
-              </div>
-  
-              <div style={{ textAlign: "right", fontWeight: 500 }}>
-                {document?.digitalSignatures?.slice(1).map((sig, index) => (
-                  <div key={index} style={{ marginBottom: 4 }}>
-                    {sig.signerName}
-                  </div>
-                ))}
-              </div>
-            </div> */}
-            <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                Thông tin chi tiết
+              </Title>
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: "12px",
+                  flex: 1,
+                  overflowY: "auto",
+                  paddingRight: 8,
                 }}
               >
-                <span style={{ color: "#5f6368", whiteSpace: "nowrap" }}>
-                  Người ký:
-                </span>
+                <Title
+                  level={4}
+                  style={{
+                    paddingTop: "20px",
+                  }}
+                >
+                  {document?.documentName}
+                </Title>
+                <Divider
+                  variant="solid"
+                  style={{
+                    borderColor: "#80868b",
+                  }}
+                ></Divider>
+                <Title level={5}>Tổng quan văn bản</Title>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Mã văn bản:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {document?.documentId}
+                  </span>
+                </div>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {document?.numberOfDocument}
+                  </span>
+                </div>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {document?.documentTypeName}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "50%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.workflowName}
+                  </span>
+                </div>
+
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Người gửi:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {document?.sender}
+                  </span>
+                </div>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Người tạo:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {document?.createdBy}
+                  </span>
+                </div>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {document?.dateReceived &&
+                      dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
+                  </span>
+                </div>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {document?.dateIssued &&
+                      dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
+                  </span>
+                </div>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
+                  </span>
+                </div>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
+                  <span style={{ float: "right", fontWeight: 500 }}>
+                    {dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
+                  </span>
+                </div>
+                <div style={{ fontSize: "14px", marginBottom: "8px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      gap: "12px",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368", whiteSpace: "nowrap" }}>
+                      Người ký:
+                    </span>
+
+                    <div
+                      style={{
+                        flex: 1,
+                        textAlign: "right",
+                        wordBreak: "break-word",
+                        fontWeight: 500,
+                        display: "inline-block",
+                        maxWidth: "50%",
+                      }}
+                    >
+                      {/* Người ký đầu tiên */}
+                      <span>
+                        {document?.digitalSignatures?.[0]?.signerName}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Các tên còn lại */}
+                  {document?.digitalSignatures?.slice(1).map((sig, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        textAlign: "right",
+                        fontWeight: 500,
+                        wordBreak: "break-word",
+                        marginTop: 4,
+                        maxWidth: "70%",
+                      }}
+                    >
+                      {sig.signerName}
+                    </div>
+                  ))}
+                </div>
+
+                <Divider
+                  variant="solid"
+                  style={{
+                    borderColor: "#80868b",
+                  }}
+                ></Divider>
+                <Title level={5}>Nội dung</Title>
+                <Paragraph style={{ fontSize: 14 }}>
+                  {document?.documentContent}
+                </Paragraph>
+                <Divider
+                  variant="solid"
+                  style={{
+                    borderColor: "#80868b",
+                  }}
+                ></Divider>
+
+                <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
+                  Danh sách các phiên bản
+                </Typography.Text>
+
+                <List
+                  itemLayout="horizontal"
+                  dataSource={document?.versions}
+                  renderItem={(item) => (
+                    <List.Item
+                      actions={[
+                        !item.isFinal && (
+                          <Tooltip title="Xem chi tiết" key="view">
+                            <EyeOutlined
+                              style={{ fontSize: 18, color: "#1890ff" }}
+                              onClick={() => {
+                                navigate("/version-document", {
+                                  state: {
+                                    version: item,
+                                    documentName: document?.documentName,
+                                    createdBy: document?.createdBy,
+                                  },
+                                });
+                              }}
+                            />
+                          </Tooltip>
+                        ),
+                      ]}
+                    >
+                      <List.Item.Meta
+                        avatar={
+                          <FileTextOutlined
+                            style={{ fontSize: 20, color: "#8c8c8c" }}
+                          />
+                        }
+                        title={
+                          <Space>
+                            <Typography.Text>
+                              Phiên bản thứ {item.versionNumber}
+                            </Typography.Text>
+                          </Space>
+                        }
+                        description={`Ngày tạo: ${dayjs(
+                          item?.createdDate
+                        ).format("DD-MM-YYYY")}`}
+                      />
+                    </List.Item>
+                  )}
+                />
+                <Divider
+                  variant="solid"
+                  style={{
+                    borderColor: "#80868b",
+                  }}
+                ></Divider>
+
+                <ActionButtonsGroup buttons={buttons} />
 
                 <div
                   style={{
-                    flex: 1,
-                    textAlign: "right",
-                    wordBreak: "break-word",
-                    fontWeight: 500,
-                    display: "inline-block",
-                    maxWidth: "50%",
+                    position: "absolute",
+                    top: 10,
+                    right: 16,
                   }}
                 >
-                  {/* Người ký đầu tiên */}
-                  <span>{document?.digitalSignatures?.[0]?.signerName}</span>
+                  <Button
+                    type="primary"
+                    ghost
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => navigate("/")}
+                  >
+                    Quay lại
+                  </Button>
                 </div>
               </div>
-
-              {/* Các tên còn lại */}
-              {document?.digitalSignatures?.slice(1).map((sig, index) => (
-                <div
-                  key={index}
-                  style={{
-                    textAlign: "right",
-                    fontWeight: 500,
-                    wordBreak: "break-word",
-                    marginTop: 4,
-                    maxWidth: "70%",
-                  }}
-                >
-                  {sig.signerName}
-                </div>
-              ))}
             </div>
-
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            ></Divider>
-            <Title level={5}>Nội dung</Title>
-            <Paragraph style={{ fontSize: 14 }}>
-              {document?.documentContent}
-            </Paragraph>
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            ></Divider>
-
-            <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
-              Danh sách các phiên bản
-            </Typography.Text>
-
-            <List
-              itemLayout="horizontal"
-              dataSource={document?.versions}
-              renderItem={(item) => (
-                <List.Item
-                  actions={[
-                    !item.isFinal && (
-                      <Tooltip title="Xem chi tiết" key="view">
-                        <EyeOutlined
-                          style={{ fontSize: 18, color: "#1890ff" }}
-                          onClick={() => {
-                            navigate("/version-document", {
-                              state: {
-                                version: item,
-                                documentName: document?.documentName,
-                                createdBy: document?.createdBy,
-                              },
-                            });
-                          }}
-                        />
-                      </Tooltip>
-                    ),
-                  ]}
-                >
-                  <List.Item.Meta
-                    avatar={
-                      <FileTextOutlined
-                        style={{ fontSize: 20, color: "#8c8c8c" }}
-                      />
-                    }
-                    title={
-                      <Space>
-                        <Typography.Text>
-                          Phiên bản thứ {item.versionNumber}
-                        </Typography.Text>
-                      </Space>
-                    }
-                    description={`Ngày tạo: ${dayjs(item?.createdDate).format(
-                      "DD-MM-YYYY"
-                    )}`}
-                  />
-                </List.Item>
-              )}
-            />
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            ></Divider>
-
-            <ActionButtonsGroup buttons={buttons} />
-
-            <div
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 16,
-              }}
-            >
-              <Button
-                type="primary"
-                ghost
-                icon={<ArrowLeftOutlined />}
-                onClick={() => navigate("/")}
-              >
-                Quay lại
-              </Button>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
       <Modal
         title="Xác nhận duyệt văn bản"

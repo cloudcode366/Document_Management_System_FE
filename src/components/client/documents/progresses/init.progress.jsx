@@ -608,9 +608,14 @@ const ViewInitProgress = () => {
         });
         navigate(`/detail-progress/${documentId}`);
       } else {
+        let errorMessage = "";
+        if (res?.data?.content === "Task 2 step 1 must be upload") {
+          errorMessage =
+            "Nhiệm vụ thứ 2 của bước 1 trong luồng 1 phải có nhiệm vụ chính là tải văn bản lên!";
+        }
         notification.error({
-          message: "Hệ thống đang bận!",
-          description: "Xin vui lòng thử lại sau.",
+          message: "Xác nhận không thành công!",
+          description: errorMessage,
         });
       }
     }
