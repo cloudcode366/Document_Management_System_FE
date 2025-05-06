@@ -207,7 +207,7 @@ const ConfirmInfoDocument = (props) => {
       className="confirm-info-modal"
     >
       <div className="confirm-info-content">
-        <div className="left-panel">
+        <div className="left-panel hide-scrollbar">
           {selectedScope === "InComing" ? (
             <PDFViewerWithToken
               url={resDocument?.canChange?.url}

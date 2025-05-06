@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Typography } from "antd";
+import { Card, Image, Typography } from "antd";
 
 const SignatureBox = ({ name, time, signatureImage }) => {
   return (
@@ -15,12 +15,12 @@ const SignatureBox = ({ name, time, signatureImage }) => {
         }
       >
         <div style={{ padding: 8 }}>
-          <img
+          <Image
             src={signatureImage}
             alt="signature"
             style={{
               width: "100%",
-              height: 80,
+              height: "100%",
               objectFit: "contain",
               marginBottom: 8,
               border: "2px solid #969696",

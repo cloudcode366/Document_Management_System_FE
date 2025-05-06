@@ -276,18 +276,23 @@ const TableDocumentTemplate = () => {
         headerTitle={
           <span style={{ fontWeight: "bold" }}>Quản lý mẫu văn bản</span>
         }
-        toolBarRender={() => [
-          <Button
-            key="buttonAddNew"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setOpenModalCreate(true);
-            }}
-            type="primary"
-          >
-            Tạo mới mẫu văn bản
-          </Button>,
-        ]}
+        toolBarRender={() =>
+          user?.mainRole?.roleName === "Chief" ||
+          user?.subRole?.roleName?.endsWith("_Chief")
+            ? [
+                <Button
+                  key="buttonAddNew"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    setOpenModalCreate(true);
+                  }}
+                  type="primary"
+                >
+                  Tạo mới mẫu văn bản
+                </Button>,
+              ]
+            : []
+        }
       />
       <CreateDocumentTemplate
         openModalCreate={openModalCreate}

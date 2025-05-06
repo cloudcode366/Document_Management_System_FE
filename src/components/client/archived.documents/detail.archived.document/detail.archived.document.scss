@@ -1,24 +1,24 @@
-.hide-scrollbar-vdd {
+.hide-scrollbar-dad {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE, Edge */
 }
 
-.hide-scrollbar-vdd::-webkit-scrollbar {
+.hide-scrollbar-dad::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge */
 }
 
-.view-detail-document {
+.detail-archived-document {
   display: flex;
   height: 100vh;
   width: 100%;
   box-sizing: border-box;
 }
 
-.view-detail-document * {
+.detail-archived-document * {
   box-sizing: border-box;
 }
 
-.left-panel-vdd {
+.left-panel-dad {
   flex: 6;
   overflow-y: auto;
   height: 100vh;
@@ -26,7 +26,7 @@
   margin-top: 20px;
 }
 
-.left-panel-vdd .custom-card-vdd {
+.left-panel-dad .custom-card-dad {
   height: 100%;
   overflow-y: auto;
   border-radius: 8px;
@@ -36,30 +36,30 @@
   background: #e8edfa;
 }
 
-.left-panel-vdd .content-wrapper-vdd {
+.left-panel-dad .content-wrapper-dad {
   min-height: 100%;
 }
 
-.left-panel-vdd .pdf-viewer-container,
-.left-panel-vdd iframe,
-.left-panel-vdd canvas {
+.left-panel-dad .pdf-viewer-container,
+.left-panel-dad iframe,
+.left-panel-dad canvas {
   width: 100%;
   height: auto;
   min-height: 70%;
 }
 
-.custom-card-no-padding-vdd .ant-card-body {
+.custom-card-no-padding-dad .ant-card-body {
   padding: 0 !important;
 }
 
-.right-panel-vdd {
+.right-panel-dad {
   flex: 4;
   padding: 20px;
   overflow-y: auto;
   height: 100vh;
 }
 
-.right-panel-vdd .custom-card-vdd {
+.right-panel-dad .custom-card-dad {
   overflow-y: auto; /* Cuộn bên trong Card */
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

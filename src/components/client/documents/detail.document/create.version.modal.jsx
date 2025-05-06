@@ -1,20 +1,11 @@
 import { InboxOutlined } from "@ant-design/icons";
-import { App, Modal, Upload, Select, Radio, Typography, Button } from "antd";
-import React, { useEffect, useState } from "react";
-import ConfirmInfoDocument from "@/components/client/documents/progresses/confirm.info.document";
-import templatePDF from "assets/files/template.pdf";
-import {
-  createUploadDocumentAPI,
-  createUploadDocumentForSubmitAPI,
-  viewWorkflowByScopeAPI,
-  viewWorkflowDetailsWithFlowAndStepAPI,
-} from "@/services/api.service";
+import { App, Modal, Upload, Select, Typography, Button } from "antd";
+import React, { useState } from "react";
+import { createUploadDocumentForSubmitAPI } from "@/services/api.service";
 import { BeatLoader } from "react-spinners";
 import ConfirmVersionModal from "./confirm.version.modal";
 
 const { Dragger } = Upload;
-const { Option } = Select;
-const { Text } = Typography;
 
 const CreateVersionModal = (props) => {
   const {
@@ -74,8 +65,8 @@ const CreateVersionModal = (props) => {
       setOpenConfirmModal(true);
     } else {
       notification.error({
-        description: "Có lỗi xảy ra!",
-        message: res.data.content || "Xin vui lòng thử lại sau ít phút.",
+        message: "Có lỗi xảy ra!",
+        description: res.data.content || "Xin vui lòng thử lại sau ít phút.",
       });
     }
     setLoading(false);
@@ -187,6 +178,7 @@ const CreateVersionModal = (props) => {
         pdfFile={pdfFile}
         setPdfFile={setPdfFile}
         taskId={taskId}
+        handleCloseCreateVersionModal={handleCloseCreateVersionModal}
       />
     </>
   );
