@@ -1,31 +1,32 @@
 import React, { useEffect, useState } from "react";
 import {
   Card,
-  Typography,
   Button,
   Divider,
-  Input,
   Col,
   Row,
   Select,
   App,
   Modal,
   Tag,
+  Typography,
+  Space,
+  Popover,
+  Badge,
+  List,
+  Tooltip,
 } from "antd";
 import {
-  PaperClipOutlined,
   ArrowLeftOutlined,
-  SendOutlined,
-  AlignLeftOutlined,
-  LinkOutlined,
-  FontSizeOutlined,
-  PictureOutlined,
   ShareAltOutlined,
   MailOutlined,
-  CloseCircleOutlined,
+  FileSyncOutlined,
+  ClockCircleOutlined,
+  UserOutlined,
+  EyeOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
-import "./view.detail.document.scss";
 import SignatureBox from "@/components/client/documents/initial.signature/signature.box";
 import { PiHandWithdraw } from "react-icons/pi";
 import { BeatLoader } from "react-spinners";
@@ -37,6 +38,9 @@ import dayjs from "dayjs";
 import axios from "axios";
 import { useCurrentApp } from "@/components/context/app.context";
 import ArchivedPDFViewerWithToken from "@/components/archived.pdf.viewer";
+import "./detail.archived.document.scss";
+import { convertArchivedStatus, convertScopeName } from "@/services/helper";
+import SignatureContainer from "../../documents/initial.signature/signature.container";
 
 const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
@@ -52,6 +56,57 @@ const grantPermissionAPI = async (documentId, userIds) => {
   });
 };
 
+const { Title, Paragraph } = Typography;
+
+const ActionButtonsGroup = ({ buttons }) => {
+  const rows = [];
+  for (let i = 0; i < buttons.length; i += 2) {
+    const isLastSingle = i === buttons.length - 1;
+    rows.push(
+      <Row key={i} justify={isLastSingle ? "center" : "start"}>
+        <Col
+          span={12}
+          style={{
+            marginBottom: "10px",
+            marginLeft: "12px",
+            maxWidth: "calc(50% - 12px)",
+          }}
+        >
+          {buttons[i]}
+        </Col>
+        {!isLastSingle && (
+          <Col
+            span={12}
+            style={{
+              marginBottom: "10px",
+              marginLeft: "12px",
+              maxWidth: "calc(50% - 12px)",
+            }}
+          >
+            {buttons[i + 1]}
+          </Col>
+        )}
+      </Row>
+    );
+  }
+
+  return <>{rows}</>;
+};
+
+const tagColor = {
+  "Văn bản đến": "#FC8330",
+  "Văn bản đi": "#18B0FF",
+  "Nội bộ phòng ban": "#9254DE",
+  "Nội bộ toàn trường": "#F759AB",
+};
+
+const statusColor = {
+  InProgress: "#3A91F5",
+  Completed: "#2BDBBB",
+  Archived: "#82E06E",
+  Rejected: "#FF6B6B",
+};
+
 const ViewDetailArchivedDocument = () => {
   const location = useLocation();
   const documentId = location.state?.documentId;
@@ -59,20 +114,12 @@ const ViewDetailArchivedDocument = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState(null);
-  const [openEmailModal, setOpenEmailModal] = useState(false);
-  const [emailForm, setEmailForm] = useState({
-    from: [],
-    to: [],
-    cc: [],
-    bcc: [],
-    subject: "",
-    content: "",
-  });
   const [accessToken, setAccessToken] = useState(null);
   const [openShareModal, setOpenShareModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const { user } = useCurrentApp();
+  const buttons = [];
 
   const loginWithGoogle = () => {
     localStorage.setItem("documentId", documentId);
@@ -90,64 +137,6 @@ const ViewDetailArchivedDocument = () => {
     window.location.href = authUrl;
   };
 
-  // const handleExchangeToken = async (code) => {
-  //   try {
-  //     const response = await fetch("https://oauth2.googleapis.com/token", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/x-www-form-urlencoded",
-  //       },
-  //       body: new URLSearchParams({
-  //         code,
-  //         client_id: CLIENT_ID,
-  //         client_secret: "YOUR_CLIENT_SECRET", // Thay bằng client secret thực tế
-  //         redirect_uri: REDIRECT_URI,
-  //         grant_type: "authorization_code",
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-  //     if (data.access_token) {
-  //       setAccessToken(data.access_token);
-  //       localStorage.setItem("googleToken", data.access_token);
-  //       message.success("Đăng nhập Google thành công!");
-  //       setOpenEmailModal(true);
-  //     } else {
-  //       throw new Error(data.error || "Không thể lấy access token");
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ Lỗi khi đổi token:", error);
-  //     message.error("❌ Lỗi khi đổi token: " + error.message);
-  //   }
-  // };
-
-  // Thêm logic từ window.onload để xử lý authorization code
-  // useEffect(() => {
-  //   console.log("useEffect chạy với location.search:", location.search);
-  //   const queryParams = new URLSearchParams(location.search);
-  //   const authCode = queryParams.get("code");
-  //   const error = queryParams.get("error");
-
-  //   if (authCode) {
-  //     console.log("✅ Authorization Code:", authCode);
-  //     console.log("🔄 Gửi code này lên server để đổi access token...");
-
-  //     // handleExchangeToken(authCode)
-  //     //   .then(() => {
-  //     //     // Sau khi đổi token thành công, chuyển hướng để xóa code khỏi URL
-  //     //     window.history.replaceState({}, document.title, REDIRECT_URI);
-  //     //   })
-  //     //   .catch((error) => {
-  //     //     console.error("❌ Lỗi khi đổi token:", error);
-  //     //     window.history.replaceState({}, document.title, REDIRECT_URI);
-  //     //   });
-  //   } else if (error) {
-  //     console.error("❌ Lỗi:", error);
-  //     message.error("❌ Lỗi khi đăng nhập: " + error);
-  //     window.history.replaceState({}, document.title, REDIRECT_URI);
-  //   }
-  // }, [location.search]);
-
   useEffect(() => {
     const storedToken = localStorage.getItem("googleToken");
     if (storedToken) {
@@ -156,49 +145,7 @@ const ViewDetailArchivedDocument = () => {
   }, []);
 
   const handleOpenEmailModal = () => {
-    if (!accessToken) {
-      loginWithGoogle();
-    } else {
-      setOpenEmailModal(true);
-    }
-  };
-
-  const handleSendEmail = () => {
-    if (emailForm.to.length === 0 || !emailForm.subject || !emailForm.content) {
-      message.warning(
-        "Vui lòng điền đầy đủ thông tin bắt buộc (Đến, Tiêu đề, Nội dung)!"
-      );
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const invalidTo = emailForm.to.find((email) => !emailRegex.test(email));
-    if (invalidTo) {
-      message.warning(`Email trong "Đến" không hợp lệ: ${invalidTo}`);
-      return;
-    }
-    const invalidCC = emailForm.cc.find((email) => !emailRegex.test(email));
-    if (invalidCC) {
-      message.warning(`Email trong "CC" không hợp lệ: ${invalidCC}`);
-      return;
-    }
-    const invalidBCC = emailForm.bcc.find((email) => !emailRegex.test(email));
-    if (invalidBCC) {
-      message.warning(`Email trong "BCC" không hợp lệ: ${invalidBCC}`);
-      return;
-    }
-
-    console.log("Gửi email:", emailForm, "với access token:", accessToken);
-    message.success("Email đã được gửi thành công!");
-    setOpenEmailModal(false);
-    setEmailForm({
-      from: [],
-      to: [],
-      cc: [],
-      bcc: [],
-      subject: "",
-      content: "",
-    });
+    loginWithGoogle();
   };
 
   const fetchInfo = async () => {
@@ -207,12 +154,6 @@ const ViewDetailArchivedDocument = () => {
       const res = await viewArchivedDocumentDetailAPI(documentId);
       if (res?.data?.statusCode === 200) {
         const data = res.data.content;
-        const digitalSignatures = data.signatures.filter(
-          (signature) => signature.isDigital === true
-        );
-        const initalSignatures = data.signatures.filter(
-          (signature) => signature.isDigital === false
-        );
         const finalVersion = data.versions.find(
           (version) => version.isFinal === true
         );
@@ -221,8 +162,6 @@ const ViewDetailArchivedDocument = () => {
         );
         setDocument({
           ...data,
-          digitalSignatures,
-          initalSignatures,
           finalVersion,
           rejectedVersions,
         });
@@ -230,7 +169,7 @@ const ViewDetailArchivedDocument = () => {
         message.error("Không thể tải thông tin văn bản!");
       }
     } catch (error) {
-      console.error("❌ Lỗi khi lấy thông tin văn bản:", error);
+      console.error("Lỗi khi lấy thông tin văn bản:", error);
       message.error("Lỗi khi lấy thông tin văn bản: " + error.message);
     } finally {
       setLoading(false);
@@ -246,7 +185,7 @@ const ViewDetailArchivedDocument = () => {
         message.error("Không thể tải danh sách người dùng!");
       }
     } catch (error) {
-      console.error("❌ Lỗi khi lấy danh sách người dùng:", error);
+      console.error("Lỗi khi lấy danh sách người dùng:", error);
       message.error("Lỗi khi lấy danh sách người dùng: " + error.message);
     }
   };
@@ -285,6 +224,210 @@ const ViewDetailArchivedDocument = () => {
     }
   }, [documentId]);
 
+  const digitalSignaturesContent = (
+    <div style={{ minWidth: 280 }}>
+      {document?.digitalSignatures?.map((signature, index) => (
+        <div key={index}>
+          <Space direction="vertical" size={4}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <UserOutlined style={{ color: "#1890ff" }} />
+              <span>
+                <strong>Người ký:</strong> {signature.signerName}
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <ClockCircleOutlined style={{ color: "#52c41a" }} />
+              <span>
+                <strong>Thời gian ký:</strong>{" "}
+                {dayjs(signature.signedDate).format("DD/MM/YYYY HH:mm")}
+              </span>
+            </div>
+          </Space>
+          {index < document.digitalSignatures.length - 1 && (
+            <Divider style={{ margin: "10px 0" }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  // Cấp quyền truy cập
+  if (document?.canGrant) {
+    buttons.push(
+      <Button
+        icon={<ShareAltOutlined style={{ color: "#1890ff" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#e6f4ff",
+          border: "1px solid #91d5ff",
+          fontWeight: 600,
+          transition: "all 0.3s ease",
+          padding: "0 12px",
+          minWidth: 150,
+          maxWidth: "100%",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#d1e9ff";
+          e.currentTarget.style.border = "1px solid #69c0ff";
+          e.currentTarget.style.color = "#096dd9";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#e6f4ff";
+          e.currentTarget.style.border = "1px solid #91d5ff";
+          e.currentTarget.style.color = "#1890ff";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={handleOpenShareModal}
+      >
+        Cấp quyền truy cập
+      </Button>
+    );
+  }
+
+  // Gửi email
+  if (
+    document?.scope === "OutGoing" &&
+    (user?.mainRole?.roleName === "Chief" ||
+      user?.subRole?.roleName?.endsWith("_Chief")) &&
+    (document?.status === "Archived" || document?.status === "Sent")
+  ) {
+    buttons.push(
+      <Button
+        icon={<MailOutlined style={{ color: "#fa8c16" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#fff7e6",
+          border: "1px solid #ffd591",
+          fontWeight: 600,
+          transition: "all 0.3s ease",
+          padding: "0 12px",
+          minWidth: 150,
+          maxWidth: "100%",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#ffe7ba";
+          e.currentTarget.style.border = "1px solid #ffc069";
+          e.currentTarget.style.color = "#d46b08";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#fff7e6";
+          e.currentTarget.style.border = "1px solid #ffd591";
+          e.currentTarget.style.color = "#fa8c16";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={handleOpenEmailModal}
+      >
+        Gửi email
+      </Button>
+    );
+  }
+
+  // Thu hồi văn bản
+  if (
+    document?.scope === "OutGoing" &&
+    (user?.mainRole?.roleName === "Chief" ||
+      user?.subRole?.roleName?.endsWith("_Chief")) &&
+    document?.status === "Sent"
+  ) {
+    buttons.push(
+      <Button
+        icon={<PiHandWithdraw style={{ color: "#ff4d4f" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#fff1f0",
+          border: "1px solid #ffa39e",
+          transition: "all 0.3s ease",
+          fontWeight: 600,
+          padding: "0 12px",
+          minWidth: 150,
+          maxWidth: "100%",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#ffccc7";
+          e.currentTarget.style.border = "1px solid #ff7875";
+          e.currentTarget.style.color = "#f5222d";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#fff1f0";
+          e.currentTarget.style.border = "1px solid #ffa39e";
+          e.currentTarget.style.color = "#ff4d4f";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => {
+          true;
+        }}
+      >
+        Thu hồi văn bản
+      </Button>
+    );
+  }
+
+  // Khởi tạo văn bản thay thế
+  if (
+    document?.scope === "OutGoing" &&
+    (user?.mainRole?.roleName === "Chief" ||
+      user?.subRole?.roleName?.endsWith("_Chief")) &&
+    document?.status === "Withdrawn"
+  ) {
+    buttons.push(
+      <Button
+        icon={<FileSyncOutlined style={{ color: "#52c41a" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#f6ffed",
+          border: "1px solid #b7eb8f",
+          transition: "all 0.3s ease",
+          fontWeight: 600,
+          padding: "0 12px",
+          minWidth: 150,
+          maxWidth: "100%",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#b7eb8f";
+          e.currentTarget.style.border = "1px solid #95de64";
+          e.currentTarget.style.color = "#389e0d";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#f6ffed";
+          e.currentTarget.style.border = "1px solid #b7eb8f";
+          e.currentTarget.style.color = "#52c41a";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => true}
+      >
+        Khởi tạo văn bản thay thế
+      </Button>
+    );
+  }
+
   if (loading) {
     return (
       <div
@@ -302,491 +445,469 @@ const ViewDetailArchivedDocument = () => {
   }
 
   return (
-    <div style={{ height: "100vh" }}>
-      <div
-        style={{
-          display: "flex",
-          gap: 16,
-          padding: 16,
-          minHeight: "90vh",
-          flexDirection: "row",
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Left Panel: PDF Viewer */}
-        <Card
-          style={{
-            flex: 1,
-            minWidth: 300,
-            height: "88vh",
-            overflowY: "auto",
-          }}
-        >
-          <div style={{ height: "100%", overflowY: "auto" }}>
-            <ArchivedPDFViewerWithToken
-              url={document?.versions?.[0]?.url}
-              token={localStorage.getItem(`access_token`)}
-              documentName={document?.documentName}
-            />
-
-            <div style={{ padding: 16 }}>
-              {document?.digitalSignatures?.map((signature, index) => (
-                <div
-                  key={index}
-                  style={{ display: "inline-block", marginRight: 12 }}
-                >
-                  <SignatureBox
-                    name={signature.name}
-                    time={dayjs(signature.time).format("HH:mm - DD/MM/YYYY")}
-                    signatureImage="signatureImg"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        {/* Right Panel: Detail Info */}
-        <Card
-          className="custom-card"
-          style={{
-            height: "88vh",
-            display: "flex",
-            flexDirection: "column",
-            width: 400,
-            minWidth: 300,
-          }}
-        >
-          <Title
-            level={5}
-            style={{
-              borderBottom: "1px solid #80868b",
-              paddingBottom: "10px",
-              paddingRight: "5px",
-            }}
-          >
-            Thông tin chi tiết
-          </Title>
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              paddingRight: 8,
-            }}
-          >
-            <Title
-              level={4}
-              style={{
-                paddingTop: "20px",
-              }}
-            >
-              {document?.documentName}
-            </Title>
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            />
-            <Title level={5}>Tổng quan văn bản</Title>
-            <div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Người tạo:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.createdBy}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Người gửi:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.sender}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.dateReceived
-                    ? dayjs(document.dateReceived).format("DD-MM-YYYY HH:mm")
-                    : "N/A"}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.dateIssued
-                    ? dayjs(document.dateIssued).format("DD-MM-YYYY HH:mm")
-                    : "N/A"}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.dateExpires
-                    ? dayjs(document.dateExpires).format("DD-MM-YYYY HH:mm")
-                    : "N/A"}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.deadline
-                    ? dayjs(document.deadline).format("DD-MM-YYYY HH:mm")
-                    : "N/A"}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.numberOfDocument || "N/A"}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.documentTypeName || "N/A"}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.scope || "N/A"}
-                </span>
-              </div>
-              <div style={{ fontSize: "14px", marginBottom: "8px" }}>
-                <span style={{ color: "#5f6368" }}>Người ký:</span>
-                <span style={{ float: "right", fontWeight: 500 }}>
-                  {document?.digitalSignatures?.map((item) => (
-                    <Tag key={item.name} color="blue">
-                      {item.name}
-                    </Tag>
-                  )) || "N/A"}
-                </span>
-              </div>
-            </div>
-            <Divider
-              variant="solid"
-              style={{
-                borderColor: "#80868b",
-              }}
-            />
-            <Title level={5}>Nội dung</Title>
-            <Paragraph style={{ fontSize: 14 }}>
-              {document?.documentContent || "N/A"}
-            </Paragraph>
-
-            <Row gutter={[12, 12, 24]}>
-              <Col span={12}>
-                <Button
-                  icon={<ShareAltOutlined style={{ color: "#fa8c16" }} />}
-                  block
-                  size="middle"
-                  onClick={handleOpenShareModal}
-                  style={{
-                    height: 70,
-                    fontSize: 19,
-                    background: "#F4F5F6",
-                    border: "none",
-                    color: "#000",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    whiteSpace: "normal",
-                    textAlign: "center",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  Cấp quyền xem
-                </Button>
-              </Col>
-              <Col span={12}>
-                {(user?.mainRole?.roleName === "Chief" ||
-                  user?.subRole?.roleName?.endsWith("_Chief")) && (
-                  <Button
-                    icon={<MailOutlined style={{ color: "#fa8c16" }} />}
-                    block
-                    size="middle"
-                    onClick={handleOpenEmailModal}
-                    style={{
-                      height: 70,
-                      fontSize: 19,
-                      background: "#F4F5F6",
-                      border: "none",
-                      color: "#000",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      whiteSpace: "normal",
-                      textAlign: "center",
-                      lineHeight: "1.2",
-                    }}
-                  >
-                    Gửi Email
-                  </Button>
+    <div>
+      <div className="detail-archived-document">
+        <div className="left-panel-dad hide-scrollbar-dad">
+          <Card className="custom-card-no-padding-dad hide-scrollbar-dad">
+            <div className="content-wrapper-dad hide-scrollbar-dad">
+              <ArchivedPDFViewerWithToken
+                url={document?.finalVersion?.url}
+                token={localStorage.getItem(`access_token`)}
+                documentName={document?.documentName}
+              />
+              {Array.isArray(document?.approvalSignatures) &&
+                document.approvalSignatures.length > 0 && (
+                  <SignatureContainer>
+                    {document.approvalSignatures.map((signature, index) => (
+                      <div
+                        key={index}
+                        style={{ display: "inline-block", marginRight: 12 }}
+                      >
+                        <SignatureBox
+                          name={signature.signerName}
+                          time={dayjs(signature.signedDate).format(
+                            "DD/MM/YYYY HH:mm"
+                          )}
+                          signatureImage={signature.imgUrl}
+                        />
+                      </div>
+                    ))}
+                  </SignatureContainer>
                 )}
-              </Col>
-              <Col span={24}>
-                <Button
-                  icon={<PiHandWithdraw style={{ color: "#fa8c16" }} />}
-                  block
-                  size="middle"
-                  onClick={() => setOpenEmailModal(true)}
-                  style={{
-                    height: 70,
-                    fontSize: 20,
-                    background: "#F4F5F6",
-                    border: "none",
-                    color: "#000",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    whiteSpace: "normal",
-                    textAlign: "center",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  Thu hồi văn bản
-                </Button>
-              </Col>
-            </Row>
+            </div>
+          </Card>
+        </div>
+
+        <div
+          className="right-panel-dad"
+          style={{ display: "flex", flexDirection: "column", height: "100vh" }}
+        >
+          <Card
+            className="custom-card-dad hide-scrollbar-dad"
+            style={{ flex: 1, display: "flex", flexDirection: "column" }}
+          >
             <div
               style={{
-                position: "absolute",
-                top: 10,
-                right: 16,
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderBottom: "1px solid #80868b",
+                paddingBottom: "10px",
+                paddingRight: "5px",
               }}
             >
+              <Title level={5} style={{ margin: 0 }}>
+                Thông tin chi tiết
+              </Title>
               <Button
                 type="primary"
                 ghost
                 icon={<ArrowLeftOutlined />}
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/archived-document")}
               >
                 Quay lại
               </Button>
             </div>
-          </div>
-        </Card>
+
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                paddingRight: 8,
+              }}
+            >
+              <Title
+                level={4}
+                style={{
+                  paddingTop: "20px",
+                }}
+              >
+                {document?.documentName}
+              </Title>
+              <Tag color={tagColor[convertScopeName(document?.scope)]}>
+                {convertScopeName(document?.scope)}
+              </Tag>
+              <Divider
+                variant="solid"
+                style={{
+                  borderColor: "#80868b",
+                }}
+              ></Divider>
+              <Title level={5}>Tổng quan văn bản</Title>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Mã văn bản:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.documentId}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.numberOfDocument}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.documentTypeName}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Trạng thái:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  <Badge
+                    color={statusColor[document?.status]}
+                    text={convertArchivedStatus(document?.status)}
+                    className="custom-dot"
+                  />
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.workflowName}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Người gửi:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.sender}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>
+                  {document?.scope === "InComing" ? "Người nhận" : "Người tạo"}:
+                </span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.createdBy}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>
+                  {document?.scope === "InComing" ? "Ngày nhận" : "Ngày tạo"}:
+                </span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.scope === "InComing" &&
+                    document?.dateReceived &&
+                    dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
+                  {document?.scope !== "InComing" &&
+                    document?.createDate &&
+                    dayjs(document?.createDate).format("DD-MM-YYYY HH:mm")}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.dateIssued &&
+                    dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.dateExpires &&
+                    dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.deadline &&
+                    dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Người ký:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {Array.isArray(document?.digitalSignatures) &&
+                    document.digitalSignatures.length > 0 && (
+                      <Popover
+                        content={digitalSignaturesContent}
+                        title="Thông tin chữ ký"
+                        trigger="click"
+                        placement="left"
+                      >
+                        <span
+                          style={{
+                            color: "#1890ff",
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          Xem chi tiết
+                        </span>
+                      </Popover>
+                    )}
+                </span>
+              </div>
+
+              <Divider
+                variant="solid"
+                style={{
+                  borderColor: "#80868b",
+                }}
+              ></Divider>
+              <Title level={5}>Nội dung</Title>
+              <Paragraph style={{ fontSize: 14 }}>
+                {document?.documentContent}
+              </Paragraph>
+              <Divider
+                variant="solid"
+                style={{
+                  borderColor: "#80868b",
+                }}
+              ></Divider>
+
+              <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
+                Danh sách các phiên bản
+              </Typography.Text>
+
+              <List
+                itemLayout="horizontal"
+                dataSource={document?.versions}
+                renderItem={(item) => (
+                  <List.Item
+                    actions={[
+                      !item.isFinal && (
+                        <Tooltip title="Xem chi tiết" key="view">
+                          <EyeOutlined
+                            style={{ fontSize: 18, color: "#1890ff" }}
+                            onClick={() => {
+                              navigate("/version-document", {
+                                state: {
+                                  version: item,
+                                  documentName: document?.documentName,
+                                  createdBy: document?.createdBy,
+                                },
+                              });
+                            }}
+                          />
+                        </Tooltip>
+                      ),
+                    ]}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <FileTextOutlined
+                          style={{ fontSize: 20, color: "#8c8c8c" }}
+                        />
+                      }
+                      title={
+                        <Space>
+                          <Typography.Text>
+                            Phiên bản thứ {item.versionNumber}
+                          </Typography.Text>
+                        </Space>
+                      }
+                      description={`Ngày tạo: ${dayjs(item?.createdDate).format(
+                        "DD-MM-YYYY"
+                      )}`}
+                    />
+                  </List.Item>
+                )}
+              />
+              <Divider
+                variant="solid"
+                style={{
+                  borderColor: "#80868b",
+                }}
+              ></Divider>
+            </div>
+            <div
+              style={{
+                padding: "12px 12px",
+                backgroundColor: "#fff",
+                position: "sticky",
+                bottom: 30,
+                zIndex: 10,
+              }}
+            >
+              <ActionButtonsGroup buttons={buttons} />
+            </div>
+          </Card>
+        </div>
       </div>
-
-      {/* Modal gửi email */}
-      <Modal
-        open={openEmailModal}
-        onCancel={() => {
-          setOpenEmailModal(false);
-          setEmailForm({
-            from: [],
-            to: [],
-            cc: [],
-            bcc: [],
-            subject: "",
-            content: "",
-          });
-        }}
-        footer={null}
-        width={600}
-        bodyStyle={{ padding: 16 }}
-        closeIcon={<CloseCircleOutlined style={{ color: "#fa8c16" }} />}
-      >
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 14, color: "#5f6368" }}>
-              Văn bản quyết định 53/2025 QĐ-TTg chính sách nội trú học sinh,
-              sinh viên cao đẳng trung cấp
-            </span>
-            <PaperClipOutlined style={{ color: "#fa8c16" }} />
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label
-            style={{ display: "block", marginBottom: 4, color: "#5f6368" }}
-          >
-            Từ
-          </label>
-          <Input
-            value={emailForm.from}
-            onChange={(e) =>
-              setEmailForm({ ...emailForm, from: e.target.value })
-            }
-            placeholder="Nhập email người gửi"
-            style={{ borderRadius: 4 }}
-            disabled
-          />
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label
-            style={{ display: "block", marginBottom: 4, color: "#5f6368" }}
-          >
-            Đến
-          </label>
-          <Select
-            mode="tags"
-            placeholder="Chọn hoặc nhập email người nhận"
-            value={emailForm.to}
-            onChange={(value) => setEmailForm({ ...emailForm, to: value })}
-            style={{ width: "100%" }}
-            tokenSeparators={[","]}
-            showSearch
-            filterOption={(input, option) =>
-              option?.label?.toLowerCase()?.includes(input.toLowerCase())
-            }
-            disabled={allUsers.length === 0}
-          >
-            {allUsers.map((user) => (
-              <Select.Option
-                key={user.id}
-                value={user.email}
-                label={user.email}
-              >
-                <div>
-                  <strong>{user.name}</strong>
-                  <div style={{ color: "#5f6368", fontSize: 12 }}>
-                    {user.email}
-                  </div>
-                </div>
-              </Select.Option>
-            ))}
-          </Select>
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label
-            style={{ display: "block", marginBottom: 4, color: "#5f6368" }}
-          >
-            CC
-          </label>
-          <Select
-            mode="tags"
-            placeholder="Chọn hoặc nhập email CC"
-            value={emailForm.cc}
-            onChange={(value) => setEmailForm({ ...emailForm, cc: value })}
-            style={{ width: "100%" }}
-            tokenSeparators={[","]}
-            showSearch
-            filterOption={(input, option) =>
-              option?.label?.toLowerCase()?.includes(input.toLowerCase())
-            }
-            disabled={allUsers.length === 0}
-          >
-            {allUsers.map((user) => (
-              <Select.Option
-                key={user.id}
-                value={user.email}
-                label={user.email}
-              >
-                <div>
-                  <strong>{user.name}</strong>
-                  <div style={{ color: "#5f6368", fontSize: 12 }}>
-                    {user.email}
-                  </div>
-                </div>
-              </Select.Option>
-            ))}
-          </Select>
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label
-            style={{ display: "block", marginBottom: 4, color: "#5f6368" }}
-          >
-            BCC
-          </label>
-          <Select
-            mode="tags"
-            placeholder="Chọn hoặc nhập email BCC"
-            value={emailForm.bcc}
-            onChange={(value) => setEmailForm({ ...emailForm, bcc: value })}
-            style={{ width: "100%" }}
-            tokenSeparators={[","]}
-            showSearch
-            filterOption={(input, option) =>
-              option?.label?.toLowerCase()?.includes(input.toLowerCase())
-            }
-            disabled={allUsers.length === 0}
-          >
-            {allUsers.map((user) => (
-              <Select.Option
-                key={user.id}
-                value={user.email}
-                label={user.email}
-              >
-                <div>
-                  <strong>{user.name}</strong>
-                  <div style={{ color: "#5f6368", fontSize: 12 }}>
-                    {user.email}
-                  </div>
-                </div>
-              </Select.Option>
-            ))}
-          </Select>
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label
-            style={{ display: "block", marginBottom: 4, color: "#5f6368" }}
-          >
-            Tiêu đề
-          </label>
-          <Input
-            value={emailForm.subject}
-            onChange={(e) =>
-              setEmailForm({ ...emailForm, subject: e.target.value })
-            }
-            placeholder="Nhập tiêu đề email"
-            style={{ borderRadius: 4 }}
-          />
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label
-            style={{ display: "block", marginBottom: 4, color: "#5f6368" }}
-          >
-            Nội dung
-          </label>
-          <TextArea
-            value={emailForm.content}
-            onChange={(e) =>
-              setEmailForm({ ...emailForm, content: e.target.value })
-            }
-            rows={4}
-            placeholder="Nhập nội dung email"
-            style={{ borderRadius: 4 }}
-          />
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Button
-            type="primary"
-            icon={<SendOutlined />}
-            onClick={handleSendEmail}
-            style={{
-              background: "#fa8c16",
-              borderColor: "#fa8c16",
-              borderRadius: 4,
-            }}
-          >
-            Gửi
-          </Button>
-          <AlignLeftOutlined style={{ color: "#5f6368" }} />
-          <LinkOutlined style={{ color: "#5f6368" }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <FontSizeOutlined style={{ color: "#5f6368" }} />
-            <span style={{ color: "#5f6368" }}>10 px</span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              color: "#ff4d4f",
-            }}
-          >
-            <span style={{ borderBottom: "2px solid #ff4d4f" }}>A</span>
-          </div>
-          <PictureOutlined style={{ color: "#5f6368" }} />
-        </div>
-      </Modal>
 
       {/* Modal cấp quyền xem */}
       <Modal
@@ -838,28 +959,6 @@ const ViewDetailArchivedDocument = () => {
         </div>
       </Modal>
     </div>
-  );
-};
-
-// Custom components
-const Title = ({ level, children, style }) => {
-  const fontSize = level === 4 ? 20 : level === 5 ? 16 : 24;
-  return <h3 style={{ fontSize, margin: "8px 0", ...style }}>{children}</h3>;
-};
-
-const Paragraph = ({ children, style }) => {
-  return <p style={{ margin: "8px 0", ...style }}>{children}</p>;
-};
-
-const TextArea = ({ value, onChange, rows, placeholder, style }) => {
-  return (
-    <textarea
-      value={value}
-      onChange={onChange}
-      rows={rows}
-      placeholder={placeholder}
-      style={{ width: "100%", padding: 8, ...style }}
-    />
   );
 };
 

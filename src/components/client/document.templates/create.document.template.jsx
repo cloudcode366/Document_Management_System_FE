@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Modal, Button, App, Upload, Select, Input } from "antd";
+import { Modal, Button, App, Select, Input } from "antd";
 import { Document, Page, pdfjs } from "react-pdf";
 import numberOfDocumentImage from "assets/files/NumberOfDocument.png";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
@@ -156,11 +156,14 @@ const CreateDocumentTemplate = (props) => {
       template
     );
 
-    if (res && res.data) {
+    if (res && res.data && res.data.statusCode === 200) {
       message.success("Tạo mẫu văn bản thành công!");
       handleClose();
     } else {
-      message.error("Tạo mẫu văn bản thất bại!");
+      notification.error({
+        message: "Lỗi tạo mẫu văn bản",
+        description: res.data.content,
+      });
     }
   };
 

@@ -35,11 +35,10 @@ const ConfirmVersionModal = (props) => {
     setOpenConfirmModal,
     documentId,
     resDocument,
-    setResDocument,
     fetchInfo,
     pdfFile,
-    setPdfFile,
     taskId,
+    handleCloseCreateVersionModal,
   } = props;
 
   const [form] = Form.useForm();
@@ -208,6 +207,7 @@ const ConfirmVersionModal = (props) => {
     setOpenConfirmModal(false);
     form.resetFields();
     setIsLoading(false);
+    handleCloseCreateVersionModal();
   };
 
   return (
@@ -223,7 +223,7 @@ const ConfirmVersionModal = (props) => {
         className="confirm-info-modal"
       >
         <div className="confirm-info-content">
-          <div className="left-panel">
+          <div className="left-panel hide-scrollbar">
             {pdfFile && (
               <PDFViewerWithToken
                 url={pdfFile}
@@ -232,7 +232,7 @@ const ConfirmVersionModal = (props) => {
               />
             )}
           </div>
-          {/* Bên phải: Form nhập thông tin */}
+
           <div className="right-panel">
             <Card title="Thông tin văn bản" className="confirm-card">
               {resDocument.isDifferent && (

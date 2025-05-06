@@ -171,7 +171,7 @@ const TaskDetail = () => {
                   navigate(`/detail-document/${taskData.documentId}`)
                 }
               >
-                Mở văn bản mẫu
+                Mở văn bản
               </button>
             </div>
 

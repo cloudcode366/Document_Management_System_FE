@@ -9,14 +9,12 @@ import {
   Tag,
   App,
 } from "antd";
-import { FilePdfOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import { pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 import { useCurrentApp } from "@/components/context/app.context";
-import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
-import "./confirm.info.document.progress.scss";
+import { PlusOutlined } from "@ant-design/icons";
 import {
   createDocumentByTemplateAPI,
   createInComingDocumentAPI,
@@ -36,10 +34,8 @@ const ConfirmInfoDocumentProgress = (props) => {
   const {
     openConfirmModal,
     setOpenConfirmModal,
-    uploadedFile,
     resDocument,
     selectedWorkflow,
-    setSelectedTemplate,
     selectedTemplate,
     selectedDocumentType,
     selectedScope,
@@ -207,7 +203,7 @@ const ConfirmInfoDocumentProgress = (props) => {
       className="confirm-info-modal"
     >
       <div className="confirm-info-content">
-        <div className="left-panel">
+        <div className="left-panel hide-scrollbar">
           {selectedScope === "InComing" ? (
             <PDFViewerWithToken
               url={resDocument?.canChange?.url}

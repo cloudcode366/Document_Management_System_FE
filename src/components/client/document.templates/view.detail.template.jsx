@@ -4,7 +4,6 @@ import "pdfjs-dist/web/pdf_viewer.css";
 import "styles/pdf.viewer.scss";
 import { Button, Modal, Spin } from "antd";
 import {
-  DownloadOutlined,
   LeftOutlined,
   RightOutlined,
   ZoomInOutlined,

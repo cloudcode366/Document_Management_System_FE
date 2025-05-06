@@ -9,7 +9,6 @@ import {
   Upload,
   Select,
   Radio,
-  notification,
   Typography,
   Row,
   Col,
@@ -18,7 +17,6 @@ import {
 } from "antd";
 import React, { useState } from "react";
 import ConfirmInfoDocument from "@/components/client/documents/progresses/confirm.info.document";
-import templatePDF from "assets/files/template.pdf";
 import {
   createUploadDocumentAPI,
   viewAllTemplatesAPI,
