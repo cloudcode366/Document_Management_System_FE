@@ -253,10 +253,7 @@ const CreateWorkflow = ({
 
     let rolesToSelect = [];
     if (scope === "OutGoing") {
-      rolesToSelect = roleRes.filter(
-        (role) =>
-          role.roleName !== "Chief" && role.roleName !== "Clerical Assistant"
-      );
+      rolesToSelect = roleRes;
     }
 
     if (scope === "InComing") {

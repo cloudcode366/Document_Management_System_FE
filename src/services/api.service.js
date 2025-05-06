@@ -592,6 +592,26 @@ const createDocumentByTemplateAPI = (
   });
 };
 
+const createWithdrawDocumentAPI = (
+  templateId,
+  workFlowId,
+  documentTypeId,
+  documentName,
+  deadline,
+  expireDate,
+  documentId
+) => {
+  const urlBackend = `/api/ArchiveDocument/create-withdraw-document?archiveDocumentId=${documentId}`;
+  return axios.post(urlBackend, {
+    templateId,
+    workFlowId,
+    documentTypeId,
+    documentName,
+    deadline,
+    expireDate,
+  });
+};
+
 const createUploadDocumentForSubmitAPI = (DocumentId, File) => {
   const URL_BACKEND = `/api/Document/create-upload-document-for-submit`;
   let config = {
@@ -702,4 +722,5 @@ export {
   createUploadDocumentForSubmitAPI,
   updateConfirmDocumentBySubmit,
   updateEnableSignatureImgAPI,
+  createWithdrawDocumentAPI,
 };

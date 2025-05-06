@@ -22,7 +22,7 @@ const SignatureBox = ({ name, time, signatureImage }) => {
               width: "100%",
               height: "100%",
               objectFit: "contain",
-              marginBottom: 8,
+              marginBottom: 13,
               border: "2px solid #969696",
               borderRadius: "5px",
             }}

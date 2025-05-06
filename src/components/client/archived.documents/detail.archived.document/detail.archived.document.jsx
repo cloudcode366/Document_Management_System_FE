@@ -15,6 +15,9 @@ import {
   Badge,
   List,
   Tooltip,
+  Avatar,
+  Table,
+  Radio,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -25,6 +28,7 @@ import {
   UserOutlined,
   EyeOutlined,
   FileTextOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import SignatureBox from "@/components/client/documents/initial.signature/signature.box";
@@ -41,6 +45,7 @@ import ArchivedPDFViewerWithToken from "@/components/archived.pdf.viewer";
 import "./detail.archived.document.scss";
 import { convertArchivedStatus, convertScopeName } from "@/services/helper";
 import SignatureContainer from "../../documents/initial.signature/signature.container";
+import CreateWithdrawModal from "./create.withdraw.modal";
 
 const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
@@ -117,9 +122,11 @@ const ViewDetailArchivedDocument = () => {
   const [accessToken, setAccessToken] = useState(null);
   const [openShareModal, setOpenShareModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [userPermissions, setUserPermissions] = useState({});
   const [allUsers, setAllUsers] = useState([]);
   const { user } = useCurrentApp();
   const buttons = [];
+  const [openModalWithdraw, setOpenModalWithdraw] = useState(false);
 
   const loginWithGoogle = () => {
     localStorage.setItem("documentId", documentId);
@@ -180,7 +187,11 @@ const ViewDetailArchivedDocument = () => {
     try {
       const response = await viewAllUserAPI(1, 100, {}, {});
       if (response?.data?.statusCode === 200) {
-        setAllUsers(response.data.content || []);
+        const currentUserId = localStorage.getItem("user_id");
+        const listUser = response.data.content.filter(
+          (user) => user.userId !== currentUserId && user.userName !== "admin"
+        );
+        setAllUsers(listUser);
       } else {
         message.error("Không thể tải danh sách người dùng!");
       }
@@ -195,26 +206,59 @@ const ViewDetailArchivedDocument = () => {
     setOpenShareModal(true);
   };
 
+  // const handleShare = async () => {
+  //   if (selectedUsers.length === 0) {
+  //     message.warning("Vui lòng chọn ít nhất một người dùng!");
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await grantPermissionAPI(documentId, selectedUsers);
+  //     if (response?.data?.statusCode === 200) {
+  //       message.success(
+  //         `Đã cấp quyền xem cho ${selectedUsers.length} người dùng!`
+  //       );
+  //       setOpenShareModal(false);
+  //       setSelectedUsers([]);
+  //     } else {
+  //       message.error("Không thể cấp quyền xem!");
+  //     }
+  //   } catch (error) {
+  //     console.error("❌ Lỗi khi cấp quyền:", error);
+  //     message.error("Lỗi khi cấp quyền: " + error.message);
+  //   }
+  // };
+
   const handleShare = async () => {
     if (selectedUsers.length === 0) {
-      message.warning("Vui lòng chọn ít nhất một người dùng!");
+      message.warning("Vui lòng chọn ít nhất một người dùng để chia sẻ.");
       return;
     }
 
+    const shareData = selectedUsers.map((userId) => ({
+      userId,
+      permission: userPermissions[userId] || "view", // default là 'view' nếu chưa chọn
+    }));
+
+    const payload = {
+      archivedDocumentId: documentId,
+      listUser: shareData,
+    };
+
     try {
-      const response = await grantPermissionAPI(documentId, selectedUsers);
-      if (response?.data?.statusCode === 200) {
-        message.success(
-          `Đã cấp quyền xem cho ${selectedUsers.length} người dùng!`
-        );
-        setOpenShareModal(false);
-        setSelectedUsers([]);
-      } else {
-        message.error("Không thể cấp quyền xem!");
-      }
+      // const response = await shareDocumentAPI(documentId, shareData); // gọi API phù hợp
+      // if (response?.data?.statusCode === 200) {
+      //   message.success("Chia sẻ văn bản thành công!");
+      //   setOpenShareModal(false);
+      //   setSelectedUsers([]);
+      //   setUserPermissions({});
+      // } else {
+      //   message.error("Chia sẻ thất bại!");
+      // }
+      console.log("Payload:", payload);
     } catch (error) {
-      console.error("❌ Lỗi khi cấp quyền:", error);
-      message.error("Lỗi khi cấp quyền: " + error.message);
+      console.error("Lỗi khi chia sẻ:", error);
+      message.error("Đã xảy ra lỗi khi chia sẻ: " + error.message);
     }
   };
 
@@ -225,7 +269,14 @@ const ViewDetailArchivedDocument = () => {
   }, [documentId]);
 
   const digitalSignaturesContent = (
-    <div style={{ minWidth: 280 }}>
+    <div
+      style={{
+        minWidth: 280,
+        maxHeight: 300,
+        overflowY: "auto",
+        paddingRight: 8,
+      }}
+    >
       {document?.digitalSignatures?.map((signature, index) => (
         <div key={index}>
           <Space direction="vertical" size={4}>
@@ -244,6 +295,66 @@ const ViewDetailArchivedDocument = () => {
             </div>
           </Space>
           {index < document.digitalSignatures.length - 1 && (
+            <Divider style={{ margin: "10px 0" }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const viewersContent = (
+    <div
+      style={{
+        minWidth: 280,
+        maxHeight: 300,
+        overflowY: "auto",
+        paddingRight: 8,
+      }}
+    >
+      {document?.viewers?.map((viewer, index) => (
+        <div key={index}>
+          <Space direction="vertical" size={4} style={{ width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Avatar src={viewer.avatar} />
+              <div>
+                <div>
+                  <strong>{viewer.fullName}</strong>
+                </div>
+                <div style={{ color: "#888" }}>{viewer.userName}</div>
+              </div>
+            </div>
+          </Space>
+          {index < document.viewers.length - 1 && (
+            <Divider style={{ margin: "10px 0" }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const grantersContent = (
+    <div
+      style={{
+        minWidth: 280,
+        maxHeight: 300,
+        overflowY: "auto",
+        paddingRight: 8,
+      }}
+    >
+      {document?.granters?.map((granter, index) => (
+        <div key={index}>
+          <Space direction="vertical" size={4} style={{ width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Avatar src={granter.avatar} />
+              <div>
+                <div>
+                  <strong>{granter.fullName}</strong>
+                </div>
+                <div style={{ color: "#888" }}>{granter.userName}</div>
+              </div>
+            </div>
+          </Space>
+          {index < document.granters.length - 1 && (
             <Divider style={{ margin: "10px 0" }} />
           )}
         </div>
@@ -375,7 +486,7 @@ const ViewDetailArchivedDocument = () => {
           e.currentTarget.style.transform = "scale(1)";
         }}
         onClick={() => {
-          true;
+          setOpenModalWithdraw(true);
         }}
       >
         Thu hồi văn bản
@@ -454,6 +565,8 @@ const ViewDetailArchivedDocument = () => {
                 url={document?.finalVersion?.url}
                 token={localStorage.getItem(`access_token`)}
                 documentName={document?.documentName}
+                canGrant={document?.canGrant}
+                canDownLoad={document?.canDownLoad}
               />
               {Array.isArray(document?.approvalSignatures) &&
                 document.approvalSignatures.length > 0 && (
@@ -812,7 +925,84 @@ const ViewDetailArchivedDocument = () => {
                           style={{
                             color: "#1890ff",
                             cursor: "pointer",
-                            textDecoration: "underline",
+                          }}
+                        >
+                          Xem chi tiết
+                        </span>
+                      </Popover>
+                    )}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Người có thẩm quyền:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {Array.isArray(document?.granters) &&
+                    document.granters.length > 0 && (
+                      <Popover
+                        content={grantersContent}
+                        title="Thông tin người có thẩm quyền"
+                        trigger="click"
+                        placement="left"
+                      >
+                        <span
+                          style={{
+                            color: "#1890ff",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Xem chi tiết
+                        </span>
+                      </Popover>
+                    )}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Người xem:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {Array.isArray(document?.viewers) &&
+                    document.viewers.length > 0 && (
+                      <Popover
+                        content={viewersContent}
+                        title="Thông tin người xem"
+                        trigger="click"
+                        placement="left"
+                      >
+                        <span
+                          style={{
+                            color: "#1890ff",
+                            cursor: "pointer",
                           }}
                         >
                           Xem chi tiết
@@ -911,16 +1101,21 @@ const ViewDetailArchivedDocument = () => {
 
       {/* Modal cấp quyền xem */}
       <Modal
-        title="Cấp quyền xem"
+        title={
+          <div style={{ borderBottom: "1px solid #80868b", paddingBottom: 8 }}>
+            Cấp quyền truy cập văn bản
+          </div>
+        }
         open={openShareModal}
         onOk={handleShare}
         onCancel={() => {
           setOpenShareModal(false);
           setSelectedUsers([]);
+          setUserPermissions({});
         }}
         okText="Xác nhận"
         cancelText="Hủy"
-        width={400}
+        width={700}
       >
         <div style={{ marginBottom: 16 }}>
           <label
@@ -957,7 +1152,83 @@ const ViewDetailArchivedDocument = () => {
             ))}
           </Select>
         </div>
+
+        {/* Bảng thông tin người dùng đã chọn */}
+        {selectedUsers.length > 0 && (
+          <Table
+            rowKey="userId"
+            dataSource={allUsers.filter((user) =>
+              selectedUsers.includes(user.userId)
+            )}
+            pagination={false}
+            size="small"
+            columns={[
+              {
+                title: "",
+                dataIndex: "avatar",
+                width: 50,
+                render: (_, record) => (
+                  <Avatar src={record.avatar} icon={<UserOutlined />} />
+                ),
+              },
+              {
+                title: "Họ và tên",
+                dataIndex: "fullName",
+                key: "fullName",
+              },
+              {
+                title: "Tên đăng nhập",
+                dataIndex: "userName",
+                key: "userName",
+              },
+              {
+                title: "Quyền",
+                dataIndex: "permission",
+                width: 150,
+                render: (_, record) => (
+                  <Radio.Group
+                    value={userPermissions[record.userId] || "view"}
+                    onChange={(e) =>
+                      setUserPermissions({
+                        ...userPermissions,
+                        [record.userId]: e.target.value,
+                      })
+                    }
+                  >
+                    <Radio value="view">Xem</Radio>
+                    <Radio value="download">Tải</Radio>
+                  </Radio.Group>
+                ),
+              },
+              {
+                title: "Xóa",
+                width: 50,
+                render: (_, record) => (
+                  <Tooltip title="Xóa">
+                    <CloseOutlined
+                      style={{ color: "red", cursor: "pointer" }}
+                      onClick={() => {
+                        setSelectedUsers((prev) =>
+                          prev.filter((id) => id !== record.userId)
+                        );
+                        const updated = { ...userPermissions };
+                        delete updated[record.userId];
+                        setUserPermissions(updated);
+                      }}
+                    />
+                  </Tooltip>
+                ),
+              },
+            ]}
+          />
+        )}
       </Modal>
+
+      <CreateWithdrawModal
+        openModalWithdraw={openModalWithdraw}
+        setOpenModalWithdraw={setOpenModalWithdraw}
+        documentId={documentId}
+      />
     </div>
   );
 };

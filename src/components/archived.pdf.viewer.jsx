@@ -14,7 +14,8 @@ import {
 // Cấu hình worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-const ArchivedPDFViewerWithToken = ({ url, token, documentName }) => {
+const ArchivedPDFViewerWithToken = (props) => {
+  const { url, token, documentName, canGrant, canDownLoad } = props;
   const containerRef = useRef(null);
   const [pdfDoc, setPdfDoc] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,11 +135,13 @@ const ArchivedPDFViewerWithToken = ({ url, token, documentName }) => {
             icon={<RightOutlined />}
           ></Button>
         </div>
-        <Button
-          onClick={handleDownload}
-          className="download-button"
-          icon={<DownloadOutlined />}
-        ></Button>
+        {(canGrant || canDownLoad) && (
+          <Button
+            onClick={handleDownload}
+            className="download-button"
+            icon={<DownloadOutlined />}
+          ></Button>
+        )}
       </div>
 
       {/* PDF Viewer */}
