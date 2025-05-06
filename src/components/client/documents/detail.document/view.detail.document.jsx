@@ -971,7 +971,6 @@ const ViewDetailDocument = () => {
                           style={{
                             color: "#1890ff",
                             cursor: "pointer",
-                            textDecoration: "underline",
                           }}
                         >
                           Xem chi tiết

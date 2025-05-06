@@ -163,10 +163,13 @@ const SendEmailPage = () => {
 
     try {
       setIsLoading(true);
-      console.log("Gửi email với dữ liệu:", emailData); // Debug dữ liệu
-      await createSendEmailAPI(emailData);
-      message.success("Email đã được gửi thành công!");
-      navigate("/archived-document");
+      const res = await createSendEmailAPI(emailData);
+      if (res.data.statusCode === 200) {
+        message.success("Email đã được gửi thành công!");
+        navigate("/archived-document");
+      } else {
+        message.error("Gửi email không thành công!");
+      }
     } catch (error) {
       console.error("Lỗi khi gửi email:", error);
       const errorMessage =
