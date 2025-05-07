@@ -146,7 +146,8 @@ const ViewVersionDocument = () => {
                 paddingTop: "20px",
               }}
             >
-              Phiên bản thứ {version?.versionNumber}
+              Phiên bản{" "}
+              {version?.versionNumber === "0" ? "gốc" : version?.versionNumber}
             </Title>
             <Divider
               variant="solid"

@@ -326,6 +326,7 @@ const TableOutgoingDocument = () => {
           }
           onRow={(record) => ({
             title: "Bấm một lần để xem nhanh, hai lần để mở chi tiết",
+            style: { cursor: "pointer" },
             onClick: () => {
               // Đợi để phân biệt single và double click
               clickTimer = setTimeout(() => {

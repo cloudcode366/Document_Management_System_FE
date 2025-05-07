@@ -1034,7 +1034,10 @@ const ViewDetailDocument = () => {
                       title={
                         <Space>
                           <Typography.Text>
-                            Phiên bản thứ {item.versionNumber}
+                            Phiên bản{" "}
+                            {item?.versionNumber === "0"
+                              ? "gốc"
+                              : item?.versionNumber}
                           </Typography.Text>
                         </Space>
                       }

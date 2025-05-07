@@ -55,6 +55,7 @@ const TableAllArchivedDocument = () => {
                 maxWidth: "80%",
                 display: "inline-block",
                 verticalAlign: "middle",
+                cursor: "pointer",
               }}
             >
               {row.hasAttachment && (
@@ -227,7 +228,7 @@ const TableAllArchivedDocument = () => {
             const res = await getAllArchivedDocuments(
               params.current,
               params.pageSize,
-              filters 
+              filters
             );
             if (res.data) {
               setMeta({
@@ -262,6 +263,9 @@ const TableAllArchivedDocument = () => {
           }
           onRow={(record) => ({
             title: "Bấm một lần để xem nhanh, hai lần để mở chi tiết",
+            style: {
+              cursor: "pointer",
+            },
             onClick: () => {
               // Đợi để phân biệt single và double click
               clickTimer = setTimeout(() => {
