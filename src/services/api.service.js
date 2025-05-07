@@ -653,6 +653,33 @@ const updateEnableSignatureImgAPI = (userId) => {
   return axios.post(urlBackend);
 };
 
+const viewAllLogsAPI = (page, pageSize, filters = {}) => {
+  const urlBackend = `/api/Log/view-all-log`;
+  const queryParams = new URLSearchParams({
+    page: String(page || 1),
+    pageSize: String(pageSize || 20),
+  });
+
+  // Add filters
+  if (filters.userName) {
+    queryParams.append("userName", filters.userName);
+  }
+  if (filters.action) {
+    queryParams.append("action", filters.action);
+  }
+  if (filters.startTime) {
+    queryParams.append("startTime", filters.startTime);
+  }
+  if (filters.endTime) {
+    queryParams.append("endTime", filters.endTime);
+  }
+  if (filters.sort) {
+    queryParams.append("sort", filters.sort);
+  }
+
+  return axios.get(`${urlBackend}?${queryParams.toString()}`);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -720,4 +747,5 @@ export {
   updateConfirmDocumentBySubmit,
   updateEnableSignatureImgAPI,
   createWithdrawDocumentAPI,
+  viewAllLogsAPI
 };
