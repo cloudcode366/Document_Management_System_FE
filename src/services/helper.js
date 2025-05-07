@@ -64,7 +64,7 @@ export const convertScopeName = (scope) => {
 export const convertStatus = (status) => {
   switch (status) {
     case "Waiting":
-      return "Đang chờ xác nhận";
+      return "Đang chờ tới lượt";
     case "Revised":
       return "Cần chỉnh sửa";
     case "InProgress":

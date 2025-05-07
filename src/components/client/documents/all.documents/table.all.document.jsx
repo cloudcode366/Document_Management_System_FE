@@ -235,6 +235,7 @@ const TableAllDocument = () => {
         />
 
         <ProTable
+          key={activeKey}
           columns={getColumns()}
           actionRef={actionRef}
           style={{
@@ -269,18 +270,21 @@ const TableAllDocument = () => {
             let flattenedData = content;
 
             if (activeKey === "Rejected") {
-              flattenedData = content.flatMap((doc) =>
-                doc.versionOfDocResponses.map((version) => ({
-                  documentId: doc.documentId,
-                  documentName: doc.documentName,
-                  documentType: doc.documentType,
-                  workflowName: doc.workflowName,
-                  versionNumber: version.versionNumber,
-                  dateReject: version.dateReject,
-                  userReject: version.userReject,
-                  scope: doc.scope,
-                }))
-              );
+              flattenedData = content.flatMap((doc) => {
+                if (!Array.isArray(doc.versionOfDocResponses)) return [];
+                return doc.versionOfDocResponses
+                  .filter((v) => v?.dateReject && v?.versionNumber)
+                  .map((version) => ({
+                    documentId: doc.documentId,
+                    documentName: doc.documentName,
+                    documentType: doc.documentType,
+                    workflowName: doc.workflowName,
+                    versionNumber: version.versionNumber,
+                    dateReject: version.dateReject,
+                    userReject: version.userReject,
+                    scope: doc.scope,
+                  }));
+              });
             }
 
             if (res.data) {

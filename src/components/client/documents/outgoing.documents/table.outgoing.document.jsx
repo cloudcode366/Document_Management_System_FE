@@ -235,6 +235,7 @@ const TableOutgoingDocument = () => {
         />
 
         <ProTable
+          key={activeKey}
           columns={getColumns()}
           actionRef={actionRef}
           style={{

@@ -18,7 +18,7 @@ const PDFViewerWithToken = ({ url, token, documentName }) => {
   const containerRef = useRef(null);
   const [pdfDoc, setPdfDoc] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [scale, setScale] = useState(1.5);
+  const [scale, setScale] = useState(1.0);
   const [numPages, setNumPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
