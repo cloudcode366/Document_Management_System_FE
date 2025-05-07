@@ -235,6 +235,7 @@ const TableDivisionScopedDocument = () => {
         />
 
         <ProTable
+          key={activeKey}
           columns={getColumns()}
           actionRef={actionRef}
           style={{

@@ -235,6 +235,7 @@ const TableSchoolScopedDocument = () => {
         />
 
         <ProTable
+          key={activeKey}
           columns={getColumns()}
           actionRef={actionRef}
           style={{

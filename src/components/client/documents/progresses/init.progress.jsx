@@ -620,6 +620,9 @@ const ViewInitProgress = () => {
           errorMessage =
             "Nhiệm vụ thứ 2 của bước 1 trong luồng 1 phải có nhiệm vụ chính là tải văn bản lên!";
         }
+        if (res?.data?.content === "There is a step without task") {
+          errorMessage = "Có một bước không có nhiệm vụ nào được tạo!";
+        }
         notification.error({
           message: "Xác nhận không thành công!",
           description: errorMessage,
