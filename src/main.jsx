@@ -288,15 +288,15 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <ProtectedRoute>
-            <NotificationPage />
+            <ManageUserPage />
           </ProtectedRoute>
         ),
       },
       {
-        path: "user",
+        path: "notification",
         element: (
           <ProtectedRoute>
-            <ManageUserPage />
+            <NotificationPage />
           </ProtectedRoute>
         ),
       },
