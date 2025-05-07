@@ -166,7 +166,7 @@ const CreateWorkflow = ({
 
     if (!isValid) {
       message.error(
-        "Không thể chèn vai trò này vào vị trí đó vì không tồn tại flow hợp lệ."
+        "Không thể chèn vai trò này vào vị trí đó vì không tồn tại luồng hợp lệ."
       );
       return;
     }
@@ -306,27 +306,31 @@ const CreateWorkflow = ({
         <Row gutter={15} align="middle" justify="start">
           {workflowRoles.map((role, idx) => (
             <React.Fragment key={idx}>
-              {JSON.parse(workflowDetail.requiredRolesJson).includes(role) ||
-              (scope === "InComing" &&
-                (idx === 0 || idx === 1 || idx === 2)) ? (
-                <Tooltip title="Vai trò bắt buộc, không thể xóa">
-                  <LockOutlined
-                    style={{ color: "gray", fontSize: 20, marginTop: "10px" }}
-                  />
-                </Tooltip>
-              ) : (
-                <Col>
-                  <MinusCircleOutlined
-                    onClick={() => handleRemoveRole(idx)}
-                    style={{
-                      fontSize: "20px",
-                      color: "red",
-                      cursor: "pointer",
-                      marginTop: "10px",
-                    }}
-                  />
-                </Col>
-              )}
+              {
+                // JSON.parse(workflowDetail.requiredRolesJson).includes(role) ||
+                (scope === "InComing" &&
+                  (idx === 0 || idx === 1 || idx === 2)) ||
+                ((scope === "OutGoing" || scope === "School") &&
+                  (idx === roles.length - 1 || idx === roles.length - 2)) ? (
+                  <Tooltip title="Vai trò bắt buộc, không thể xóa">
+                    <LockOutlined
+                      style={{ color: "gray", fontSize: 20, marginTop: "10px" }}
+                    />
+                  </Tooltip>
+                ) : (
+                  <Col>
+                    <MinusCircleOutlined
+                      onClick={() => handleRemoveRole(idx)}
+                      style={{
+                        fontSize: "20px",
+                        color: "red",
+                        cursor: "pointer",
+                        marginTop: "10px",
+                      }}
+                    />
+                  </Col>
+                )
+              }
               <Col>
                 <Tag
                   icon={<UserOutlined />}

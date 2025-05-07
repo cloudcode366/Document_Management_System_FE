@@ -515,13 +515,10 @@ const createRejectDocumentActionAPI = (reason, taskId, userId) => {
   });
 };
 
-const grantPermissionAPI = (documentId, userIds) => {
+const grantPermissionAPI = (payload) => {
   const urlBackend =
     "/api/UserDocPermission/create-grand-permission-for-document";
-  return axios.post(urlBackend, {
-    documentId,
-    userIds,
-  });
+  return axios.post(urlBackend, payload);
 };
 
 const createSendEmailAPI = ({
