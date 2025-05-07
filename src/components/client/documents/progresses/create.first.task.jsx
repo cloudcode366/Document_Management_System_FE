@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 import { createFirstTaskAPI } from "@/services/api.service";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useCurrentApp } from "@/components/context/app.context";
 
 dayjs.extend(utc);
@@ -25,6 +25,8 @@ const { TextArea } = Input;
 
 const CreateFirstTask = () => {
   const { documentId } = useParams();
+  const location = useLocation();
+  const scope = location.state?.scope;
   const [form] = Form.useForm();
   const { message, notification } = App.useApp();
   const [isSubmit, setIsSubmit] = useState(false);
@@ -37,7 +39,7 @@ const CreateFirstTask = () => {
 
     const startDate = dayjs(values.startDate).tz("Asia/Ho_Chi_Minh").format();
     const endDate = dayjs(values.endDate).tz("Asia/Ho_Chi_Minh").format();
-    const taskType = "CreateUpload";
+    const taskType = scope === "InComing" ? "CreateUpload" : "Create";
     console.log(
       title,
       description,

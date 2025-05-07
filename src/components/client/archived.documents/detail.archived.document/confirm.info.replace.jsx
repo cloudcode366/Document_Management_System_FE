@@ -85,7 +85,9 @@ const ConfirmInfoReplace = (props) => {
         setOpenConfirmModal(false);
         handleCloseCreateDocumentModal();
         setSignerList([]);
-        navigate(`/create-first-task/${data}`);
+        navigate(`/create-first-task/${data}`, {
+          state: { scope: selectedScope },
+        });
       } else {
         notification.error({
           message: "Đã có lỗi xảy ra, vui lòng thử lại sau",

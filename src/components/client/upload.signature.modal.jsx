@@ -81,7 +81,7 @@ const UploadSignatureModal = () => {
     });
 
     try {
-      await updateSignatureImgAPI(normalFile, digitalFile);
+      await updateSignatureImgAPI(normalFile, digitalFile, isUSB);
       message.success("Xác nhận ảnh chữ ký lên hệ thống thành công!");
       setTimeout(() => {
         window.location.reload();

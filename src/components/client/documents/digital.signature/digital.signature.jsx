@@ -407,7 +407,7 @@ const DigitalSignatureComponent = () => {
                     });
                     setAspectRatio(img.naturalWidth / img.naturalHeight);
                   }}
-                  alt="Số hiệu văn bản"
+                  alt="Ảnh chữ ký"
                   style={{ width: "100%", height: "100%", borderRadius: 5 }}
                   draggable={false}
                 />
