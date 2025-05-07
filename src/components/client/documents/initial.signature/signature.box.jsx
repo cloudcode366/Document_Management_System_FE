@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Image, Typography } from "antd";
+import { Card, Image, Tooltip, Typography } from "antd";
 
 const SignatureBox = ({ name, time, signatureImage }) => {
   return (
@@ -27,19 +27,27 @@ const SignatureBox = ({ name, time, signatureImage }) => {
               borderRadius: "5px",
             }}
           />
-          <Typography.Text
-            strong
-            style={{
-              display: "block",
-              border: "2px solid #969696",
-              borderRadius: "5px",
-              width: "100%",
-              padding: "4px 6px",
-              marginBottom: 13,
-            }}
-          >
-            {name}
-          </Typography.Text>
+          <Tooltip title={name}>
+            <Typography.Text
+              strong
+              style={{
+                display: "block",
+                border: "2px solid #969696",
+                borderRadius: "5px",
+                width: "100%",
+                padding: "4px 6px",
+                marginBottom: 13,
+                minWidth: 150,
+                maxWidth: "100%",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                cursor: "pointer",
+              }}
+            >
+              {name}
+            </Typography.Text>
+          </Tooltip>
 
           <Typography.Text
             strong
