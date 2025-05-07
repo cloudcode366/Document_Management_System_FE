@@ -315,7 +315,9 @@ const TableDivisionScopedDocument = () => {
             total: meta.total,
             showTotal: (total, range) => {
               return (
-                <div>{/* {range[0]} - {range[1]} trên {total} dòng */}</div>
+                <div>
+                  {range[0]} - {range[1]} trên {total} văn bản
+                </div>
               );
             },
           }}

@@ -234,14 +234,14 @@ const TableAllArchivedDocument = () => {
               setMeta({
                 page: res.data?.meatadataDto.page,
                 limit: res.data?.meatadataDto.limit,
-                total: res.data?.meatadataDto.total,
+                total: res.data?.size,
               });
             }
             return {
               data: res.data?.content,
               page: res.data?.meatadataDto.page,
               success: true,
-              total: res.data?.meatadataDto.total,
+              total: res.data?.size,
             };
           }}
           rowKey={"id"}
@@ -252,7 +252,9 @@ const TableAllArchivedDocument = () => {
             total: meta.total,
             showTotal: (total, range) => {
               return (
-                <div>{/* {range[0]} - {range[1]} trên {total} dòng */}</div>
+                <div>
+                  {range[0]} - {range[1]} trên {total} văn bản
+                </div>
               );
             },
           }}
