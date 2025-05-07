@@ -61,6 +61,7 @@ const TableProgress = () => {
                 maxWidth: "80%",
                 display: "inline-block",
                 verticalAlign: "middle",
+                cursor: "pointer",
               }}
             >
               {row.hasAttachment && (
@@ -276,6 +277,7 @@ const TableProgress = () => {
         ]}
         onRow={(record) => ({
           title: "Bấm một lần để xem nhanh, hai lần để mở chi tiết",
+          style: { cursor: "pointer" },
           onClick: () => {
             // Đợi để phân biệt single và double click
             clickTimer = setTimeout(() => {

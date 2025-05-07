@@ -709,7 +709,7 @@ const ViewDetailArchivedDocument = () => {
                   />
                 </span>
               </div>
-              <div
+              {/* <div
                 style={{
                   fontSize: "14px",
                   marginBottom: "8px",
@@ -729,7 +729,7 @@ const ViewDetailArchivedDocument = () => {
                 >
                   {document?.workflowName}
                 </span>
-              </div>
+              </div> */}
               <div
                 style={{
                   fontSize: "14px",
@@ -1003,10 +1003,10 @@ const ViewDetailArchivedDocument = () => {
               ></Divider>
 
               <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
-                Danh sách các phiên bản
+                Danh sách các văn bản liên quan
               </Typography.Text>
 
-              <List
+              {/* <List
                 itemLayout="horizontal"
                 dataSource={document?.versions}
                 renderItem={(item) => (
@@ -1039,7 +1039,10 @@ const ViewDetailArchivedDocument = () => {
                       title={
                         <Space>
                           <Typography.Text>
-                            Phiên bản thứ {item.versionNumber}
+                            Phiên bản
+                            {item.versionNumber === 0
+                              ? "Gốc"
+                              : item.versionNumber}
                           </Typography.Text>
                         </Space>
                       }
@@ -1049,7 +1052,7 @@ const ViewDetailArchivedDocument = () => {
                     />
                   </List.Item>
                 )}
-              />
+              /> */}
               <Divider
                 variant="solid"
                 style={{
