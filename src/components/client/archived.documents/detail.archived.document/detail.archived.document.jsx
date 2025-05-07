@@ -35,6 +35,7 @@ import SignatureBox from "@/components/client/documents/initial.signature/signat
 import { PiHandWithdraw } from "react-icons/pi";
 import { BeatLoader } from "react-spinners";
 import {
+  grantPermissionAPI,
   viewAllUserAPI,
   viewArchivedDocumentDetailAPI,
 } from "@/services/api.service";
@@ -51,15 +52,6 @@ const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
 const SCOPE = "openid email https://mail.google.com/";
 const REDIRECT_URI = window.location.origin + "/send-email";
-
-const grantPermissionAPI = async (documentId, userIds) => {
-  const urlBackend =
-    "http://103.90.227.64:5290/api/UserDocPermission/create-grand-permission-for-document";
-  return axios.post(urlBackend, {
-    documentId,
-    userIds,
-  });
-};
 
 const { Title, Paragraph } = Typography;
 
@@ -106,10 +98,9 @@ const tagColor = {
 };
 
 const statusColor = {
-  InProgress: "#3A91F5",
-  Completed: "#2BDBBB",
+  Sent: "#2BDBBB",
   Archived: "#82E06E",
-  Rejected: "#FF6B6B",
+  Withdrawn: "#FF6B6B",
 };
 
 const ViewDetailArchivedDocument = () => {
@@ -191,7 +182,13 @@ const ViewDetailArchivedDocument = () => {
         const listUser = response.data.content.filter(
           (user) => user.userId !== currentUserId && user.userName !== "admin"
         );
-        setAllUsers(listUser);
+        const filterUsers = listUser.filter(
+          (user) =>
+            !document?.granters?.some(
+              (granter) => granter.userId === user.userId
+            )
+        );
+        setAllUsers(filterUsers);
       } else {
         message.error("Không thể tải danh sách người dùng!");
       }
@@ -206,29 +203,6 @@ const ViewDetailArchivedDocument = () => {
     setOpenShareModal(true);
   };
 
-  // const handleShare = async () => {
-  //   if (selectedUsers.length === 0) {
-  //     message.warning("Vui lòng chọn ít nhất một người dùng!");
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await grantPermissionAPI(documentId, selectedUsers);
-  //     if (response?.data?.statusCode === 200) {
-  //       message.success(
-  //         `Đã cấp quyền xem cho ${selectedUsers.length} người dùng!`
-  //       );
-  //       setOpenShareModal(false);
-  //       setSelectedUsers([]);
-  //     } else {
-  //       message.error("Không thể cấp quyền xem!");
-  //     }
-  //   } catch (error) {
-  //     console.error("❌ Lỗi khi cấp quyền:", error);
-  //     message.error("Lỗi khi cấp quyền: " + error.message);
-  //   }
-  // };
-
   const handleShare = async () => {
     if (selectedUsers.length === 0) {
       message.warning("Vui lòng chọn ít nhất một người dùng để chia sẻ.");
@@ -237,25 +211,24 @@ const ViewDetailArchivedDocument = () => {
 
     const shareData = selectedUsers.map((userId) => ({
       userId,
-      permission: userPermissions[userId] || "view", // default là 'view' nếu chưa chọn
+      grantPermission: userPermissions[userId] || "View",
     }));
 
     const payload = {
-      archivedDocumentId: documentId,
-      listUser: shareData,
+      documentId: documentId,
+      userGrantDocuments: shareData,
     };
 
     try {
-      // const response = await shareDocumentAPI(documentId, shareData); // gọi API phù hợp
-      // if (response?.data?.statusCode === 200) {
-      //   message.success("Chia sẻ văn bản thành công!");
-      //   setOpenShareModal(false);
-      //   setSelectedUsers([]);
-      //   setUserPermissions({});
-      // } else {
-      //   message.error("Chia sẻ thất bại!");
-      // }
-      console.log("Payload:", payload);
+      const response = await grantPermissionAPI(payload);
+      if (response?.data?.statusCode === 200) {
+        message.success("Cấp quyền truy cập văn bản thành công!");
+        setOpenShareModal(false);
+        setSelectedUsers([]);
+        setUserPermissions({});
+      } else {
+        message.error("Chia sẻ thất bại!");
+      }
     } catch (error) {
       console.error("Lỗi khi chia sẻ:", error);
       message.error("Đã xảy ra lỗi khi chia sẻ: " + error.message);
@@ -1195,8 +1168,8 @@ const ViewDetailArchivedDocument = () => {
                       })
                     }
                   >
-                    <Radio value="view">Xem</Radio>
-                    <Radio value="download">Tải</Radio>
+                    <Radio value="View">Xem</Radio>
+                    <Radio value="Download">Tải</Radio>
                   </Radio.Group>
                 ),
               },

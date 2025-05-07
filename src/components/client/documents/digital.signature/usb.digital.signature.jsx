@@ -245,7 +245,7 @@ const USBDigitalSignatureModal = ({
           </div>
         )}
 
-        <div
+        {/* <div
           style={{
             border: "1px solid #d9d9d9",
             padding: 16,
@@ -274,7 +274,7 @@ const USBDigitalSignatureModal = ({
           ) : (
             <p>Chưa có thông báo.</p>
           )}
-        </div>
+        </div> */}
 
         {signatureResult && (
           <div style={{ border: "1px solid #d9d9d9", padding: 16 }}>
