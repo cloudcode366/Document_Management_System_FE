@@ -630,6 +630,7 @@ const ViewDetailProgress = () => {
           setSelectedTask={setSelectedTask}
           setTaskCreated={setTaskCreated}
           currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
         />
       </div>
     </div>

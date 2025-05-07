@@ -104,6 +104,13 @@ const AddTaskModal = (props) => {
       if (errorMessage === "Task in previous step not found") {
         errorMessage = "Không tìm thấy nhiệm vụ trong bước trước đó";
       }
+      if (
+        errorMessage ===
+        "End date of the task must not be greater than the deadline"
+      ) {
+        errorMessage =
+          "Thời gian kết thúc của nhiệm vụ không được lớn hơn thời hạn xử lý";
+      }
       notification.error({
         message: "Đã có lỗi xảy ra",
         description: errorMessage,
@@ -290,7 +297,7 @@ const AddTaskModal = (props) => {
                 >
                   {users.map((user) => (
                     <Select.Option key={user.userId} value={user.userId}>
-                      {user.fullName} - {user.userName}
+                      {user.userName}
                     </Select.Option>
                   ))}
                 </Select>

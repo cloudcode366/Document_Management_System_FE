@@ -372,9 +372,16 @@ const ViewInitProgress = () => {
                     message.success("Xoá nhiệm vụ thành công");
                     setTaskCreated(true);
                   } else {
+                    let errorMessage = res?.data?.content;
+                    if (
+                      errorMessage === "Task 1 has completed, cannot delete"
+                    ) {
+                      errorMessage =
+                        "Nhiệm vụ đầu tiên của luồng xử lý đã hoàn thành, không thể xóa nhiệm vụ được nữa!";
+                    }
                     notification.error({
                       message: "Hệ thống đang bận",
-                      description: "Xin vui lòng thử lại sau.",
+                      description: errorMessage,
                     });
                   }
                 } catch (error) {
@@ -585,8 +592,8 @@ const ViewInitProgress = () => {
           navigate(`/detail-progress/${documentId}`);
         } else {
           notification.error({
-            message: "Hệ thống đang bận!",
-            description: "Xin vui lòng thử lại sau.",
+            message: "Xác nhận hoàn thành không thành công!",
+            description: res2?.data?.content,
           });
         }
       } else {
@@ -762,6 +769,7 @@ const ViewInitProgress = () => {
           setSelectedTask={setSelectedTask}
           setTaskCreated={setTaskCreated}
           currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
         />
       </div>
     </div>

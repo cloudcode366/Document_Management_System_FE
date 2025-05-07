@@ -2,7 +2,6 @@ import {
   Modal,
   Form,
   Input,
-  DatePicker,
   Button,
   Card,
   App,
@@ -42,7 +41,7 @@ const ConfirmVersionModal = (props) => {
   } = props;
 
   const [form] = Form.useForm();
-  const { notification, message, modal } = App.useApp();
+  const { notification } = App.useApp();
   const { user } = useCurrentApp();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -125,7 +124,7 @@ const ConfirmVersionModal = (props) => {
 
               {/* Bảng thông tin */}
               <Table
-                rowKey={(record, index) => index}
+                rowKey="label"
                 dataSource={[
                   {
                     label: "Tên văn bản",

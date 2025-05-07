@@ -289,7 +289,7 @@ const EditTaskModal = (props) => {
                 >
                   {users.map((user) => (
                     <Select.Option key={user.userId} value={user.userId}>
-                      {user.fullName} - {user.userName}
+                      {user.userName}
                     </Select.Option>
                   ))}
                 </Select>

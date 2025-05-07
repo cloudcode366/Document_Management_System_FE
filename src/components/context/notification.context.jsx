@@ -148,7 +148,7 @@ export const NotificationProvider = ({ children }) => {
     });
 
     newConnection.onclose((error) => {
-      console.error("SignalR connection closed:", error);
+      // console.error("SignalR connection closed:", error);
       connectionRef.current = null; // Cho phép reconnect nếu cần thiết
     });
 

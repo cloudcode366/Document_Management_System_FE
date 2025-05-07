@@ -226,6 +226,7 @@ const ViewDetailArchivedDocument = () => {
         setOpenShareModal(false);
         setSelectedUsers([]);
         setUserPermissions({});
+        await fetchInfo();
       } else {
         message.error("Chia sẻ thất bại!");
       }
@@ -239,7 +240,7 @@ const ViewDetailArchivedDocument = () => {
     if (documentId) {
       fetchInfo();
     }
-  }, [documentId]);
+  }, []);
 
   const digitalSignaturesContent = (
     <div
