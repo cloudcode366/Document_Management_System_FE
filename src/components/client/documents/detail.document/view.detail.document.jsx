@@ -1007,7 +1007,7 @@ const ViewDetailDocument = () => {
                 renderItem={(item) => (
                   <List.Item
                     actions={[
-                      !item.isFinal && (
+                      !item.isFinal && item.versionNumber !== "0" && (
                         <Tooltip title="Xem chi tiết" key="view">
                           <EyeOutlined
                             style={{ fontSize: 18, color: "#1890ff" }}

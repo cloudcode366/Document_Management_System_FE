@@ -291,7 +291,7 @@ const TableUser = () => {
           <div
             style={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-start",
               alignItems: "center",
               gap: 16,
             }}
@@ -316,13 +316,13 @@ const TableUser = () => {
             <Popconfirm
               placement="leftTop"
               title="Xác nhận cấp quyền tải ảnh chữ ký"
-              description="Bạn có chắc chắn muốn cấp quyền tải ảnh chữ ký cho tài khoản này?"
+              description="Bạn có chắc chắn muốn cấp quyền tải ảnh chữ ký lên hệ thống cho tài khoản này?"
               onConfirm={() =>
                 handleEnableSignature(entity.userId, entity.userName)
               }
               okText="Xác nhận"
               cancelText="Hủy"
-              okButtonProps={{ loading: isDeleteUser }}
+              okButtonProps={{ loading: isEnable }}
             >
               <Tooltip title="Cấp quyền tải ảnh chữ ký">
                 <SignatureOutlined

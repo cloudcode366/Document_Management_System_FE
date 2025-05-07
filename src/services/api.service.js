@@ -492,7 +492,7 @@ const updateInsertNameSignatureImgAPI = (file, fullName) => {
   return axios.post(URL_BACKEND, bodyFormData, config);
 };
 
-const updateSignatureImgAPI = (NormalSignature, DigitalSignature) => {
+const updateSignatureImgAPI = (NormalSignature, DigitalSignature, isUsb) => {
   const URL_BACKEND = `/api/User/update-signature-img`;
   let config = {
     headers: {
@@ -503,6 +503,7 @@ const updateSignatureImgAPI = (NormalSignature, DigitalSignature) => {
   const bodyFormData = new FormData();
   bodyFormData.append("NormalSignature", NormalSignature);
   bodyFormData.append("DigitalSignature", DigitalSignature);
+  bodyFormData.append("isUsb", isUsb);
   return axios.post(URL_BACKEND, bodyFormData, config);
 };
 
@@ -747,5 +748,5 @@ export {
   updateConfirmDocumentBySubmit,
   updateEnableSignatureImgAPI,
   createWithdrawDocumentAPI,
-  viewAllLogsAPI
+  viewAllLogsAPI,
 };

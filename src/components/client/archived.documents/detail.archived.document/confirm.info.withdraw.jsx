@@ -76,7 +76,9 @@ const ConfirmInfoWithdraw = (props) => {
         message.success(`Khởi tạo văn bản thành công!`);
         setOpenConfirmModal(false);
         handleCloseCreateDocumentModal();
-        navigate(`/create-first-task/${data}`);
+        navigate(`/create-first-task/${data}`, {
+          state: { scope: selectedScope },
+        });
       } else {
         notification.error({
           message: "Đã có lỗi xảy ra, vui lòng thử lại sau",

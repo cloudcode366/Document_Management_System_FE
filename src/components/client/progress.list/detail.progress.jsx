@@ -543,7 +543,9 @@ const ViewDetailProgress = () => {
             <Button
               type="primary"
               onClick={() => {
-                navigate(`/create-first-task/${documentId}`);
+                navigate(`/create-first-task/${documentId}`, {
+                  state: { scope: processDetail?.workflowRequest?.scope },
+                });
               }}
               style={{
                 backgroundColor: "#FC8330",
