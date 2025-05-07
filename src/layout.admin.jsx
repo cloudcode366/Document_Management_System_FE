@@ -30,7 +30,10 @@ const NotificationDropdown = () => {
   const hasUnread = notifications?.some((n) => !n.isRead);
 
   return (
-    <div onClick={() => navigate("/admin")} style={{ cursor: "pointer" }}>
+    <div
+      onClick={() => navigate("/admin/notification")}
+      style={{ cursor: "pointer" }}
+    >
       <Badge
         count={
           hasUnread ? (
@@ -88,8 +91,8 @@ const LayoutAdmin = () => {
 
   const items = [
     {
-      label: <Link to="/admin/user">Quản lý tài khoản</Link>,
-      key: "/admin/user",
+      label: <Link to="/admin">Quản lý tài khoản</Link>,
+      key: "/admin",
       icon: <UserOutlined />,
     },
     {
