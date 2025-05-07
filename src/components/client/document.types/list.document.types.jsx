@@ -203,7 +203,11 @@ const ListDocumentType = () => {
           showSizeChanger: true,
           total: meta.total,
           showTotal: (total, range) => {
-            return <div>{/* {range[0]} - {range[1]} trên {total} dòng */}</div>;
+            return (
+              <div>
+                {range[0]} - {range[1]} trên {total} loại văn bản
+              </div>
+            );
           },
         }}
         headerTitle={
