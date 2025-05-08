@@ -282,7 +282,9 @@ const TableDocumentTemplate = () => {
         }
         toolBarRender={() =>
           user?.mainRole?.roleName === "Chief" ||
-          user?.subRole?.roleName?.endsWith("_Chief")
+          user?.subRole?.roleName?.endsWith("_Chief") ||
+          user?.mainRole?.roleName === "Clerical Assistant" ||
+          user?.subRole?.roleName?.endsWith("_Clerical Assistant")
             ? [
                 <Button
                   key="buttonAddNew"
