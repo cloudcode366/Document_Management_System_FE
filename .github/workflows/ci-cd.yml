@@ -65,37 +65,41 @@ jobs:
           SSH_PORT: ${{ secrets.SERVER_PORT }}
           DOMAIN: signdoc-core.io.vn  # Thay bằng tên miền của bạn
         run: |
-          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST" << 'EOF'
-            # Tạo thư mục cần thiết
-            mkdir -p /root/myapp/certs /root/myapp/certbot/www
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST" << EOF
+            DOMAIN=signdoc-core.io.vn
 
-            # Tạo mạng Docker nếu chưa có
+            mkdir -p /root/myapp/certs /root/myapp/certbot/www
             docker network create app-network || true
 
-            # Lấy chứng chỉ SSL nếu chưa có
-            if [ ! -d "/root/myapp/certs/live/$DOMAIN" ]; then
-            docker run --rm -v /root/myapp/certs:/etc/letsencrypt -v /root/myapp/certbot/www:/var/www/certbot certbot/certbot certonly --webroot --webroot-path=/var/www/certbot -d $DOMAIN -d www.$DOMAIN --non-interactive --agree-tos --email tgnhatminh@gmail.com
+            if [ ! -d "/root/myapp/certs/live/\$DOMAIN" ]; then
+              docker run --rm \
+                -v /root/myapp/certs:/etc/letsencrypt \
+                -v /root/myapp/certbot/www:/var/www/certbot \
+                certbot/certbot certonly --webroot \
+                --webroot-path=/var/www/certbot \
+                -d \$DOMAIN -d www.\$DOMAIN \
+                --non-interactive --agree-tos --email tgnhatminh@gmail.com
             fi
 
-            # Kéo image mới nhất
             docker pull wiramin/dmsfe:latest
-            
-            # Lấy ID của image mới để tránh xóa nó
-            NEW_IMAGE_ID=$(docker images -q wiramin/dmsfe:latest | head -n 1)
-            
-            # Dừng và xóa container cũ
+            NEW_IMAGE_ID=\$(docker images -q wiramin/dmsfe:latest | head -n 1)
+
             docker stop dmsfe || true
             docker rm dmsfe || true
-            
-            # Chạy container Nginx mới
-            docker run -d --name dmsfe -p 80:80 -p 443:443 --network app-network -v /root/myapp/nginx.conf:/etc/nginx/nginx.conf -v /root/myapp/certs:/etc/nginx/certs -v /root/myapp/certbot/www:/var/www/certbot wiramin/dmsfe:latest
-            
-            # Chạy container Certbot để gia hạn chứng chỉ
+
+            docker run -d --name dmsfe -p 80:80 -p 443:443 --network app-network \
+              -v /root/myapp/nginx.conf:/etc/nginx/nginx.conf \
+              -v /root/myapp/certs:/etc/nginx/certs \
+              -v /root/myapp/certbot/www:/var/www/certbot \
+              wiramin/dmsfe:latest
+
             docker stop certbot || true
             docker rm certbot || true
-            docker run -d --name certbot --network app-network -v /root/myapp/certs:/etc/letsencrypt -v /root/myapp/certbot/www:/var/www/certbot certbot/certbot /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait \${!}; done;"
-            
-            # Xóa các image cũ của wiramin/dmsfe, trừ image đang dùng
-            docker images wiramin/dmsfe --format '{{.ID}}' | grep -v "$NEW_IMAGE_ID" | sort -u | xargs -r docker rmi -f
+            docker run -d --name certbot --network app-network \
+              -v /root/myapp/certs:/etc/letsencrypt \
+              -v /root/myapp/certbot/www:/var/www/certbot \
+              certbot/certbot /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait \${!}; done;"
+
+            docker images wiramin/dmsfe --format '{{.ID}}' | grep -v "\$NEW_IMAGE_ID" | sort -u | xargs -r docker rmi -f
           EOF
 
