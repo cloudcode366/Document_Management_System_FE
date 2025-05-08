@@ -63,7 +63,7 @@ jobs:
           SSH_USERNAME: ${{ secrets.SERVER_USERNAME }}
            SSH_HOST: ${{ secrets.SERVER_HOST }}
           SSH_PORT: ${{ secrets.SERVER_PORT }}
-          DOMAIN: yourdomain.com  # Thay bằng tên miền của bạn
+          DOMAIN: signdoc-core.io.vn  # Thay bằng tên miền của bạn
         run: |
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST" << 'EOF'
             # Tạo thư mục cần thiết
@@ -80,7 +80,7 @@ jobs:
                 certbot/certbot certonly \
                 --webroot --webroot-path=/var/www/certbot \
                 -d $DOMAIN -d www.$DOMAIN \
-                --non-interactive --agree-tos --email your.email@example.com
+                --non-interactive --agree-tos --email tgnhatminh@gmail.com
             fi
 
             # Kéo image mới nhất
