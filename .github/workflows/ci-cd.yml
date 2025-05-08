@@ -74,8 +74,9 @@ jobs:
 
             # Lấy chứng chỉ SSL nếu chưa có
             if [ ! -d "/root/myapp/certs/live/$DOMAIN" ]; then
-  docker run --rm -v /root/myapp/certs:/etc/letsencrypt -v /root/myapp/certbot/www:/var/www/certbot certbot/certbot certonly --webroot --webroot-path=/var/www/certbot -d $DOMAIN -d www.$DOMAIN --non-interactive --agree-tos --email tgnhatminh@gmail.com
-fi
+            docker run --rm -v /root/myapp/certs:/etc/letsencrypt -v /root/myapp/certbot/www:/var/www/certbot certbot/certbot certonly --webroot --webroot-path=/var/www/certbot -d $DOMAIN -d www.$DOMAIN --non-interactive --agree-tos --email tgnhatminh@gmail.com
+            fi
+
             # Kéo image mới nhất
             docker pull wiramin/dmsfe:latest
             
