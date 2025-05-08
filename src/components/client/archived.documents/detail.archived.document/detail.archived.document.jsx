@@ -640,7 +640,7 @@ const ViewDetailArchivedDocument = () => {
                     wordBreak: "break-word",
                   }}
                 >
-                  {document?.documentId}
+                  {document?.systemNumberOfDocument}
                 </span>
               </div>
               <div
