@@ -36,6 +36,7 @@ import { BeatLoader } from "react-spinners";
 import { useCurrentApp } from "@/components/context/app.context";
 import DetailTaskModal from "./detail.task.modal";
 import EditTaskModal from "./edit.task.modal";
+import { IoIosNavigate } from "react-icons/io";
 
 const { Text, Title } = Typography;
 const { Step } = Steps;
@@ -520,12 +521,56 @@ const ViewDetailProgress = () => {
           }}
         >
           <h2>Thông tin quá trình xử lý văn bản</h2>
-          {user.userId === firstTask?.user?.userId &&
-            firstTask.taskStatus === "InProgress" && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <Button
+              type="primary"
+              onClick={() => {
+                navigate(`/detail-document/${documentId}`);
+              }}
+              style={{
+                backgroundColor: "#1890ff",
+                borderColor: "#1890ff",
+                marginTop: 20,
+                marginBottom: 40,
+              }}
+              loading={isSubmit}
+              icon={<IoIosNavigate />}
+            >
+              Xem văn bản
+            </Button>
+            {user.userId === firstTask?.user?.userId &&
+              firstTask.taskStatus === "InProgress" && (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    navigate(`/init-progress/${documentId}`);
+                  }}
+                  style={{
+                    backgroundColor: "#FC8330",
+                    borderColor: "#FC8330",
+                    marginTop: 20,
+                    marginBottom: 40,
+                  }}
+                  loading={isSubmit}
+                  icon={<RightCircleFilled />}
+                >
+                  Khởi tạo nhiệm vụ
+                </Button>
+              )}
+            {!taskId && (
               <Button
                 type="primary"
                 onClick={() => {
-                  navigate(`/init-progress/${documentId}`);
+                  navigate(`/create-first-task/${documentId}`, {
+                    state: { scope: processDetail?.workflowRequest?.scope },
+                  });
                 }}
                 style={{
                   backgroundColor: "#FC8330",
@@ -539,26 +584,7 @@ const ViewDetailProgress = () => {
                 Khởi tạo nhiệm vụ
               </Button>
             )}
-          {!taskId && (
-            <Button
-              type="primary"
-              onClick={() => {
-                navigate(`/create-first-task/${documentId}`, {
-                  state: { scope: processDetail?.workflowRequest?.scope },
-                });
-              }}
-              style={{
-                backgroundColor: "#FC8330",
-                borderColor: "#FC8330",
-                marginTop: 20,
-                marginBottom: 40,
-              }}
-              loading={isSubmit}
-              icon={<RightCircleFilled />}
-            >
-              Khởi tạo nhiệm vụ
-            </Button>
-          )}
+          </div>
         </div>
 
         <div style={{ margin: "20px 10px 0 10px" }}>

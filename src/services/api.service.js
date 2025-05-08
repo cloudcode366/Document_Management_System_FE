@@ -610,6 +610,26 @@ const createWithdrawDocumentAPI = (
   });
 };
 
+const createReplaceDocumentAPI = (
+  templateId,
+  workFlowId,
+  documentTypeId,
+  documentName,
+  deadline,
+  expireDate,
+  documentId
+) => {
+  const urlBackend = `/api/ArchiveDocument/create-replace-document?archiveDocumentId=${documentId}`;
+  return axios.post(urlBackend, {
+    templateId,
+    workFlowId,
+    documentTypeId,
+    documentName,
+    deadline,
+    expireDate,
+  });
+};
+
 const createUploadDocumentForSubmitAPI = (DocumentId, File) => {
   const URL_BACKEND = `/api/Document/create-upload-document-for-submit`;
   let config = {
@@ -681,6 +701,11 @@ const viewAllLogsAPI = (page, pageSize, filters = {}) => {
   return axios.get(`${urlBackend}?${queryParams.toString()}`);
 };
 
+const deleteTemplateAPI = (templateId) => {
+  const urlBackend = `/api/ArchiveDocument/delete-template?templateId=${templateId}`;
+  return axios.delete(urlBackend);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -749,4 +774,6 @@ export {
   updateEnableSignatureImgAPI,
   createWithdrawDocumentAPI,
   viewAllLogsAPI,
+  createReplaceDocumentAPI,
+  deleteTemplateAPI,
 };

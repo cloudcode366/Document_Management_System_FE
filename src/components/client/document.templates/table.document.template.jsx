@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import CreateDocumentTemplate from "./create.document.template";
 import { BeatLoader } from "react-spinners";
 import {
+  deleteTemplateAPI,
   viewAllDocumentTypesAPI,
   viewAllTemplatesAPI,
 } from "@/services/api.service";
@@ -30,7 +31,7 @@ const TableDocumentTemplate = () => {
   const [documentTypes, setDocumentTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
-  const { message } = App.useApp();
+  const { message, notification } = App.useApp();
   const { user } = useCurrentApp();
 
   const fetchDocumentType = async () => {
@@ -174,7 +175,7 @@ const TableDocumentTemplate = () => {
                   placement="leftTop"
                   title="Xác nhận xóa mẫu"
                   description="Bạn có chắc chắn muốn xóa mẫu văn bản này?"
-                  // onConfirm={() => handleDeleteUser(entity._id)}
+                  onConfirm={() => handleDeleteUser(entity.id, entity.name)}
                   okText="Xác nhận"
                   cancelText="Hủy"
                   okButtonProps={{ loading: isDelete }}
@@ -191,6 +192,21 @@ const TableDocumentTemplate = () => {
       },
     },
   ];
+
+  const handleDeleteUser = async (id, name) => {
+    setIsDelete(true);
+    const res = await deleteTemplateAPI(id);
+    if (res && res.data && res.data.statusCode === 200) {
+      message.success(`Xóa ${name} thành công!`);
+      refreshTable();
+    } else {
+      notification.error({
+        message: `Đã có lỗi xảy ra!`,
+        description: res.data.content,
+      });
+    }
+    setIsDelete(false);
+  };
 
   const refreshTable = () => {
     actionRef.current?.reload();

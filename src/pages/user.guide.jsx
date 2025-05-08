@@ -1,25 +1,33 @@
 import React from "react";
-import { Card, Typography, Space } from "antd";
-import { PlayCircleOutlined } from "@ant-design/icons";
+import { Card, Typography, Space, Button } from "antd";
+import { PlayCircleOutlined, DownloadOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
 const videos = [
   {
     title: "Hướng dẫn tách nền chữ ký cá nhân",
-    url: "https://www.youtube.com/embed/b7Vm2Q6B3qc", // Thay bằng ID thực tế
+    url: "https://www.youtube.com/embed/b7Vm2Q6B3qc",
   },
   {
-    title: "Hướng dẫn xác định vị trí số hiệu văn bản khi tạo mẫu văn bản",
-    url: "https://www.youtube.com/embed/VIDEO_ID_2", // Thay bằng ID thực tế
+    title: "Hướng dẫn tải và cài đặt ứng dụng ký số",
+    url: "https://www.youtube.com/embed/VIDEO_ID_2",
+    showDownload: true, // Dùng flag để hiển thị nút download
   },
   {
-    title: "Hướng dẫn ký văn bản bằng chữ ký điện tử",
-    url: "https://www.youtube.com/embed/VIDEO_ID_3", // Thay bằng ID thực tế
+    title: "Hướng dẫn tổng quan sử dụng hệ thống",
+    url: "https://www.youtube.com/embed/VIDEO_ID_3",
   },
 ];
 
 const UserGuide = () => {
+  const handleDownload = () => {
+    window.open(
+      `${import.meta.env.VITE_BACKEND_URL}/api/Log/download`,
+      "_blank"
+    );
+  };
+
   return (
     <div style={{ height: "100vh" }}>
       <div
@@ -46,19 +54,77 @@ const UserGuide = () => {
                 borderRadius: 12,
               }}
             >
-              <Title
-                level={4}
+              <div
                 style={{
-                  whiteSpace: "normal",
-                  wordWrap: "break-word",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  rowGap: 8,
                   marginBottom: 16,
                 }}
               >
-                <PlayCircleOutlined
-                  style={{ color: "#1890ff", fontSize: 20 }}
-                />{" "}
-                {video.title}
-              </Title>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    flex: 1,
+                    minWidth: 0, // để tránh tràn nội dung
+                  }}
+                >
+                  <PlayCircleOutlined
+                    style={{ color: "#1890ff", fontSize: 20 }}
+                  />
+                  <Title
+                    level={4}
+                    style={{
+                      margin: 0,
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {video.title}
+                  </Title>
+                </div>
+
+                {video.showDownload && (
+                  <Button
+                    icon={<DownloadOutlined style={{ color: "#1890ff" }} />}
+                    size="middle"
+                    style={{
+                      height: 40,
+                      fontSize: 16,
+                      background: "#e6f4ff",
+                      border: "1px solid #91d5ff",
+                      fontWeight: 600,
+                      transition: "all 0.3s ease",
+                      padding: "0 12px",
+                      minWidth: 150,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#d1e9ff";
+                      e.currentTarget.style.border = "1px solid #69c0ff";
+                      e.currentTarget.style.color = "#096dd9";
+                      e.currentTarget.style.transform = "scale(1.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#e6f4ff";
+                      e.currentTarget.style.border = "1px solid #91d5ff";
+                      e.currentTarget.style.color = "#1890ff";
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                    onClick={handleDownload}
+                  >
+                    Tải ứng dụng ký số
+                  </Button>
+                )}
+              </div>
+
               <div style={{ position: "relative", paddingTop: "56.25%" }}>
                 <iframe
                   src={video.url}
