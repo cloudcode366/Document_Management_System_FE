@@ -44,7 +44,7 @@ const getTaskColor = (status) => {
   switch (status) {
     case "Completed":
       return "#52c41a";
-    case "Rejected":
+    case "Revised":
       return "#ff4d4f";
     case "Waiting":
       return "#d9d9d9";
