@@ -712,7 +712,7 @@ const ViewDetailDocument = () => {
                     wordBreak: "break-word",
                   }}
                 >
-                  {document?.documentId}
+                  {document?.systemNumberOfDocument}
                 </span>
               </div>
               <div
@@ -1079,6 +1079,7 @@ const ViewDetailDocument = () => {
         cancelText="Hủy"
         centered
         maskClosable={false}
+        confirmLoading={isSubmit}
       >
         <p>Bạn có chắc chắn muốn duyệt văn bản này không?</p>
       </Modal>
@@ -1095,6 +1096,7 @@ const ViewDetailDocument = () => {
         cancelText="Hủy"
         centered
         maskClosable={false}
+        confirmLoading={isSubmit}
       >
         <Form form={rejectForm} layout="vertical">
           <Form.Item
@@ -1121,6 +1123,7 @@ const ViewDetailDocument = () => {
         cancelText="Hủy"
         centered
         maskClosable={false}
+        confirmLoading={isSubmit}
       >
         <p>Bạn có chắc chắn xác nhận đã xem văn bản này không?</p>
       </Modal>
@@ -1134,6 +1137,7 @@ const ViewDetailDocument = () => {
         cancelText="Hủy"
         centered
         maskClosable={false}
+        confirmLoading={isSubmit}
       >
         <p>Bạn có chắc chắn xác nhận nộp văn bản này không?</p>
       </Modal>

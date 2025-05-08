@@ -29,6 +29,43 @@ const ClientDetailUser = (props) => {
       >
         <Descriptions
           bordered
+          column={1}
+          style={{
+            backgroundColor: "#ffffff",
+            padding: "6px",
+            borderRadius: 10,
+          }}
+          labelStyle={{
+            fontWeight: "bold",
+            fontSize: 15,
+            backgroundColor: "#F2F2F2",
+            padding: "8px 12px",
+            color: "#1d1d1f",
+          }}
+        >
+          <Descriptions.Item
+            label="Ảnh đại diện"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <Image
+              width={300}
+              height={300}
+              src={dataViewDetail?.avatar || undefined}
+              fallback="/default-avatar.png"
+              style={{
+                objectFit: "cover",
+                borderRadius: "30px",
+              }}
+            />
+          </Descriptions.Item>
+        </Descriptions>
+        <Descriptions
+          bordered
           column={2}
           style={{
             backgroundColor: "#ffffff",
@@ -137,13 +174,28 @@ const ClientDetailUser = (props) => {
             {dayjs(dataViewDetail?.createdAt).format(FORMATE_DATE_VN)}
           </Descriptions.Item>
           <Descriptions.Item
-            label="Ảnh đại diện"
+            label="Ảnh chữ ký nháy"
             labelStyle={{ fontWeight: "bold" }}
           >
             <Image
               width={200}
               height={200}
-              src={dataViewDetail?.avatar || undefined}
+              src={dataViewDetail?.sign || undefined}
+              fallback="/default-avatar.png"
+              style={{
+                objectFit: "cover",
+                borderRadius: "30px",
+              }}
+            />
+          </Descriptions.Item>
+          <Descriptions.Item
+            label="Ảnh chữ ký điện tử"
+            labelStyle={{ fontWeight: "bold" }}
+          >
+            <Image
+              width={200}
+              height={200}
+              src={dataViewDetail?.signDigital || undefined}
               fallback="/default-avatar.png"
               style={{
                 objectFit: "cover",
