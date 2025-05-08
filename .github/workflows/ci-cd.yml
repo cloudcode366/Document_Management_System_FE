@@ -61,7 +61,7 @@ jobs:
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           SSH_USERNAME: ${{ secrets.SERVER_USERNAME }}
-           SSH_HOST: ${{ secrets.SERVER_HOST }}
+          SSH_HOST: ${{ secrets.SERVER_HOST }}
           SSH_PORT: ${{ secrets.SERVER_PORT }}
           DOMAIN: signdoc-core.io.vn  # Thay bằng tên miền của bạn
         run: |
