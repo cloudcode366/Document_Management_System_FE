@@ -15,7 +15,10 @@ import { pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 import { useCurrentApp } from "@/components/context/app.context";
 import { PlusOutlined } from "@ant-design/icons";
-import { createWithdrawDocumentAPI } from "@/services/api.service";
+import {
+  createReplaceDocumentAPI,
+  createWithdrawDocumentAPI,
+} from "@/services/api.service";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { useNavigate } from "react-router-dom";
@@ -70,7 +73,7 @@ const ConfirmInfoReplace = (props) => {
       // Sẽ throw nếu còn ô chưa thỏa mãn validate
       const values = await form.validateFields();
 
-      const res = await createWithdrawDocumentAPI(
+      const res = await createReplaceDocumentAPI(
         selectedTemplate.id,
         selectedWorkflow.workflowId,
         selectedDocumentType.documentTypeId,

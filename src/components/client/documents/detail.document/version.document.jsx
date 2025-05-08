@@ -1,5 +1,13 @@
 import React from "react";
-import { Card, Typography, Button, Divider } from "antd";
+import {
+  Card,
+  Typography,
+  Button,
+  Divider,
+  Avatar,
+  Tooltip,
+  Image,
+} from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./view.detail.document.scss";
@@ -77,19 +85,23 @@ const ViewVersionDocument = () => {
                   paddingTop: "20px",
                 }}
               >
+                {documentName}
+              </Title>
+              <Title level={5}>
                 Phiên bản{" "}
                 {version?.versionNumber === "0"
                   ? "gốc"
                   : version?.versionNumber}
               </Title>
+
               <Divider
                 variant="solid"
                 style={{
                   borderColor: "#80868b",
                 }}
               ></Divider>
-              <Title level={5}>Tổng quan văn bản</Title>
-              <div
+              <Title level={5}>Tổng quan phiên bản</Title>
+              {/* <div
                 style={{
                   fontSize: "14px",
                   marginBottom: "8px",
@@ -131,7 +143,7 @@ const ViewVersionDocument = () => {
                   {version?.createdDate &&
                     dayjs(version?.createdDate).format("DD-MM-YYYY HH:mm")}
                 </span>
-              </div>
+              </div> */}
               <div
                 style={{
                   fontSize: "14px",
@@ -150,7 +162,22 @@ const ViewVersionDocument = () => {
                     wordBreak: "break-word",
                   }}
                 >
-                  {version?.rejectedBy}
+                  <Tooltip title={version?.fullName}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                      <Image
+                        src={version?.avatar}
+                        width={32}
+                        height={32}
+                        style={{ borderRadius: "50%", objectFit: "cover" }}
+                        fallback="/default-avatar.png"
+                      />
+                      <p style={{ wordBreak: "break-word" }}>
+                        {version?.userName}
+                      </p>
+                    </div>
+                  </Tooltip>
                 </span>
               </div>
               <div
@@ -171,8 +198,8 @@ const ViewVersionDocument = () => {
                     wordBreak: "break-word",
                   }}
                 >
-                  {version?.rejectedDate &&
-                    dayjs(version?.rejectedDate).format("DD-MM-YYYY HH:mm")}
+                  {version?.dateReject &&
+                    dayjs(version?.dateReject).format("DD-MM-YYYY HH:mm")}
                 </span>
               </div>
               <div
@@ -193,7 +220,7 @@ const ViewVersionDocument = () => {
                     wordBreak: "break-word",
                   }}
                 >
-                  {version?.reason}
+                  {version?.reasonReject}
                 </span>
               </div>
             </div>

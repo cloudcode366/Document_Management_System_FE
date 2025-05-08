@@ -8,6 +8,7 @@ import { Image, Tooltip } from "antd";
 import React, { useEffect, useState } from "react";
 import { MdOutlineMoreVert } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
+import { BeatLoader } from "react-spinners";
 
 const TaskDetail = () => {
   const { taskId } = useParams();
@@ -40,7 +41,21 @@ const TaskDetail = () => {
     fetchTask();
   }, [taskId]);
 
-  if (loading) return <p>Đang tải dữ liệu...</p>;
+  if (loading) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <BeatLoader size={25} color="#364AD6" />
+      </div>
+    );
+  }
   if (error) return <p>Lỗi: {error}</p>;
 
   const formatDateTime = (dateString) => {

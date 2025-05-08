@@ -7,11 +7,12 @@ import "react-pdf/dist/esm/Page/TextLayer.css";
 import "styles/loading.scss";
 import "./digital.signature.scss";
 import { viewDetailDocumentAPI } from "@/services/api.service";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "@/services/axios.customize";
 import { useCurrentApp } from "@/components/context/app.context";
 import LoginESignModal from "./login.e.sign";
 import {
+  ArrowLeftOutlined,
   EditOutlined,
   SignatureOutlined,
   UsbOutlined,
@@ -61,10 +62,11 @@ const DigitalSignatureComponent = () => {
     page: 1,
   });
   const location = useLocation();
-  const { taskId } = location.state || {};
+  const { taskId, isUsb } = location.state || {};
   const [openUSBDigitalSignatureModal, setOpenUSBDigitalSignatureModal] =
     useState(false);
   const [USBReq, setUSBReq] = useState(null);
+  const navigate = useNavigate();
 
   const fetchInfo = async () => {
     setLoading(true);
@@ -334,6 +336,27 @@ const DigitalSignatureComponent = () => {
           <div
             style={{
               display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 24,
+            }}
+          >
+            <h5 style={{ fontSize: 18, margin: 0, color: "#1a1a1a" }}>
+              Vui lòng xác định vị trí chữ ký số trên văn bản
+            </h5>
+
+            <Button
+              type="primary"
+              ghost
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate(`/detail-document/${documentId}`)}
+            >
+              Quay lại
+            </Button>
+          </div>
+          <div
+            style={{
+              display: "flex",
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
@@ -430,8 +453,7 @@ const DigitalSignatureComponent = () => {
               marginTop: "30px",
             }}
           >
-            {(user?.mainRole?.roleName === "Leader" ||
-              user?.subRole?.roleName?.endsWith("_Leader")) && (
+            {!isUsb && (
               <Button
                 icon={<SignatureOutlined style={{ color: "#08979c" }} />}
                 size="middle"
@@ -467,8 +489,7 @@ const DigitalSignatureComponent = () => {
                 Ký điện tử bằng e-Sign
               </Button>
             )}
-            {(user?.mainRole?.roleName === "Chief" ||
-              user?.subRole?.roleName?.endsWith("_Chief")) && (
+            {isUsb && (
               <Button
                 icon={<UsbOutlined style={{ color: "#1890ff" }} />}
                 size="middle"

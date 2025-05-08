@@ -134,6 +134,7 @@ const ViewDetailDocument = () => {
       const taskType = currentTask?.taskType;
       const taskId = currentTask?.taskId;
       const taskStatus = currentTask?.status;
+      const isUsb = currentTask?.isUsb;
 
       setDocument({
         ...data,
@@ -142,6 +143,7 @@ const ViewDetailDocument = () => {
         taskType,
         taskId,
         taskStatus,
+        isUsb,
       });
     }
     setLoading(false);
@@ -357,6 +359,7 @@ const ViewDetailDocument = () => {
           navigate(`/digital-signature/${documentId}`, {
             state: {
               taskId: document?.taskId,
+              isUsb: document?.isUsb,
             },
           })
         }
@@ -1017,6 +1020,7 @@ const ViewDetailDocument = () => {
                                   version: item,
                                   documentName: document?.documentName,
                                   createdBy: document?.createdBy,
+                                  createdDate: document?.createdDate,
                                 },
                               });
                             }}
@@ -1042,7 +1046,7 @@ const ViewDetailDocument = () => {
                         </Space>
                       }
                       description={`Ngày tạo: ${dayjs(item?.createdDate).format(
-                        "DD-MM-YYYY"
+                        "DD-MM-YYYY HH:mm"
                       )}`}
                     />
                   </List.Item>

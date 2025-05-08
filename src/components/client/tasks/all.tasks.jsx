@@ -12,15 +12,19 @@ import {
   convertTaskType,
 } from "@/services/helper";
 import { getStatusColor } from "@/services/helper";
+import { BeatLoader } from "react-spinners";
 
 const AllTasks = () => {
   const { user } = useCurrentApp();
   const [tasks, setTasks] = useState([]);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
+      setLoading(true);
       const data = await getAllTasks(user.userId);
+      setLoading(false);
       setTasks(data);
     };
     fetchTasks();
@@ -32,6 +36,22 @@ const AllTasks = () => {
     acc[scope].push(item.taskDto);
     return acc;
   }, {});
+
+  if (loading) {
+    return (
+      <div
+        className="full-screen-overlay"
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <BeatLoader size={25} color="#364AD6" />
+      </div>
+    );
+  }
 
   return (
     <div

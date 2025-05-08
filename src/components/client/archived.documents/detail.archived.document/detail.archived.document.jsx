@@ -18,6 +18,7 @@ import {
   Avatar,
   Table,
   Radio,
+  Image,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -47,6 +48,7 @@ import "./detail.archived.document.scss";
 import { convertArchivedStatus, convertScopeName } from "@/services/helper";
 import SignatureContainer from "../../documents/initial.signature/signature.container";
 import CreateWithdrawModal from "./create.withdraw.modal";
+import CreateReplaceModal from "./create.replace.modal";
 
 const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
@@ -118,6 +120,7 @@ const ViewDetailArchivedDocument = () => {
   const { user } = useCurrentApp();
   const buttons = [];
   const [openModalWithdraw, setOpenModalWithdraw] = useState(false);
+  const [openModalReplace, setOpenModalReplace] = useState(false);
 
   const loginWithGoogle = () => {
     localStorage.setItem("documentId", documentId);
@@ -289,7 +292,13 @@ const ViewDetailArchivedDocument = () => {
         <div key={index}>
           <Space direction="vertical" size={4} style={{ width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Avatar src={viewer.avatar} />
+              <Image
+                src={viewer?.avatar}
+                width={32}
+                height={32}
+                style={{ borderRadius: "50%", objectFit: "cover" }}
+                fallback="/default-avatar.png"
+              />
               <div>
                 <div>
                   <strong>{viewer.fullName}</strong>
@@ -319,7 +328,13 @@ const ViewDetailArchivedDocument = () => {
         <div key={index}>
           <Space direction="vertical" size={4} style={{ width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Avatar src={granter.avatar} />
+              <Image
+                src={granter?.avatar}
+                width={32}
+                height={32}
+                style={{ borderRadius: "50%", objectFit: "cover" }}
+                fallback="/default-avatar.png"
+              />
               <div>
                 <div>
                   <strong>{granter.fullName}</strong>
@@ -426,7 +441,8 @@ const ViewDetailArchivedDocument = () => {
     document?.scope === "OutGoing" &&
     (user?.mainRole?.roleName === "Chief" ||
       user?.subRole?.roleName?.endsWith("_Chief")) &&
-    document?.status === "Sent"
+    document?.status === "Sent" &&
+    document?.canRevoke === true
   ) {
     buttons.push(
       <Button
@@ -471,9 +487,8 @@ const ViewDetailArchivedDocument = () => {
   // Khởi tạo văn bản thay thế
   if (
     document?.scope === "OutGoing" &&
-    (user?.mainRole?.roleName === "Chief" ||
-      user?.subRole?.roleName?.endsWith("_Chief")) &&
-    document?.status === "Withdrawn"
+    document?.status === "Withdrawn" &&
+    document?.canRevoke === false
   ) {
     buttons.push(
       <Button
@@ -506,7 +521,9 @@ const ViewDetailArchivedDocument = () => {
           e.currentTarget.style.color = "#52c41a";
           e.currentTarget.style.transform = "scale(1)";
         }}
-        onClick={() => true}
+        onClick={() => {
+          setOpenModalReplace(true);
+        }}
       >
         Khởi tạo văn bản thay thế
       </Button>
@@ -710,27 +727,6 @@ const ViewDetailArchivedDocument = () => {
                   />
                 </span>
               </div>
-              {/* <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.workflowName}
-                </span>
-              </div> */}
               <div
                 style={{
                   fontSize: "14px",
@@ -740,30 +736,7 @@ const ViewDetailArchivedDocument = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <span style={{ color: "#5f6368" }}>Người gửi:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.sender}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>
-                  {document?.scope === "InComing" ? "Người nhận" : "Người tạo"}:
-                </span>
+                <span style={{ color: "#5f6368" }}>Người tạo:</span>
                 <span
                   style={{
                     fontWeight: 500,
@@ -784,9 +757,7 @@ const ViewDetailArchivedDocument = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <span style={{ color: "#5f6368" }}>
-                  {document?.scope === "InComing" ? "Ngày nhận" : "Ngày tạo"}:
-                </span>
+                <span style={{ color: "#5f6368" }}>Ngày tạo:</span>
                 <span
                   style={{
                     fontWeight: 500,
@@ -795,12 +766,74 @@ const ViewDetailArchivedDocument = () => {
                     wordBreak: "break-word",
                   }}
                 >
-                  {document?.scope === "InComing" &&
-                    document?.dateReceived &&
-                    dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
-                  {document?.scope !== "InComing" &&
-                    document?.createDate &&
+                  {document?.createDate &&
                     dayjs(document?.createDate).format("DD-MM-YYYY HH:mm")}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Người lưu:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.archivedBy}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Ngày lưu:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.archivedDate &&
+                    dayjs(document?.archivedDate).format("DD-MM-YYYY HH:mm")}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#5f6368" }}>Người gửi:</span>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    textAlign: "right",
+                    maxWidth: "70%",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {document?.sender}
                 </span>
               </div>
               <div
@@ -1204,6 +1237,11 @@ const ViewDetailArchivedDocument = () => {
       <CreateWithdrawModal
         openModalWithdraw={openModalWithdraw}
         setOpenModalWithdraw={setOpenModalWithdraw}
+        documentId={documentId}
+      />
+      <CreateReplaceModal
+        openModalReplace={openModalReplace}
+        setOpenModalReplace={setOpenModalReplace}
         documentId={documentId}
       />
     </div>
