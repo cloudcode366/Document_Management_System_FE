@@ -118,4 +118,4 @@ jobs:
             # Xóa các image cũ của wiramin/dmsfe, trừ image đang dùng
             docker images wiramin/dmsfe --format '{{.ID}}' | grep -v "$NEW_IMAGE_ID" | sort -u | xargs -r docker rmi -f
           EOF
-</DOCUMENT>
+
