@@ -529,22 +529,24 @@ const ViewDetailProgress = () => {
               flexWrap: "wrap",
             }}
           >
-            <Button
-              type="primary"
-              onClick={() => {
-                navigate(`/detail-document/${documentId}`);
-              }}
-              style={{
-                backgroundColor: "#1890ff",
-                borderColor: "#1890ff",
-                marginTop: 20,
-                marginBottom: 40,
-              }}
-              loading={isSubmit}
-              icon={<IoIosNavigate />}
-            >
-              Xem văn bản
-            </Button>
+            {taskId !== null && (
+              <Button
+                type="primary"
+                onClick={() => {
+                  navigate(`/detail-document/${documentId}`);
+                }}
+                style={{
+                  backgroundColor: "#1890ff",
+                  borderColor: "#1890ff",
+                  marginTop: 20,
+                  marginBottom: 40,
+                }}
+                loading={isSubmit}
+                icon={<IoIosNavigate />}
+              >
+                Xem văn bản
+              </Button>
+            )}
             {user.userId === firstTask?.user?.userId &&
               firstTask.taskStatus === "InProgress" && (
                 <Button
