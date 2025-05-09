@@ -243,7 +243,7 @@ const ViewDetailArchivedDocument = () => {
     if (documentId) {
       fetchInfo();
     }
-  }, []);
+  }, [documentId]);
 
   const digitalSignaturesContent = (
     <div
@@ -889,28 +889,6 @@ const ViewDetailArchivedDocument = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.deadline &&
-                    dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
                 <span style={{ color: "#5f6368" }}>Người ký:</span>
                 <span
                   style={{
@@ -1036,57 +1014,77 @@ const ViewDetailArchivedDocument = () => {
                 }}
               ></Divider>
 
-              <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
+              <Typography.Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  marginBottom: 12,
+                  display: "block",
+                }}
+              >
                 Danh sách các văn bản liên quan
               </Typography.Text>
 
-              {/* <List
-                itemLayout="horizontal"
-                dataSource={document?.versions}
-                renderItem={(item) => (
-                  <List.Item
-                    actions={[
-                      !item.isFinal && (
-                        <Tooltip title="Xem chi tiết" key="view">
-                          <EyeOutlined
-                            style={{ fontSize: 18, color: "#1890ff" }}
-                            onClick={() => {
-                              navigate("/version-document", {
-                                state: {
-                                  version: item,
-                                  documentName: document?.documentName,
-                                  createdBy: document?.createdBy,
-                                },
-                              });
-                            }}
-                          />
-                        </Tooltip>
-                      ),
-                    ]}
+              {document?.revokeDocument?.documentId && (
+                <div
+                  style={{
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Typography.Text
+                    strong
+                    style={{
+                      fontSize: 14,
+                      color: "#1677ff",
+                      cursor: "pointer",
+                      wordBreak: "break-word",
+                      paddingTop: 4,
+                    }}
+                    onClick={() =>
+                      navigate("/detail-archived-document", {
+                        state: {
+                          documentId: document?.revokeDocument?.documentId,
+                        },
+                      })
+                    }
                   >
-                    <List.Item.Meta
-                      avatar={
-                        <FileTextOutlined
-                          style={{ fontSize: 20, color: "#8c8c8c" }}
-                        />
-                      }
-                      title={
-                        <Space>
-                          <Typography.Text>
-                            Phiên bản
-                            {item.versionNumber === 0
-                              ? "Gốc"
-                              : item.versionNumber}
-                          </Typography.Text>
-                        </Space>
-                      }
-                      description={`Ngày tạo: ${dayjs(item?.createdDate).format(
-                        "DD-MM-YYYY"
-                      )}`}
-                    />
-                  </List.Item>
-                )}
-              /> */}
+                    {document?.revokeDocument?.documentName}
+                  </Typography.Text>
+                </div>
+              )}
+
+              {document?.replacedDocument?.documentId && (
+                <div
+                  style={{
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Typography.Text
+                    strong
+                    style={{
+                      fontSize: 14,
+                      color: "#1677ff",
+                      cursor: "pointer",
+                      wordBreak: "break-word",
+                      paddingTop: 4,
+                    }}
+                    onClick={() =>
+                      navigate("/detail-archived-document", {
+                        state: {
+                          documentId: document?.replacedDocument?.documentId,
+                        },
+                      })
+                    }
+                  >
+                    {document?.replacedDocument?.documentName}
+                  </Typography.Text>
+                </div>
+              )}
+
               <Divider
                 variant="solid"
                 style={{

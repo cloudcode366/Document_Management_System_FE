@@ -11,19 +11,19 @@ const videos = [
   },
   {
     title: "Hướng dẫn tải và cài đặt ứng dụng ký số",
-    url: "https://www.youtube.com/embed/VIDEO_ID_2",
+    url: "https://www.youtube.com/embed/",
     showDownload: true, // Dùng flag để hiển thị nút download
   },
   {
     title: "Hướng dẫn tổng quan sử dụng hệ thống",
-    url: "https://www.youtube.com/embed/VIDEO_ID_3",
+    url: "https://www.youtube.com/embed/",
   },
 ];
 
 const UserGuide = () => {
   const handleDownload = () => {
     window.open(
-      `${import.meta.env.VITE_BACKEND_URL}/api/Log/download`,
+      `${import.meta.env.VITE_BACKEND_URL}/api/Log/view-download`,
       "_blank"
     );
   };

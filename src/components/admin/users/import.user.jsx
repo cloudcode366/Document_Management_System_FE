@@ -366,7 +366,7 @@ const ImportUser = ({
     <Modal
       title={
         <div style={{ borderBottom: "1px solid #80868b", paddingBottom: 8 }}>
-          Import người dùng từ file Excel
+          Import người dùng bằng file
         </div>
       }
       open={openModalImport}
@@ -420,7 +420,7 @@ const ImportUser = ({
               Nhấp hoặc kéo file vào khu vực này
             </p>
             <p className="ant-upload-hint">
-              Chỉ hỗ trợ .xls hoặc .xlsx &nbsp;
+              Chỉ hỗ trợ .csv, .xls hoặc .xlsx &nbsp;
               <a
                 onClick={(e) => e.stopPropagation()}
                 href={templateFile}
