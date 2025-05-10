@@ -14,10 +14,6 @@ const videos = [
     url: "https://www.youtube.com/embed/zO4ufXzHvnI",
     showDownload: true, // Dùng flag để hiển thị nút download
   },
-  {
-    title: "Hướng dẫn tổng quan sử dụng hệ thống",
-    url: "https://www.youtube.com/embed/",
-  },
 ];
 
 const UserGuide = () => {
