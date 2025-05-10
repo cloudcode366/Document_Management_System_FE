@@ -145,7 +145,7 @@ const ArchivedPDFViewerWithToken = (props) => {
       </div>
 
       {/* PDF Viewer */}
-      <Spin spinning={isLoading} tip="Đang tải mẫu văn bản...">
+      <Spin spinning={isLoading} tip="Đang tải văn bản...">
         <div ref={containerRef} className="pdf-canvas-container" />
       </Spin>
     </div>
