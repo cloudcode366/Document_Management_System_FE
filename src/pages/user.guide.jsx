@@ -11,7 +11,7 @@ const videos = [
   },
   {
     title: "Hướng dẫn tải và cài đặt ứng dụng ký số",
-    url: "https://www.youtube.com/embed/",
+    url: "https://www.youtube.com/embed/zO4ufXzHvnI",
     showDownload: true, // Dùng flag để hiển thị nút download
   },
   {
