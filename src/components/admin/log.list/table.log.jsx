@@ -4,40 +4,6 @@ import { useRef, useState } from "react";
 import dayjs from "dayjs";
 import { viewAllLogsAPI } from "@/services/api.service";
 
-const data = [
-  {
-    id: "dt1",
-    username: "admin",
-    time: "2025-02-02T07:50:00.943Z",
-    action: "Đã gán vai trò Sub Leader cho namlph1",
-  },
-  {
-    id: "dt1",
-    username: "admin",
-    time: "2025-02-01T07:00:00.943Z",
-    action: "Kết thúc bảo trì hệ thống",
-  },
-  {
-    id: "dt1",
-    username: "admin",
-    time: "2025-02-01T00:00:00.943Z",
-    action: "Hệ thống tiến hành bảo trì",
-  },
-  {
-    id: "dt1",
-    username: "minhtgn1",
-    time: "2025-01-22T09:11:00.943Z",
-    action:
-      "minhtgn1 nộp văn bản báo cáo kế hoạch tài chính cho việc khen thưởng tết Ất Tỵ 2025",
-  },
-  {
-    id: "dt1",
-    username: "hieuhc1",
-    time: "2025-01-21T07:11:00.943Z",
-    action: "Ký số văn bản lịch trực tết của cán bộ và giáo viên trong trường",
-  },
-];
-
 const TableLogs = () => {
   const actionRef = useRef();
   const [meta, setMeta] = useState({
@@ -57,15 +23,9 @@ const TableLogs = () => {
       sorter: true,
       hideInSearch: true,
       render(dom, entity, index, action, schema) {
-        return <>{dayjs(entity.createdAt).format("DD-MM-YYYY HH:mm")}</>;
+        return <>{dayjs(entity.timestamp).format("DD-MM-YYYY HH:mm")}</>;
       },
       width: "20%",
-    },
-    {
-      title: "Thời gian",
-      dataIndex: "createdAtRange",
-      valueType: "dateRange",
-      hideInTable: true,
     },
     {
       title: "Tên đăng nhập",
@@ -77,6 +37,7 @@ const TableLogs = () => {
         labelCol: { span: 8 },
         wrapperCol: { span: 18 },
       },
+      hideInSearch: true,
       width: "20%",
     },
     {
@@ -85,6 +46,7 @@ const TableLogs = () => {
       fieldProps: {
         placeholder: "Vui lòng nhập hành động",
       },
+      hideInSearch: true,
       formItemProps: {
         labelCol: { span: 8 },
         wrapperCol: { span: 18 },
@@ -120,6 +82,7 @@ const TableLogs = () => {
         columns={columns}
         actionRef={actionRef}
         cardBordered
+        search={false}
         request={async (params, sort, filter) => {
           try {
             const filters = {
