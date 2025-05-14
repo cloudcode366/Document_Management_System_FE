@@ -98,8 +98,9 @@ jobs:
             docker run -d --name certbot --network app-network \
             -v /root/certs:/etc/letsencrypt \
             -v /root/certbot/www:/var/www/certbot \
-            certbot/certbot \
-            /bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'
+            -v /root/renew.sh:/renew.sh \
+            certbot/certbot /renew.sh
+
             docker images wiramin/dmsfe --format '{{.ID}}' | grep -v "\$NEW_IMAGE_ID" | sort -u | xargs -r docker rmi -f
           EOF
 
