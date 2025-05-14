@@ -93,13 +93,13 @@ jobs:
               -v /root/certbot/www:/var/www/certbot \
               wiramin/dmsfe:latest
 
-            docker stop certbot || true
-            docker rm certbot || true
-            docker run -d --name certbot --network app-network \
-            -v /root/certs:/etc/letsencrypt \
-            -v /root/certbot/www:/var/www/certbot \
-            --entrypoint /bin/sh \
-            certbot/certbot -c "while true; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h; done"
+            # docker stop certbot || true
+            # docker rm certbot || true
+            # docker run -d --name certbot --network app-network \
+            # -v /root/certs:/etc/letsencrypt \
+            # -v /root/certbot/www:/var/www/certbot \
+            # --entrypoint /bin/sh \
+            # certbot/certbot -c "while true; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h; done"
 
 
             docker images wiramin/dmsfe --format '{{.ID}}' | grep -v "\$NEW_IMAGE_ID" | sort -u | xargs -r docker rmi -f
