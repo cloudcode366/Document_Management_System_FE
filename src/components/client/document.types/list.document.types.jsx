@@ -213,27 +213,27 @@ const ListDocumentType = () => {
         headerTitle={
           <span style={{ fontWeight: "bold" }}>Danh sách loại văn bản</span>
         }
-        toolBarRender={() =>
-          user?.mainRole?.roleName === "Chief" ||
-          user?.subRole?.roleName?.endsWith("_Chief")
-            ? [
-                <Button
-                  key="buttonAddNew"
-                  icon={<PlusOutlined />}
-                  onClick={() => setOpenModalCreate(true)}
-                  type="primary"
-                >
-                  Tạo mới loại văn bản
-                </Button>,
-              ]
-            : []
-        }
+        // toolBarRender={() =>
+        //   user?.mainRole?.roleName === "Chief" ||
+        //   user?.subRole?.roleName?.endsWith("_Chief")
+        //     ? [
+        //         <Button
+        //           key="buttonAddNew"
+        //           icon={<PlusOutlined />}
+        //           onClick={() => setOpenModalCreate(true)}
+        //           type="primary"
+        //         >
+        //           Tạo mới loại văn bản
+        //         </Button>,
+        //       ]
+        //     : []
+        // }
       />
-      <CreateDocumentType
+      {/* <CreateDocumentType
         openModalCreate={openModalCreate}
         setOpenModalCreate={setOpenModalCreate}
         refreshTable={refreshTable}
-      />
+      /> */}
     </div>
   );
 };
