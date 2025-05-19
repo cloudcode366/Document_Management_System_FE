@@ -81,8 +81,10 @@ const LoginPage = () => {
     } else {
       let errorMessage = res?.data?.content;
 
-      if (errorMessage === "Email not exists or Password not exists") {
-        errorMessage = "Email không tồn tại hoặc sai mật khẩu!";
+      if (
+        errorMessage === "Email or username not exists or Password not exists"
+      ) {
+        errorMessage = "Email/Tên đăng nhập không tồn tại hoặc sai mật khẩu!";
       }
 
       if (errorMessage === "User has been deleted") {

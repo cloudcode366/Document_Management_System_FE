@@ -553,6 +553,7 @@ const ViewDetailArchivedDocument = () => {
           <Card className="custom-card-no-padding-dad hide-scrollbar-dad">
             <div className="content-wrapper-dad hide-scrollbar-dad">
               <ArchivedPDFViewerWithToken
+                documentId={document?.documentId}
                 url={document?.finalVersion?.url}
                 token={localStorage.getItem(`access_token`)}
                 documentName={document?.documentName}

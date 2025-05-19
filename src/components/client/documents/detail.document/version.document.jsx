@@ -23,7 +23,7 @@ const { Title, Paragraph } = Typography;
 
 const ViewVersionDocument = () => {
   const location = useLocation();
-  const { version, documentName, createdBy } = location.state || {};
+  const { documentId, version, documentName } = location.state || {};
   const navigate = useNavigate();
 
   return (
@@ -33,6 +33,7 @@ const ViewVersionDocument = () => {
           <Card className="custom-card-no-padding-vdd hide-scrollbar-vdd">
             <div className="content-wrapper-vdd hide-scrollbar-vdd">
               <PDFViewerWithToken
+                documentId={documentId}
                 url={document?.finalVersion?.url}
                 token={localStorage.getItem(`access_token`)}
                 documentName={document?.documentName}

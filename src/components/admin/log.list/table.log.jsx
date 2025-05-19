@@ -78,7 +78,7 @@ const TableLogs = () => {
           display: "flex",
           flexDirection: "column",
         }}
-        scroll={{ y: "calc(100vh - 350px)" }}
+        scroll={{ y: "calc(100vh - 250px)" }}
         columns={columns}
         actionRef={actionRef}
         cardBordered
@@ -109,7 +109,7 @@ const TableLogs = () => {
               current: meatadataDto.page,
               pageSize: meatadataDto.limit,
               pages: meatadataDto.total,
-              total: total || size,
+              total: size,
             });
 
             return {
@@ -118,7 +118,7 @@ const TableLogs = () => {
                 key: item.timestamp || `log-${index}`, // Generate unique key
               })),
               success: true,
-              total: total || size,
+              total: size,
               page: meatadataDto.page,
             };
           } catch (error) {

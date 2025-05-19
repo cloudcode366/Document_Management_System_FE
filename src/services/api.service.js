@@ -706,6 +706,11 @@ const deleteTemplateAPI = (templateId) => {
   return axios.delete(urlBackend);
 };
 
+const createLogDownloadAPI = (documentId) => {
+  const urlBackend = `/api/Document/create-log-download?documentId=${documentId}`;
+  return axios.get(urlBackend);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -776,4 +781,5 @@ export {
   viewAllLogsAPI,
   createReplaceDocumentAPI,
   deleteTemplateAPI,
+  createLogDownloadAPI,
 };

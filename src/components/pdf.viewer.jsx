@@ -10,11 +10,12 @@ import {
   ZoomInOutlined,
   ZoomOutOutlined,
 } from "@ant-design/icons";
+import { createLogDownloadAPI } from "@/services/api.service";
 
 // Cấu hình worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-const PDFViewerWithToken = ({ url, token, documentName }) => {
+const PDFViewerWithToken = ({ documentId, url, token, documentName }) => {
   const containerRef = useRef(null);
   const [pdfDoc, setPdfDoc] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -93,6 +94,13 @@ const PDFViewerWithToken = ({ url, token, documentName }) => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
+
+      if (documentId) {
+        const logResponse = await createLogDownloadAPI(documentId);
+        if (logResponse?.data?.statusCode !== 200) {
+          console.log("Ghi log thất bại");
+        }
+      }
     } catch (error) {
       console.error("Tải file thất bại:", error);
     }
