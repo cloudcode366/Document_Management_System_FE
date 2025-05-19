@@ -614,6 +614,7 @@ const ViewDetailDocument = () => {
           <Card className="custom-card-no-padding-vdd hide-scrollbar-vdd">
             <div className="content-wrapper-vdd hide-scrollbar-vdd">
               <PDFViewerWithToken
+                documentId={document?.documentId}
                 url={document?.finalVersion?.url}
                 token={localStorage.getItem(`access_token`)}
                 documentName={document?.documentName}
@@ -1017,6 +1018,7 @@ const ViewDetailDocument = () => {
                             onClick={() => {
                               navigate("/version-document", {
                                 state: {
+                                  documentId: document?.documentId,
                                   version: item,
                                   documentName: document?.documentName,
                                   createdBy: document?.createdBy,

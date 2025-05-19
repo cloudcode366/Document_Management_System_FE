@@ -204,24 +204,24 @@ const TableDocumentType = () => {
         headerTitle={
           <span style={{ fontWeight: "bold" }}>Quản lý loại văn bản</span>
         }
-        toolBarRender={() => [
-          <Button
-            key="buttonAddNew"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setOpenModalCreate(true);
-            }}
-            type="primary"
-          >
-            Tạo mới loại văn bản
-          </Button>,
-        ]}
+        // toolBarRender={() => [
+        //   <Button
+        //     key="buttonAddNew"
+        //     icon={<PlusOutlined />}
+        //     onClick={() => {
+        //       setOpenModalCreate(true);
+        //     }}
+        //     type="primary"
+        //   >
+        //     Tạo mới loại văn bản
+        //   </Button>,
+        // ]}
       />
-      <CreateDocumentType
+      {/* <CreateDocumentType
         openModalCreate={openModalCreate}
         setOpenModalCreate={setOpenModalCreate}
         refreshTable={refreshTable}
-      />
+      /> */}
     </div>
   );
 };
