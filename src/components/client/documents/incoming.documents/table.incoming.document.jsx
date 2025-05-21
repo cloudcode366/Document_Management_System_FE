@@ -72,11 +72,11 @@ const TableIncomingDocument = () => {
             </div>
           ),
           fieldProps: {
-            placeholder: "Vui lòng nhập tên",
+            placeholder: "Vui lòng nhập tên văn bản",
           },
           formItemProps: {
-            labelCol: { span: 8 },
-            wrapperCol: { span: 20 },
+            labelCol: { span: 6 },
+            wrapperCol: { span: 18 },
           },
         },
 
@@ -150,11 +150,11 @@ const TableIncomingDocument = () => {
             </div>
           ),
           fieldProps: {
-            placeholder: "Vui lòng nhập tên",
+            placeholder: "Vui lòng nhập tên văn bản",
           },
           formItemProps: {
-            labelCol: { span: 8 },
-            wrapperCol: { span: 20 },
+            labelCol: { span: 6 },
+            wrapperCol: { span: 18 },
           },
         },
         {
@@ -243,6 +243,10 @@ const TableIncomingDocument = () => {
             flex: 1,
             display: "flex",
             flexDirection: "column",
+          }}
+          search={{
+            labelWidth: "auto",
+            span: 8, // mỗi field chiếm 1/3 dòng (24/8)
           }}
           scroll={{ y: "calc(100vh - 400px)" }}
           cardBordered

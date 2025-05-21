@@ -64,7 +64,7 @@ const TableDocumentTemplate = () => {
         placeholder: "Vui lòng nhập tên mẫu văn bản",
       },
       formItemProps: {
-        labelCol: { span: 8 },
+        labelCol: { span: 6 },
         wrapperCol: { span: 18 },
       },
       render(dom, entity) {
@@ -77,7 +77,7 @@ const TableDocumentTemplate = () => {
       dataIndex: "documentName",
       hideInTable: true,
       formItemProps: {
-        labelCol: { span: 8 },
+        labelCol: { span: 6 },
         wrapperCol: { span: 18 },
       },
       fieldProps: {
@@ -246,6 +246,10 @@ const TableDocumentTemplate = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+        }}
+        search={{
+          labelWidth: "auto",
+          span: 8,
         }}
         scroll={{ y: "calc(100vh - 350px)" }}
         columns={columns}

@@ -58,8 +58,8 @@ const ListDocumentType = () => {
         placeholder: "Vui lòng nhập tên loại văn bản",
       },
       formItemProps: {
-        labelCol: { span: 8 }, // Điều chỉnh label rộng hơn để không bị đè
-        wrapperCol: { span: 18 }, // Đảm bảo input không chiếm hết không gian
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
     },
     {
@@ -167,6 +167,10 @@ const ListDocumentType = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+        }}
+        search={{
+          labelWidth: "auto",
+          span: 8,
         }}
         scroll={{ y: "calc(100vh - 350px)" }}
         columns={columns}

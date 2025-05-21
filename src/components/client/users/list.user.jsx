@@ -70,8 +70,8 @@ const ListUser = () => {
         placeholder: "Vui lòng nhập họ và tên",
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
       render(dom, entity) {
         return (
@@ -110,8 +110,8 @@ const ListUser = () => {
         placeholder: "Vui lòng nhập email",
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
       width: "10%",
     },
@@ -157,8 +157,8 @@ const ListUser = () => {
         showSearch: true,
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
     },
     {
@@ -181,8 +181,8 @@ const ListUser = () => {
               showSearch: true,
             },
             formItemProps: {
-              labelCol: { span: 7 },
-              wrapperCol: { span: 24 },
+              labelCol: { span: 6 },
+              wrapperCol: { span: 18 },
             },
           },
         ]
@@ -196,8 +196,8 @@ const ListUser = () => {
         placeholder: "Vui lòng nhập chức vụ",
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
       width: "15%",
     },
@@ -268,6 +268,10 @@ const ListUser = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+        }}
+        search={{
+          labelWidth: "auto",
+          span: 8,
         }}
         scroll={{ y: "calc(100vh - 400px)" }}
         columns={columns}

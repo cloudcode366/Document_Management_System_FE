@@ -25,8 +25,8 @@ const ListWorkflow = () => {
         placeholder: "Vui lòng nhập tên luồng xử lý",
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
       width: "40%",
       render(dom, entity) {
@@ -66,12 +66,12 @@ const ListWorkflow = () => {
         ];
       },
       fieldProps: {
-        placeholder: "Vui lòng chọn vai trò",
+        placeholder: "Vui lòng chọn phạm vi",
         showSearch: true,
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
     },
     {
@@ -110,6 +110,10 @@ const ListWorkflow = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+        }}
+        search={{
+          labelWidth: "auto",
+          span: 8,
         }}
         scroll={{ y: "calc(100vh - 350px)" }}
         columns={columns}
