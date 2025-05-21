@@ -698,291 +698,351 @@ const ViewDetailDocument = () => {
                 }}
               ></Divider>
               <Title level={5}>Tổng quan văn bản</Title>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Số hiệu hệ thống:</span>
-                <span
+              {document?.systemNumberOfDocument && (
+                <div
                   style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  {document?.systemNumberOfDocument}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
-                <span
+                  <span style={{ color: "#5f6368" }}>Số hiệu hệ thống:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.systemNumberOfDocument}
+                  </span>
+                </div>
+              )}
+              {document?.numberOfDocument && (
+                <div
                   style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  {document?.numberOfDocument}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
-                <span
+                  <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.numberOfDocument}
+                  </span>
+                </div>
+              )}
+              {document?.documentTypeName && (
+                <div
                   style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  {document?.documentTypeName}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Trạng thái:</span>
-                <span
+                  <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.documentTypeName}
+                  </span>
+                </div>
+              )}
+              {document?.status && (
+                <div
                   style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Badge
-                    color={statusColor[document?.status]}
-                    text={convertProcessingStatus(document?.status)}
-                    className="custom-dot"
-                  />
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
-                <span
+                  <span style={{ color: "#5f6368" }}>Trạng thái:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    <Badge
+                      color={statusColor[document?.status]}
+                      text={convertProcessingStatus(document?.status)}
+                      className="custom-dot"
+                    />
+                  </span>
+                </div>
+              )}
+              {document?.workflowName && (
+                <div
                   style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  {document?.workflowName}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Người gửi:</span>
-                <span
+                  <span style={{ color: "#5f6368" }}>Luồng xử lý:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.workflowName}
+                  </span>
+                </div>
+              )}
+              {document?.sender && (
+                <div
                   style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  {document?.sender}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>
-                  {document?.scope === "InComing" ? "Người nhận" : "Người tạo"}:
-                </span>
-                <span
+                  <span style={{ color: "#5f6368" }}>Người gửi:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.sender}
+                  </span>
+                </div>
+              )}
+              {document?.createdBy && (
+                <div
                   style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  {document?.createdBy}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>
-                  {document?.scope === "InComing" ? "Ngày nhận" : "Ngày tạo"}:
-                </span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.scope === "InComing" &&
-                    document?.dateReceived &&
-                    dayjs(document?.dateReceived).format("DD-MM-YYYY HH:mm")}
-                  {document?.scope !== "InComing" &&
-                    document?.createDate &&
-                    dayjs(document?.createDate).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.dateIssued &&
-                    dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.dateExpires &&
-                    dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.deadline &&
-                    dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Người ký:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {Array.isArray(document?.digitalSignatures) &&
-                    document.digitalSignatures.length > 0 && (
-                      <Popover
-                        content={digitalSignaturesContent}
-                        title="Thông tin chữ ký"
-                        trigger="click"
-                        placement="left"
-                      >
-                        <span
-                          style={{
-                            color: "#1890ff",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Xem chi tiết
-                        </span>
-                      </Popover>
-                    )}
-                </span>
-              </div>
+                  <span style={{ color: "#5f6368" }}>
+                    {document?.scope === "InComing"
+                      ? "Người nhận"
+                      : "Người tạo"}
+                    :
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.createdBy}
+                  </span>
+                </div>
+              )}
+              {document?.scope === "InComing" &&
+                document?.dateReceived &&
+                dayjs(document.dateReceived).year() > 1900 &&
+                dayjs(document.dateReceived).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày nhận:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.dateReceived &&
+                        dayjs(document?.dateReceived).format(
+                          "DD-MM-YYYY HH:mm"
+                        )}
+                    </span>
+                  </div>
+                )}
+              {document?.scope !== "InComing" &&
+                document?.createDate &&
+                dayjs(document.createDate).year() > 1900 &&
+                dayjs(document.createDate).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày tạo:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.createDate &&
+                        dayjs(document?.createDate).format("DD-MM-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
+              {document?.dateIssued &&
+                dayjs(document.dateIssued).year() > 1900 &&
+                dayjs(document.dateIssued).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.dateIssued &&
+                        dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
+              {document?.dateExpires &&
+                dayjs(document.dateExpires).year() > 1900 &&
+                dayjs(document.dateExpires).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.dateExpires &&
+                        dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
+              {document?.deadline &&
+                dayjs(document.deadline).year() > 1900 &&
+                dayjs(document.deadline).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Hạn xử lý:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.deadline &&
+                        dayjs(document?.deadline).format("DD-MM-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
+              {Array.isArray(document?.digitalSignatures) &&
+                document.digitalSignatures.length > 0 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Người ký:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {Array.isArray(document?.digitalSignatures) &&
+                        document.digitalSignatures.length > 0 && (
+                          <Popover
+                            content={digitalSignaturesContent}
+                            title="Thông tin chữ ký"
+                            trigger="click"
+                            placement="left"
+                          >
+                            <span
+                              style={{
+                                color: "#1890ff",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Xem chi tiết
+                            </span>
+                          </Popover>
+                        )}
+                    </span>
+                  </div>
+                )}
 
               <Divider
                 variant="solid"
@@ -990,16 +1050,20 @@ const ViewDetailDocument = () => {
                   borderColor: "#80868b",
                 }}
               ></Divider>
-              <Title level={5}>Nội dung</Title>
-              <Paragraph style={{ fontSize: 14 }}>
-                {document?.documentContent}
-              </Paragraph>
-              <Divider
-                variant="solid"
-                style={{
-                  borderColor: "#80868b",
-                }}
-              ></Divider>
+              {document?.documentContent && (
+                <>
+                  <Title level={5}>Nội dung</Title>
+                  <Paragraph style={{ fontSize: 14 }}>
+                    {document?.documentContent}
+                  </Paragraph>
+                  <Divider
+                    variant="solid"
+                    style={{
+                      borderColor: "#80868b",
+                    }}
+                  ></Divider>
+                </>
+              )}
 
               <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
                 Danh sách các phiên bản
