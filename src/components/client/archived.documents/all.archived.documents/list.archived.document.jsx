@@ -73,12 +73,24 @@ const TableAllArchivedDocument = () => {
         </div>
       ),
       fieldProps: {
-        placeholder: "Vui lòng nhập tên",
+        placeholder: "Vui lòng nhập tên văn bản",
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
+    },
+    {
+      title: "Số hiệu hệ thống",
+      dataIndex: "systemNumberDocument",
+      fieldProps: {
+        placeholder: "Vui lòng nhập số hiệu hệ thống",
+      },
+      formItemProps: {
+        labelCol: { span: 8 },
+        wrapperCol: { span: 16 },
+      },
+      width: "15%",
     },
     {
       title: "Phạm vi",
@@ -98,8 +110,22 @@ const TableAllArchivedDocument = () => {
         showSearch: true,
       },
       formItemProps: {
-        labelCol: { span: 7 },
+        labelCol: { span: 8 },
         wrapperCol: { span: 24 },
+      },
+    },
+    {
+      title: "Ngày lưu",
+      dataIndex: "createdAtRange",
+      valueType: "dateRange",
+      hideInTable: true,
+      formItemProps: {
+        labelCol: { span: 6 },
+        wrapperCol: { span: 24 },
+      },
+      fieldProps: {
+        // format: "DD-MM-YYYY",
+        placeholder: ["Từ ngày", "Đến ngày"],
       },
     },
     {
@@ -119,22 +145,8 @@ const TableAllArchivedDocument = () => {
         showSearch: true,
       },
       formItemProps: {
-        labelCol: { span: 7 },
+        labelCol: { span: 8 },
         wrapperCol: { span: 24 },
-      },
-    },
-    {
-      title: "Ngày lưu",
-      dataIndex: "createdAtRange",
-      valueType: "dateRange",
-      hideInTable: true,
-      formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
-      },
-      fieldProps: {
-        // format: "DD-MM-YYYY",
-        placeholder: ["Từ ngày", "Đến ngày"],
       },
     },
 
@@ -164,7 +176,7 @@ const TableAllArchivedDocument = () => {
     {
       title: "Trạng thái",
       dataIndex: "status",
-      width: "15%",
+      width: "10%",
       render: (_, row) => (
         <Badge
           color={statusColor[row.status]}
@@ -179,121 +191,124 @@ const TableAllArchivedDocument = () => {
   return (
     <div
       style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        backgroundColor: "#e8edfa",
+        padding: "20px 0",
+        width: "100%",
         height: "100vh",
       }}
     >
-      <div
+      <ProTable
+        columns={columns}
+        actionRef={actionRef}
         style={{
-          backgroundColor: "#ffffff",
-          padding: "20px",
-          boxShadow: `0px 4px 10px rgba(0, 0, 0, 0.1)`,
-          borderRadius: "10px",
-          marginTop: "20px",
+          width: "100%",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
         }}
-      >
-        <ProTable
-          columns={columns}
-          actionRef={actionRef}
-          style={{
-            width: "100%",
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-          }}
-          scroll={{ y: "calc(100vh - 400px)" }}
-          cardBordered
-          request={async (params, sort) => {
-            const filters = Object.fromEntries(
-              Object.entries(params).filter(
-                ([key, value]) =>
-                  value !== undefined &&
-                  value !== null &&
-                  value !== "" &&
-                  key !== "current" &&
-                  key !== "pageSize" &&
-                  key !== "createdAtRange"
-              )
-            );
+        search={{
+          labelWidth: "auto",
+          span: 8, // mỗi field chiếm 1/3 dòng (24/8)
+        }}
+        scroll={{ y: "calc(100vh - 400px)" }}
+        cardBordered
+        request={async (params, sort) => {
+          const filters = Object.fromEntries(
+            Object.entries(params).filter(
+              ([key, value]) =>
+                value !== undefined &&
+                value !== null &&
+                value !== "" &&
+                key !== "current" &&
+                key !== "pageSize" &&
+                key !== "createdAtRange" &&
+                key !== "systemNumberDocument"
+            )
+          );
 
-            if (params.createdAtRange && params.createdAtRange.length === 2) {
-              filters.startCreatedDate = params.createdAtRange[0];
-              filters.endCreatedDate = params.createdAtRange[1];
-            }
-
-            if (sort && sort.createdDate) {
-              const sortByCreatedDate =
-                sort.createdDate === "ascend" ? "Ascending" : "Descending";
-              filters.sortByCreatedDate = sortByCreatedDate;
-            }
-            const res = await getAllArchivedDocuments(
-              params.current,
-              params.pageSize,
-              filters
-            );
-            if (res.data) {
-              setMeta({
-                page: res.data?.meatadataDto.page,
-                limit: res.data?.meatadataDto.limit,
-                total: res.data?.size,
-              });
-            }
-            return {
-              data: res.data?.content,
-              page: res.data?.meatadataDto.page,
-              success: true,
-              total: res.data?.size,
-            };
-          }}
-          rowKey={"id"}
-          pagination={{
-            current: meta.page,
-            pageSize: meta.limit,
-            showSizeChanger: true,
-            total: meta.total,
-            showTotal: (total, range) => {
-              return (
-                <div>
-                  {range[0]} - {range[1]} trên {total} văn bản
-                </div>
-              );
-            },
-          }}
-          headerTitle={
-            <span style={{ fontWeight: "bold" }}>
-              Danh sách văn bản lưu trữ
-            </span>
+          if (params.createdAtRange && params.createdAtRange.length === 2) {
+            filters.startCreatedDate = params.createdAtRange[0];
+            filters.endCreatedDate = params.createdAtRange[1];
           }
-          onRow={(record) => ({
-            title: "Bấm một lần để xem nhanh, hai lần để mở chi tiết",
-            style: {
-              cursor: "pointer",
-            },
-            onClick: () => {
-              // Đợi để phân biệt single và double click
-              clickTimer = setTimeout(() => {
-                setSelectedRecord(record);
-                setOpenViewDetail(true);
-              }, 250); // Delay ngắn, vừa đủ để phân biệt double click
-            },
-            onDoubleClick: () => {
-              clearTimeout(clickTimer); // Hủy click nếu là double click
 
-              // navigate(`/detail-archived-document/${record.id}`);
-              navigate("/detail-archived-document", {
-                state: {
-                  documentId: record.id, // truyền documentId
-                },
-              });
-            },
-          })}
-        />
-        <DrawerArchivedDocument
-          openViewDetail={openViewDetail}
-          setOpenViewDetail={setOpenViewDetail}
-          selectedRecord={selectedRecord}
-          setSelectedRecord={setSelectedRecord}
-        />
-      </div>
+          if (params.systemNumberDocument) {
+            filters.systemNumber = params.systemNumberDocument;
+          }
+
+          if (sort && sort.createdDate) {
+            const sortByCreatedDate =
+              sort.createdDate === "ascend" ? "Ascending" : "Descending";
+            filters.sortByCreatedDate = sortByCreatedDate;
+          }
+          const res = await getAllArchivedDocuments(
+            params.current,
+            params.pageSize,
+            filters
+          );
+          if (res.data) {
+            setMeta({
+              page: res.data?.meatadataDto.page,
+              limit: res.data?.meatadataDto.limit,
+              total: res.data?.size,
+            });
+          }
+          return {
+            data: res.data?.content,
+            page: res.data?.meatadataDto.page,
+            success: true,
+            total: res.data?.size,
+          };
+        }}
+        rowKey={"id"}
+        pagination={{
+          current: meta.page,
+          pageSize: meta.limit,
+          showSizeChanger: true,
+          total: meta.total,
+          showTotal: (total, range) => {
+            return (
+              <div>
+                {range[0]} - {range[1]} trên {total} văn bản
+              </div>
+            );
+          },
+        }}
+        headerTitle={
+          <span style={{ fontWeight: "bold" }}>Danh sách văn bản lưu trữ</span>
+        }
+        onRow={(record) => ({
+          title: "Bấm một lần để xem nhanh, hai lần để mở chi tiết",
+          style: {
+            cursor: "pointer",
+          },
+          onClick: () => {
+            // Đợi để phân biệt single và double click
+            clickTimer = setTimeout(() => {
+              setSelectedRecord(record);
+              setOpenViewDetail(true);
+            }, 250); // Delay ngắn, vừa đủ để phân biệt double click
+          },
+          onDoubleClick: () => {
+            clearTimeout(clickTimer); // Hủy click nếu là double click
+
+            // navigate(`/detail-archived-document/${record.id}`);
+            navigate("/detail-archived-document", {
+              state: {
+                documentId: record.id, // truyền documentId
+              },
+            });
+          },
+        })}
+      />
+      <DrawerArchivedDocument
+        openViewDetail={openViewDetail}
+        setOpenViewDetail={setOpenViewDetail}
+        selectedRecord={selectedRecord}
+        setSelectedRecord={setSelectedRecord}
+      />
     </div>
   );
 };

@@ -707,7 +707,7 @@ const ViewDetailDocument = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <span style={{ color: "#5f6368" }}>Mã văn bản:</span>
+                <span style={{ color: "#5f6368" }}>Số hiệu hệ thống:</span>
                 <span
                   style={{
                     fontWeight: 500,

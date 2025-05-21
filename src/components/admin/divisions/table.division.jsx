@@ -43,6 +43,10 @@ const TableDivision = () => {
       fieldProps: {
         placeholder: "Vui lòng nhập tên phòng ban",
       },
+      formItemProps: {
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
+      },
       render(dom, entity) {
         return (
           <Tooltip title="Xem chi tiết">
@@ -194,6 +198,10 @@ const TableDivision = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+        }}
+        search={{
+          labelWidth: "auto",
+          span: 8,
         }}
         scroll={{ y: "calc(100vh - 350px)" }}
         columns={columns}

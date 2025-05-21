@@ -79,11 +79,11 @@ const TableProgress = () => {
         </div>
       ),
       fieldProps: {
-        placeholder: "Vui lòng nhập tên",
+        placeholder: "Vui lòng nhập tên văn bản",
       },
       formItemProps: {
-        labelCol: { span: 8 },
-        wrapperCol: { span: 20 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
     },
     {
@@ -104,8 +104,8 @@ const TableProgress = () => {
         showSearch: true,
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 8 },
+        wrapperCol: { span: 16 },
       },
     },
     {
@@ -126,8 +126,8 @@ const TableProgress = () => {
         showSearch: true,
       },
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 8 },
+        wrapperCol: { span: 16 },
       },
     },
     {
@@ -136,8 +136,8 @@ const TableProgress = () => {
       valueType: "dateRange",
       hideInTable: true,
       formItemProps: {
-        labelCol: { span: 7 },
-        wrapperCol: { span: 24 },
+        labelCol: { span: 6 },
+        wrapperCol: { span: 18 },
       },
       fieldProps: {
         // format: "DD-MM-YYYY",
@@ -203,6 +203,10 @@ const TableProgress = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+        }}
+        search={{
+          labelWidth: "auto",
+          span: 8,
         }}
         scroll={{ y: "calc(100vh - 400px)" }}
         columns={columns}

@@ -676,17 +676,11 @@ const updateEnableSignatureImgAPI = (userId) => {
 
 const viewAllLogsAPI = (page, pageSize, filters = {}) => {
   const urlBackend = `/api/Log/view-all-log`;
-  const queryParams = new URLSearchParams({
-    page: String(page || 1),
-    pageSize: String(pageSize || 20),
-  });
+  const queryParams = new URLSearchParams({});
 
   // Add filters
-  if (filters.userName) {
-    queryParams.append("userName", filters.userName);
-  }
-  if (filters.action) {
-    queryParams.append("action", filters.action);
+  if (filters.query) {
+    queryParams.append("query", filters.query);
   }
   if (filters.startTime) {
     queryParams.append("startTime", filters.startTime);
@@ -694,8 +688,11 @@ const viewAllLogsAPI = (page, pageSize, filters = {}) => {
   if (filters.endTime) {
     queryParams.append("endTime", filters.endTime);
   }
-  if (filters.sort) {
-    queryParams.append("sort", filters.sort);
+  if (page) {
+    queryParams.append("page", page);
+  }
+  if (pageSize) {
+    queryParams.append("pageSize", pageSize);
   }
 
   return axios.get(`${urlBackend}?${queryParams.toString()}`);
