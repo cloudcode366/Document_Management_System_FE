@@ -640,451 +640,401 @@ const ViewDetailArchivedDocument = () => {
                 }}
               ></Divider>
               <Title level={5}>Tổng quan văn bản</Title>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Số hiệu hệ thống:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.systemNumberOfDocument}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.numberOfDocument}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.documentTypeName}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Trạng thái:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  <Badge
-                    color={statusColor[document?.status]}
-                    text={convertArchivedStatus(document?.status)}
-                    className="custom-dot"
-                  />
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Người tạo:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.createdBy}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Ngày tạo:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.createDate &&
-                    dayjs(document?.createDate).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Người lưu:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.archivedBy}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Ngày lưu:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.archivedDate &&
-                    dayjs(document?.archivedDate).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Người gửi:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.sender}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.dateIssued &&
-                    dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {document?.dateExpires &&
-                    dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Người ký:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {Array.isArray(document?.digitalSignatures) &&
-                    document.digitalSignatures.length > 0 && (
-                      <Popover
-                        content={digitalSignaturesContent}
-                        title="Thông tin chữ ký"
-                        trigger="click"
-                        placement="left"
-                      >
-                        <span
-                          style={{
-                            color: "#1890ff",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Xem chi tiết
-                        </span>
-                      </Popover>
-                    )}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Người có thẩm quyền:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {Array.isArray(document?.granters) &&
-                    document.granters.length > 0 && (
-                      <Popover
-                        content={grantersContent}
-                        title="Thông tin người có thẩm quyền"
-                        trigger="click"
-                        placement="left"
-                      >
-                        <span
-                          style={{
-                            color: "#1890ff",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Xem chi tiết
-                        </span>
-                      </Popover>
-                    )}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  fontSize: "14px",
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#5f6368" }}>Người xem:</span>
-                <span
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "right",
-                    maxWidth: "70%",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {Array.isArray(document?.viewers) &&
-                    document.viewers.length > 0 && (
-                      <Popover
-                        content={viewersContent}
-                        title="Thông tin người xem"
-                        trigger="click"
-                        placement="left"
-                      >
-                        <span
-                          style={{
-                            color: "#1890ff",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Xem chi tiết
-                        </span>
-                      </Popover>
-                    )}
-                </span>
-              </div>
-
-              <Divider
-                variant="solid"
-                style={{
-                  borderColor: "#80868b",
-                }}
-              ></Divider>
-              <Title level={5}>Nội dung</Title>
-              <Paragraph style={{ fontSize: 14 }}>
-                {document?.documentContent}
-              </Paragraph>
-              <Divider
-                variant="solid"
-                style={{
-                  borderColor: "#80868b",
-                }}
-              ></Divider>
-
-              <Typography.Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: 600,
-                  marginBottom: 12,
-                  display: "block",
-                }}
-              >
-                Danh sách các văn bản liên quan
-              </Typography.Text>
-
-              {document?.revokeDocument?.documentId && (
+              {document?.systemNumberOfDocument && (
                 <div
                   style={{
+                    fontSize: "14px",
                     marginBottom: "8px",
                     display: "flex",
-                    flexDirection: "column",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Typography.Text
-                    strong
+                  <span style={{ color: "#5f6368" }}>Số hiệu hệ thống:</span>
+                  <span
                     style={{
-                      fontSize: 14,
-                      color: "#1677ff",
-                      cursor: "pointer",
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
                       wordBreak: "break-word",
-                      paddingTop: 4,
                     }}
-                    onClick={() =>
-                      navigate("/detail-archived-document", {
-                        state: {
-                          documentId: document?.revokeDocument?.documentId,
-                        },
-                      })
-                    }
                   >
-                    {document?.revokeDocument?.documentName}
-                  </Typography.Text>
+                    {document?.systemNumberOfDocument}
+                  </span>
                 </div>
               )}
-
-              {document?.replacedDocument?.documentId && (
+              {document?.numberOfDocument && (
                 <div
                   style={{
+                    fontSize: "14px",
                     marginBottom: "8px",
                     display: "flex",
-                    flexDirection: "column",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Typography.Text
-                    strong
+                  <span style={{ color: "#5f6368" }}>Số hiệu văn bản:</span>
+                  <span
                     style={{
-                      fontSize: 14,
-                      color: "#1677ff",
-                      cursor: "pointer",
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
                       wordBreak: "break-word",
-                      paddingTop: 4,
                     }}
-                    onClick={() =>
-                      navigate("/detail-archived-document", {
-                        state: {
-                          documentId: document?.replacedDocument?.documentId,
-                        },
-                      })
-                    }
                   >
-                    {document?.replacedDocument?.documentName}
-                  </Typography.Text>
+                    {document?.numberOfDocument}
+                  </span>
                 </div>
               )}
+              {document?.documentTypeName && (
+                <div
+                  style={{
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ color: "#5f6368" }}>Loại văn bản:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.documentTypeName}
+                  </span>
+                </div>
+              )}
+              {document?.status && (
+                <div
+                  style={{
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ color: "#5f6368" }}>Trạng thái:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    <Badge
+                      color={statusColor[document?.status]}
+                      text={convertArchivedStatus(document?.status)}
+                      className="custom-dot"
+                    />
+                  </span>
+                </div>
+              )}
+              {document?.createdBy && (
+                <div
+                  style={{
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ color: "#5f6368" }}>Người tạo:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.createdBy}
+                  </span>
+                </div>
+              )}
+              {document?.createDate &&
+                dayjs(document.createDate).year() > 1900 &&
+                dayjs(document.createDate).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày tạo:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {dayjs(document.createDate).format("DD-MM-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
+              {document?.archivedBy && (
+                <div
+                  style={{
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ color: "#5f6368" }}>Người lưu:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.archivedBy}
+                  </span>
+                </div>
+              )}
+              {document?.archivedDate &&
+                dayjs(document.archivedDate).year() > 1900 &&
+                dayjs(document.archivedDate).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày lưu:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.archivedDate &&
+                        dayjs(document?.archivedDate).format(
+                          "DD-MM-YYYY HH:mm"
+                        )}
+                    </span>
+                  </div>
+                )}
+              {document?.sender && (
+                <div
+                  style={{
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ color: "#5f6368" }}>Người gửi:</span>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "right",
+                      maxWidth: "70%",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {document?.sender}
+                  </span>
+                </div>
+              )}
+              {document?.dateIssued &&
+                dayjs(document.dateIssued).year() > 1900 &&
+                dayjs(document.dateIssued).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày ban hành:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.dateIssued &&
+                        dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
+              {document?.dateExpires &&
+                dayjs(document.dateExpires).year() > 1900 &&
+                dayjs(document.dateExpires).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày hết hiệu lực:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.dateExpires &&
+                        dayjs(document?.dateExpires).format("DD-MM-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
+              {Array.isArray(document?.digitalSignatures) &&
+                document.digitalSignatures.length > 0 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Người ký:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {Array.isArray(document?.digitalSignatures) &&
+                        document.digitalSignatures.length > 0 && (
+                          <Popover
+                            content={digitalSignaturesContent}
+                            title="Thông tin chữ ký"
+                            trigger="click"
+                            placement="left"
+                          >
+                            <span
+                              style={{
+                                color: "#1890ff",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Xem chi tiết
+                            </span>
+                          </Popover>
+                        )}
+                    </span>
+                  </div>
+                )}
+              {Array.isArray(document?.granters) &&
+                document.granters.length > 0 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>
+                      Người có thẩm quyền:
+                    </span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {Array.isArray(document?.granters) &&
+                        document.granters.length > 0 && (
+                          <Popover
+                            content={grantersContent}
+                            title="Thông tin người có thẩm quyền"
+                            trigger="click"
+                            placement="left"
+                          >
+                            <span
+                              style={{
+                                color: "#1890ff",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Xem chi tiết
+                            </span>
+                          </Popover>
+                        )}
+                    </span>
+                  </div>
+                )}
+              {Array.isArray(document?.viewers) &&
+                document.viewers.length > 0 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Người xem:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {Array.isArray(document?.viewers) &&
+                        document.viewers.length > 0 && (
+                          <Popover
+                            content={viewersContent}
+                            title="Thông tin người xem"
+                            trigger="click"
+                            placement="left"
+                          >
+                            <span
+                              style={{
+                                color: "#1890ff",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Xem chi tiết
+                            </span>
+                          </Popover>
+                        )}
+                    </span>
+                  </div>
+                )}
 
               <Divider
                 variant="solid"
@@ -1092,6 +1042,103 @@ const ViewDetailArchivedDocument = () => {
                   borderColor: "#80868b",
                 }}
               ></Divider>
+              {document?.documentContent && (
+                <>
+                  <Title level={5}>Nội dung</Title>
+                  <Paragraph style={{ fontSize: 14 }}>
+                    {document?.documentContent}
+                  </Paragraph>
+                  <Divider
+                    variant="solid"
+                    style={{
+                      borderColor: "#80868b",
+                    }}
+                  ></Divider>
+                </>
+              )}
+              {(document?.revokeDocument?.documentId ||
+                document?.replacedDocument?.documentId) && (
+                <>
+                  <Typography.Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 600,
+                      marginBottom: 12,
+                      display: "block",
+                    }}
+                  >
+                    Danh sách các văn bản liên quan
+                  </Typography.Text>
+                  {document?.revokeDocument?.documentId && (
+                    <div
+                      style={{
+                        marginBottom: "8px",
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <Tooltip title="Xem chi tiết">
+                        <Typography.Text
+                          strong
+                          style={{
+                            fontSize: 14,
+                            color: "#1677ff",
+                            cursor: "pointer",
+                            wordBreak: "break-word",
+                            paddingTop: 4,
+                          }}
+                          onClick={() =>
+                            navigate("/detail-archived-document", {
+                              state: {
+                                documentId:
+                                  document?.revokeDocument?.documentId,
+                              },
+                            })
+                          }
+                        >
+                          {document?.revokeDocument?.documentName}
+                        </Typography.Text>
+                      </Tooltip>
+                    </div>
+                  )}
+                  {document?.replacedDocument?.documentId && (
+                    <div
+                      style={{
+                        marginBottom: "8px",
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <Typography.Text
+                        strong
+                        style={{
+                          fontSize: 14,
+                          color: "#1677ff",
+                          cursor: "pointer",
+                          wordBreak: "break-word",
+                          paddingTop: 4,
+                        }}
+                        onClick={() =>
+                          navigate("/detail-archived-document", {
+                            state: {
+                              documentId:
+                                document?.replacedDocument?.documentId,
+                            },
+                          })
+                        }
+                      >
+                        {document?.replacedDocument?.documentName}
+                      </Typography.Text>
+                    </div>
+                  )}
+                  <Divider
+                    variant="solid"
+                    style={{
+                      borderColor: "#80868b",
+                    }}
+                  ></Divider>
+                </>
+              )}
             </div>
             <div
               style={{
