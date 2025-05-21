@@ -44,6 +44,8 @@ const CreateDocumentProgress = (props) => {
   const [selectedDocumentType, setSelectedDocumentType] = useState({});
   const [showWorkflowSelect, setShowWorkflowSelect] = useState(false);
   const [showDocumentTypeSelect, setShowDocumentTypeSelect] = useState(false);
+  const [showDocumentTemplateSelect, setShowDocumentTemplateSelect] =
+    useState(false);
   const [workflowDetail, setWorkflowDetail] = useState(null);
   const [resDocument, setResDocument] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -90,8 +92,18 @@ const CreateDocumentProgress = (props) => {
     const res = await viewWorkflowByScopeAPI(scope);
     if (res && res.data && res.data.statusCode === 200) {
       const data = res.data.content;
-      setListWorkflows(data);
-      setShowWorkflowSelect(true);
+      const filterWorkflows = data.filter(
+        (workflow) => user?.mainRole?.roleName === workflow.firstRole
+      );
+      if (filterWorkflows.length > 0) {
+        setListWorkflows(filterWorkflows);
+        setShowWorkflowSelect(true);
+      } else {
+        notification.warning({
+          message: "Không có luồng xử lý nào phù hợp với vai trò của bạn!",
+          description: "Vui lòng chọn phạm vi ban hành khác!",
+        });
+      }
     } else {
       notification.error({
         message: "Lấy dữ liệu luồng xử lý không thành công!",
@@ -174,7 +186,8 @@ const CreateDocumentProgress = (props) => {
     setListDocumentTypes([]);
     setWorkflowDetail(null);
     setShowDocumentTypeSelect(false);
-    setShowWorkflowSelect(null);
+    setShowWorkflowSelect(false);
+    setShowDocumentTemplateSelect(false);
     setResDocument(null);
     setLoading(false);
     setListDocumentTemplates([]);
@@ -243,11 +256,28 @@ const CreateDocumentProgress = (props) => {
     const docType = listDocumentTypes.find((dt) => dt.documentTypeId === value);
     setSelectedDocumentType(docType);
     if (selectedScope !== "InComing") {
+      setSelectedTemplate(null);
       const res = await viewAllTemplatesAPI(
         `documentName=${docType.documentTypeName}&page=1&pageSize=10000`
       );
       if (res?.data?.statusCode === 200) {
-        setListDocumentTemplates(res?.data?.content);
+        const data = res?.data?.content;
+        if (data.length > 0) {
+          setListDocumentTemplates(data);
+          setShowDocumentTemplateSelect(true);
+        } else {
+          setSelectedTemplate(null);
+          setShowDocumentTemplateSelect(false);
+          notification.warning({
+            message: "Chưa có mẫu văn bản nào ứng với loại văn bản này!",
+            description: "Vui lòng chọn loại văn bản khác!",
+          });
+        }
+      } else {
+        notification.error({
+          message: "Lấy dữ liệu loại văn bản không thành công!",
+          description: "Vui lòng thử lại sau!",
+        });
       }
     }
   };
@@ -296,7 +326,7 @@ const CreateDocumentProgress = (props) => {
       <Modal
         title={
           <div style={{ borderBottom: "1px solid #80868b", paddingBottom: 8 }}>
-            Khởi tạo văn bản
+            Khởi tạo văn bản aaa
           </div>
         }
         width="50vw"
@@ -318,7 +348,11 @@ const CreateDocumentProgress = (props) => {
                 ? handleConfirmInComing(uploadedFile)
                 : handleConfirmRest(selectedTemplate);
             }}
-            disabled={!selectedDocumentType?.documentTypeId}
+            disabled={
+              selectedScope === "InComing"
+                ? !selectedDocumentType?.documentTypeId
+                : !selectedTemplate
+            }
             loading={loading}
           >
             Tiếp tục
@@ -413,33 +447,37 @@ const CreateDocumentProgress = (props) => {
               </Dragger>
             ) : (
               <>
-                <div
-                  style={{
-                    marginBottom: 8,
-                    marginTop: 8,
-                    fontWeight: "bold",
-                    fontSize: "15px",
-                  }}
-                >
-                  Vui lòng chọn mẫu văn bản:
-                </div>
-                <Select
-                  placeholder="Chọn mẫu văn bản"
-                  style={{ width: "100%" }}
-                  onChange={(value) => {
-                    const selected = listDocumentTemplates.find(
-                      (tpl) => tpl.id === value
-                    );
-                    setSelectedTemplate(selected);
-                  }}
-                  value={selectedTemplate?.id}
-                >
-                  {listDocumentTemplates.map((template) => (
-                    <Option key={template.id} value={template.id}>
-                      {template.name}
-                    </Option>
-                  ))}
-                </Select>
+                {showDocumentTemplateSelect && (
+                  <>
+                    <div
+                      style={{
+                        marginBottom: 8,
+                        marginTop: 8,
+                        fontWeight: "bold",
+                        fontSize: "15px",
+                      }}
+                    >
+                      Vui lòng chọn mẫu văn bản:
+                    </div>
+                    <Select
+                      placeholder="Chọn mẫu văn bản"
+                      style={{ width: "100%" }}
+                      onChange={(value) => {
+                        const selected = listDocumentTemplates.find(
+                          (tpl) => tpl.id === value
+                        );
+                        setSelectedTemplate(selected);
+                      }}
+                      value={selectedTemplate?.id}
+                    >
+                      {listDocumentTemplates.map((template) => (
+                        <Option key={template.id} value={template.id}>
+                          {template.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </>
+                )}
               </>
             )}
           </div>
