@@ -37,6 +37,7 @@ import { useCurrentApp } from "@/components/context/app.context";
 import DetailTaskModal from "./detail.task.modal";
 import EditTaskModal from "./edit.task.modal";
 import { IoIosNavigate } from "react-icons/io";
+import UserInfoModal from "../users/user.info.modal";
 
 const { Text, Title } = Typography;
 const { Step } = Steps;
@@ -70,6 +71,8 @@ const ViewDetailProgress = () => {
   const [openTaskDetailModal, setOpenTaskDetailModal] = useState(false);
   const [openEditInitTaskModal, setOpenEditInitTaskModal] = useState(false);
   const [firstTask, setFirstTask] = useState(null);
+  const [openUserInfoModal, setOpenUserInfoModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const fetchProgress = async () => {
     setLoading(true);
@@ -458,12 +461,16 @@ const ViewDetailProgress = () => {
             {dayjs(task?.startDate).format("DD-MM-YYYY HH:mm")}
           </Text>
           <Tooltip title={task?.user?.fullName}>
-            <Image
+            <img
               width={24}
               height={24}
               src={task?.user?.avatar}
               style={{ borderRadius: "50%", objectFit: "cover" }}
-              preview={false}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenUserInfoModal(true);
+                setCurrentUser(task?.user);
+              }}
             />
           </Tooltip>
         </div>
@@ -661,6 +668,12 @@ const ViewDetailProgress = () => {
           setTaskCreated={setTaskCreated}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
+        />
+        <UserInfoModal
+          openUserInfoModal={openUserInfoModal}
+          setOpenUserInfoModal={setOpenUserInfoModal}
+          currentUser={currentUser}
+          setCurrentUser={setCurrentUser}
         />
       </div>
     </div>

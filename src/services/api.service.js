@@ -708,6 +708,11 @@ const createLogDownloadAPI = (documentId) => {
   return axios.get(urlBackend);
 };
 
+const viewDivisionDetailsAPI = (divisionId) => {
+  const urlBackend = `/api/Division/view-division-details?divisionId=${divisionId}`;
+  return axios.get(urlBackend);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -779,4 +784,5 @@ export {
   createReplaceDocumentAPI,
   deleteTemplateAPI,
   createLogDownloadAPI,
+  viewDivisionDetailsAPI,
 };

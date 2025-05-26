@@ -181,9 +181,8 @@ const ViewDetailArchivedDocument = () => {
     try {
       const response = await viewAllUserAPI(1, 100, {}, {});
       if (response?.data?.statusCode === 200) {
-        const currentUserId = localStorage.getItem("user_id");
         const listUser = response.data.content.filter(
-          (user) => user.userId !== currentUserId && user.userName !== "admin"
+          (user) => user.userName?.trim().toLowerCase() !== "admin"
         );
         const filterUsers = listUser.filter(
           (user) =>

@@ -1,0 +1,23 @@
+.user-info-container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: 16px;
+}
+
+.avatar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+}
+
+.user-fullname {
+  margin-top: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.info-column {
+  flex: 1;
+}

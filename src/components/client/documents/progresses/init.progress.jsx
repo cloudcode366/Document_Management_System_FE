@@ -43,6 +43,7 @@ import AddTaskModal from "./add.task.modal";
 import { useCurrentApp } from "@/components/context/app.context";
 import DetailTaskModal from "./detail.task";
 import EditInitTaskModal from "./edit.init.task.modal";
+import UserInfoModal from "../../users/user.info.modal";
 
 const { Text, Title } = Typography;
 const { Step } = Steps;
@@ -79,6 +80,8 @@ const ViewInitProgress = () => {
   const [openEditInitTaskModal, setOpenEditInitTaskModal] = useState(false);
   const [isSecondTask, setIsSecondTask] = useState(false);
   const [scope, setScope] = useState(null);
+  const [openUserInfoModal, setOpenUserInfoModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const fetchProgress = async () => {
     setLoading(true);
@@ -92,6 +95,8 @@ const ViewInitProgress = () => {
         data?.workflowRequest?.scope !== "InComing"
       ) {
         setIsSecondTask(true);
+      } else {
+        setIsSecondTask(false);
       }
       setScope(data?.workflowRequest?.scope);
     } else {
@@ -364,64 +369,67 @@ const ViewInitProgress = () => {
         e.currentTarget.style.border = "1px solid transparent";
       }}
     >
-      {task.taskId !== taskId && (
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            modal.confirm({
-              title: "Bạn có chắc muốn xoá nhiệm vụ này?",
-              onOk: async () => {
-                setIsDeleteTask(true);
+      {task.taskId !== taskId &&
+        task.taskStatus !== "Completed" &&
+        task.taskStatus !== "InProgress" && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              modal.confirm({
+                title: "Bạn có chắc muốn xoá nhiệm vụ này?",
+                cancelText: "Huỷ",
+                onOk: async () => {
+                  setIsDeleteTask(true);
 
-                try {
-                  const res = await deleteTaskAPI(task.taskId);
+                  try {
+                    const res = await deleteTaskAPI(task.taskId);
 
-                  if (res?.data?.statusCode === 200) {
-                    message.success("Xoá nhiệm vụ thành công");
-                    setTaskCreated(true);
-                  } else {
-                    let errorMessage = res?.data?.content;
-                    if (
-                      errorMessage === "Task 1 has completed, cannot delete"
-                    ) {
-                      errorMessage =
-                        "Nhiệm vụ đầu tiên của luồng xử lý đã hoàn thành, không thể xóa nhiệm vụ được nữa!";
+                    if (res?.data?.statusCode === 200) {
+                      message.success("Xoá nhiệm vụ thành công");
+                      setTaskCreated(true);
+                    } else {
+                      let errorMessage = res?.data?.content;
+                      if (
+                        errorMessage === "Task 1 has completed, cannot delete"
+                      ) {
+                        errorMessage =
+                          "Nhiệm vụ đầu tiên của luồng xử lý đã hoàn thành, không thể xóa nhiệm vụ được nữa!";
+                      }
+                      notification.error({
+                        message: "Hệ thống đang bận",
+                        description: errorMessage,
+                      });
                     }
+                  } catch (error) {
                     notification.error({
-                      message: "Hệ thống đang bận",
-                      description: errorMessage,
+                      message: "Lỗi hệ thống",
+                      description:
+                        "Không thể xóa nhiệm vụ, xin vui lòng thử lại sau.",
                     });
+                  } finally {
+                    setIsDeleteTask(false);
                   }
-                } catch (error) {
-                  notification.error({
-                    message: "Lỗi hệ thống",
-                    description:
-                      "Không thể xóa nhiệm vụ, xin vui lòng thử lại sau.",
-                  });
-                } finally {
-                  setIsDeleteTask(false);
-                }
-              },
-              loading: isDeleteTask,
-            });
-          }}
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            background: "#fff",
-            borderRadius: "50%",
-            boxShadow: "0 0 4px rgba(0,0,0,0.2)",
-            padding: 4,
-            zIndex: 10,
-            cursor: "pointer",
-          }}
-        >
-          <Tooltip title="Xoá nhiệm vụ">
-            <CloseCircleOutlined style={{ color: "#ff4d4f", fontSize: 18 }} />
-          </Tooltip>
-        </div>
-      )}
+                },
+                loading: isDeleteTask,
+              });
+            }}
+            style={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              background: "#fff",
+              borderRadius: "50%",
+              boxShadow: "0 0 4px rgba(0,0,0,0.2)",
+              padding: 4,
+              zIndex: 10,
+              cursor: "pointer",
+            }}
+          >
+            <Tooltip title="Xoá nhiệm vụ">
+              <CloseCircleOutlined style={{ color: "#ff4d4f", fontSize: 18 }} />
+            </Tooltip>
+          </div>
+        )}
 
       <Space direction="vertical" style={{ width: "100%" }}>
         <div
@@ -474,20 +482,22 @@ const ViewInitProgress = () => {
               {task.title}
             </Title>
           </Tooltip>
-          {task.taskId !== taskId && (
-            <Tooltip title="Cập nhật nhiệm vụ này">
-              <EditTwoTone
-                twoToneColor="#f57800"
-                style={{ cursor: "pointer", marginRight: 15, fontSize: 18 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedTask(task);
-                  setCurrentStep(step);
-                  setOpenEditInitTaskModal(true);
-                }}
-              />
-            </Tooltip>
-          )}
+          {task.taskId !== taskId &&
+            task.taskStatus !== "Completed" &&
+            task.taskStatus !== "InProgress" && (
+              <Tooltip title="Cập nhật nhiệm vụ này">
+                <EditTwoTone
+                  twoToneColor="#f57800"
+                  style={{ cursor: "pointer", marginRight: 15, fontSize: 18 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedTask(task);
+                    setCurrentStep(step);
+                    setOpenEditInitTaskModal(true);
+                  }}
+                />
+              </Tooltip>
+            )}
         </div>
 
         <Text style={{ color: "#666", fontSize: 14, marginTop: 0 }}>
@@ -542,12 +552,16 @@ const ViewInitProgress = () => {
             {dayjs(task?.startDate).format("DD-MM-YYYY HH:mm")}
           </Text>
           <Tooltip title={task?.user?.fullName}>
-            <Image
+            <img
               width={24}
               height={24}
               src={task?.user?.avatar}
               style={{ borderRadius: "50%", objectFit: "cover" }}
-              preview={false}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenUserInfoModal(true);
+                setCurrentUser(task?.user);
+              }}
             />
           </Tooltip>
         </div>
@@ -792,6 +806,12 @@ const ViewInitProgress = () => {
           setTaskCreated={setTaskCreated}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
+        />
+        <UserInfoModal
+          openUserInfoModal={openUserInfoModal}
+          setOpenUserInfoModal={setOpenUserInfoModal}
+          currentUser={currentUser}
+          setCurrentUser={setCurrentUser}
         />
       </div>
     </div>
