@@ -390,7 +390,7 @@ const ViewDetailProgress = () => {
             </Title>
           </Tooltip>
 
-          {task.taskId !== taskId && task.status === "Waiting" && (
+          {task.taskId !== taskId && task.taskStatus === "Waiting" && (
             <Tooltip title="Cập nhật nhiệm vụ này">
               <EditTwoTone
                 twoToneColor="#f57800"

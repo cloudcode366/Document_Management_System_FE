@@ -64,12 +64,12 @@ const ConfirmInfoDocumentProgress = (props) => {
         DateReceived: resDocument?.canChange?.DateReceived
           ? dayjs(resDocument?.canChange?.DateReceived)
           : null,
-        validTo: resDocument?.canChange?.validTo
-          ? dayjs(resDocument?.canChange?.validTo)
-          : null,
-        validFrom: resDocument?.canChange?.validFrom
-          ? dayjs(resDocument?.canChange?.validFrom)
-          : null,
+        // validTo: resDocument?.canChange?.validTo
+        //   ? dayjs(resDocument?.canChange?.validTo)
+        //   : null,
+        // validFrom: resDocument?.canChange?.validFrom
+        //   ? dayjs(resDocument?.canChange?.validFrom)
+        //   : null,
         Deadline: resDocument?.canChange?.Deadline
           ? dayjs(resDocument?.canChange?.Deadline)
           : null,

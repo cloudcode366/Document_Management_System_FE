@@ -150,7 +150,7 @@ export const convertColorArchivedStatus = (status) => {
 export function convertTaskType(taskType) {
   switch (taskType) {
     case "Create":
-      return "Khởi tạo văn bản";
+      return "Khởi tạo hoặc phân bổ văn bản";
     case "Browse":
       return "Duyệt văn bản";
     case "Sign":

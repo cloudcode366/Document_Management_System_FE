@@ -326,7 +326,7 @@ const CreateDocumentProgress = (props) => {
       <Modal
         title={
           <div style={{ borderBottom: "1px solid #80868b", paddingBottom: 8 }}>
-            Khởi tạo văn bản aaa
+            Khởi tạo văn bản
           </div>
         }
         width="50vw"
