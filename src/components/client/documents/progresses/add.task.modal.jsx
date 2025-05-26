@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import { createTaskAPI, viewAllUserAPI } from "@/services/api.service";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { useCurrentApp } from "@/components/context/app.context";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -38,6 +39,7 @@ const AddTaskModal = (props) => {
   const [users, setUsers] = useState([]);
   const { message, notification } = App.useApp();
   const [isSubmit, setIsSubmit] = useState(false);
+  const { user } = useCurrentApp();
 
   useEffect(() => {
     if (openModalCreate) {
@@ -53,18 +55,38 @@ const AddTaskModal = (props) => {
 
   const fetchUsers = async () => {
     try {
-      const res = await viewAllUserAPI(
-        1,
-        100000,
-        { role: `${currentStep.role.roleName}` },
-        {}
-      );
-      const data = res.data.content.map((user) => ({
-        userId: user.userId,
-        fullName: user.fullName,
-        userName: user.userName,
-      }));
-      setUsers(data);
+      if (scope !== "Division") {
+        const res = await viewAllUserAPI(
+          1,
+          100000,
+          { role: `${currentStep.role.roleName}` },
+          {}
+        );
+
+        const data = res.data.content.map((user) => ({
+          userId: user.userId,
+          fullName: user.fullName,
+          userName: user.userName,
+        }));
+        setUsers(data);
+      } else {
+        const res = await viewAllUserAPI(
+          1,
+          100000,
+          {
+            role: `${currentStep.role.roleName}`,
+            division: `${user?.divisionDto?.divisionName}`,
+          },
+          {}
+        );
+
+        const data = res.data.content.map((user) => ({
+          userId: user.userId,
+          fullName: user.fullName,
+          userName: user.userName,
+        }));
+        setUsers(data);
+      }
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -96,7 +118,7 @@ const AddTaskModal = (props) => {
       form.resetFields();
     } else {
       let errorMessage = "";
-      errorMessage = res.data.content || "Đã có lỗi xảy ra";
+      errorMessage = res.data.content || "Tạo nhiệm vụ không thành công";
       if (
         errorMessage ===
         "Start times of current task must be greater than end task of previous task"
@@ -121,8 +143,21 @@ const AddTaskModal = (props) => {
         errorMessage =
           "Thời gian kết thúc của nhiệm vụ không được lớn hơn thời hạn xử lý";
       }
+      if (
+        errorMessage === "You cannot create task has task type submit in here"
+      ) {
+        errorMessage =
+          "Vui lòng kiểm tra lại người thực hiện hoặc nhiệm vụ chính";
+      }
+      if (
+        errorMessage ===
+        "Start date of the task must be greater than the end date of the last task"
+      ) {
+        errorMessage =
+          "Thời gian bắt đầu của nhiệm vụ phải lớn hơn thời gian kết thúc của nhiệm vụ trước đó";
+      }
       notification.error({
-        message: "Đã có lỗi xảy ra",
+        message: "Tạo nhiệm vụ không thành công",
         description: errorMessage,
       });
     }
@@ -288,17 +323,24 @@ const AddTaskModal = (props) => {
                     <Option value="Upload">Tải văn bản lên</Option>
                   ) : scope === "InComing" ? (
                     <>
-                      <Option value="Create">
-                        Khởi tạo hoặc phân bổ văn bản
-                      </Option>
-                      <Option value="Browse">Duyệt văn bản</Option>
+                      {currentStep?.role?.roleName === "Chief" && (
+                        <Option value="Create">
+                          Khởi tạo hoặc phân bổ văn bản
+                        </Option>
+                      )}
+                      {currentStep?.role?.roleName === "Chief" && (
+                        <Option value="Browse">Duyệt văn bản</Option>
+                      )}
                       <Option value="View">Xem văn bản</Option>
                     </>
                   ) : (
                     <>
                       <Option value="Browse">Duyệt văn bản</Option>
                       <Option value="Submit">Nộp văn bản</Option>
-                      <Option value="Sign">Ký điện tử</Option>
+                      {(currentStep?.role?.roleName === "Chief" ||
+                        currentStep?.role?.roleName === "Leader") && (
+                        <Option value="Sign">Ký điện tử</Option>
+                      )}
                     </>
                   )}
                 </Select>
