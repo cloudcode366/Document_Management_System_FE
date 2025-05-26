@@ -77,6 +77,8 @@ const ViewInitProgress = () => {
   const [openTaskDetailModal, setOpenTaskDetailModal] = useState(false);
   const [isDeleteTask, setIsDeleteTask] = useState(false);
   const [openEditInitTaskModal, setOpenEditInitTaskModal] = useState(false);
+  const [isSecondTask, setIsSecondTask] = useState(false);
+  const [scope, setScope] = useState(null);
 
   const fetchProgress = async () => {
     setLoading(true);
@@ -85,6 +87,13 @@ const ViewInitProgress = () => {
       const data = res.data.content;
       setProcessDetail(data);
       setTaskId(data?.workflowRequest?.flows[0]?.steps[0]?.taskDtos[0]?.taskId);
+      if (
+        data?.workflowRequest?.flows[0]?.steps[0]?.taskDtos.length === 1 &&
+        data?.workflowRequest?.scope !== "InComing"
+      ) {
+        setIsSecondTask(true);
+      }
+      setScope(data?.workflowRequest?.scope);
     } else {
       notification.error({
         message: "Tải dữ liệu thất bại",
@@ -240,8 +249,7 @@ const ViewInitProgress = () => {
                         type="primary"
                         icon={<PlusCircleOutlined />}
                         onClick={() => {
-                          setCurrentStep(step);
-                          setOpenModalCreate(true);
+                          handleOpenModalCreate(step);
                         }}
                         style={{ top: -20, backgroundColor: "#FC8330" }}
                       >
@@ -624,13 +632,20 @@ const ViewInitProgress = () => {
           errorMessage = "Có một bước không có nhiệm vụ nào được tạo!";
         }
         notification.error({
-          message: "Xác nhận không thành công!",
-          description: errorMessage,
+          message: "Xác nhận không thành công",
+          description:
+            errorMessage ||
+            "Vui lòng kiểm tra lại đã có ít nhất một nhiệm vụ được phân bổ trong mỗi bước hay chưa!",
         });
       }
     }
 
     setIsSubmit(false);
+  };
+
+  const handleOpenModalCreate = (step) => {
+    setCurrentStep(step);
+    setOpenModalCreate(true);
   };
 
   const labelStyle = {
@@ -758,6 +773,10 @@ const ViewInitProgress = () => {
           taskCreated={taskCreated}
           setTaskCreated={setTaskCreated}
           documentId={documentId}
+          isSecondTask={isSecondTask}
+          setIsSecondTask={setIsSecondTask}
+          scope={scope}
+          setScope={setScope}
         />
         <DetailTaskModal
           openTaskDetailModal={openTaskDetailModal}

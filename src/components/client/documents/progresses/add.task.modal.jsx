@@ -29,11 +29,27 @@ const AddTaskModal = (props) => {
     currentStep,
     setTaskCreated,
     documentId,
+    isSecondTask,
+    setIsSecondTask,
+    scope,
+    setScope,
   } = props;
   const [form] = Form.useForm();
   const [users, setUsers] = useState([]);
   const { message, notification } = App.useApp();
   const [isSubmit, setIsSubmit] = useState(false);
+
+  useEffect(() => {
+    if (openModalCreate) {
+      fetchUsers();
+      if (isSecondTask && scope !== "InComing") {
+        form.setFieldsValue({ taskType: "Upload" });
+      }
+      if (currentStep?.taskDtos[0]?.user?.userId) {
+        form.setFieldsValue({ userId: currentStep.taskDtos[0].user.userId });
+      }
+    }
+  }, [openModalCreate, isSecondTask]);
 
   const fetchUsers = async () => {
     try {
@@ -53,12 +69,6 @@ const AddTaskModal = (props) => {
       console.error("Error fetching users:", error);
     }
   };
-
-  useEffect(() => {
-    if (openModalCreate) {
-      fetchUsers();
-    }
-  }, [openModalCreate]);
 
   const handleSave = async (values) => {
     setIsSubmit(true);
@@ -144,7 +154,7 @@ const AddTaskModal = (props) => {
           boxShadow: "0 0 10px rgba(0,0,0,0.05)",
         }}
       >
-        <Form form={form} layout="vertical" initialValues={{}}>
+        <Form form={form} layout="vertical">
           <Form.Item
             label="Tên nhiệm vụ"
             name="title"
@@ -269,13 +279,28 @@ const AddTaskModal = (props) => {
                   { required: true, message: "Vui lòng chọn nhiệm vụ chính!" },
                 ]}
               >
-                <Select placeholder="Chọn nhiệm vụ chính" allowClear>
-                  <Option value="Create">Khởi tạo văn bản</Option>
-                  <Option value="Browse">Duyệt văn bản</Option>
-                  <Option value="Submit">Nộp văn bản</Option>
-                  <Option value="Sign">Ký điện tử</Option>
-                  <Option value="View">Xem văn bản</Option>
-                  <Option value="Upload">Tải văn bản lên</Option>
+                <Select
+                  placeholder="Chọn nhiệm vụ chính"
+                  allowClear
+                  disabled={isSecondTask}
+                >
+                  {isSecondTask ? (
+                    <Option value="Upload">Tải văn bản lên</Option>
+                  ) : scope === "InComing" ? (
+                    <>
+                      <Option value="Create">
+                        Khởi tạo hoặc phân bổ văn bản
+                      </Option>
+                      <Option value="Browse">Duyệt văn bản</Option>
+                      <Option value="View">Xem văn bản</Option>
+                    </>
+                  ) : (
+                    <>
+                      <Option value="Browse">Duyệt văn bản</Option>
+                      <Option value="Submit">Nộp văn bản</Option>
+                      <Option value="Sign">Ký điện tử</Option>
+                    </>
+                  )}
                 </Select>
               </Form.Item>
             </Col>
@@ -294,6 +319,7 @@ const AddTaskModal = (props) => {
                   filterOption={(input, option) =>
                     option.children.toLowerCase().includes(input.toLowerCase())
                   }
+                  disabled={currentStep?.taskDtos[0]?.user?.userId}
                 >
                   {users.map((user) => (
                     <Select.Option key={user.userId} value={user.userId}>
