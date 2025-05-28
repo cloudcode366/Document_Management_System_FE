@@ -71,7 +71,7 @@ const ConfirmVersionModal = (props) => {
     const values = await form.validateFields();
     const effectiveDate =
       effectiveOption === "fromIssueDate" ? null : values.validFrom;
-    const attachments = values.attachments.map((item) => ({
+    const attachments = values?.attachments?.map((item) => ({
       name: item.name,
       file: item.file?.[0]?.originFileObj || null,
     }));
