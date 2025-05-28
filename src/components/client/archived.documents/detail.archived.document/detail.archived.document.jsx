@@ -49,6 +49,7 @@ import { convertArchivedStatus, convertScopeName } from "@/services/helper";
 import SignatureContainer from "../../documents/initial.signature/signature.container";
 import CreateWithdrawModal from "./create.withdraw.modal";
 import CreateReplaceModal from "./create.replace.modal";
+import { MdEmail } from "react-icons/md";
 
 const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
@@ -108,7 +109,7 @@ const statusColor = {
 const ViewDetailArchivedDocument = () => {
   const location = useLocation();
   const documentId = location.state?.documentId;
-  const { message } = App.useApp();
+  const { message, notification } = App.useApp();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState(null);
@@ -161,10 +162,17 @@ const ViewDetailArchivedDocument = () => {
         const rejectedVersions = data.versions.filter(
           (version) => version.isFinal === false
         );
+        const senderArray =
+          data.sender?.split(",").map((email) => email.trim()) || [];
+
+        const externalPartnerArray =
+          data.externalPartner?.split(",").map((email) => email.trim()) || [];
         setDocument({
           ...data,
           finalVersion,
           rejectedVersions,
+          senderArray,
+          externalPartnerArray,
         });
       } else {
         message.error("Không thể tải thông tin văn bản!");
@@ -230,7 +238,10 @@ const ViewDetailArchivedDocument = () => {
         setUserPermissions({});
         await fetchInfo();
       } else {
-        message.error("Chia sẻ thất bại!");
+        notification.error({
+          message: "Chia sẻ thất bại!",
+          description: response?.data?.content,
+        });
       }
     } catch (error) {
       console.error("Lỗi khi chia sẻ:", error);
@@ -343,6 +354,56 @@ const ViewDetailArchivedDocument = () => {
             </div>
           </Space>
           {index < document.granters.length - 1 && (
+            <Divider style={{ margin: "10px 0" }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const senderContent = (
+    <div
+      style={{
+        minWidth: 280,
+        maxHeight: 300,
+        overflowY: "auto",
+        paddingRight: 8,
+      }}
+    >
+      {document?.senderArray?.map((sender, index) => (
+        <div key={index}>
+          <Space direction="vertical" size={4}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <MdEmail style={{ color: "#1890ff" }} />
+              <span>{sender}</span>
+            </div>
+          </Space>
+          {index < document.senderArray.length - 1 && (
+            <Divider style={{ margin: "10px 0" }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const externalPartnerContent = (
+    <div
+      style={{
+        minWidth: 280,
+        maxHeight: 300,
+        overflowY: "auto",
+        paddingRight: 8,
+      }}
+    >
+      {document?.externalPartnerArray?.map((sender, index) => (
+        <div key={index}>
+          <Space direction="vertical" size={4}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <MdEmail style={{ color: "#1890ff" }} />
+              <span>{sender}</span>
+            </div>
+          </Space>
+          {index < document.externalPartnerArray.length - 1 && (
             <Divider style={{ margin: "10px 0" }} />
           )}
         </div>
@@ -629,9 +690,19 @@ const ViewDetailArchivedDocument = () => {
               >
                 {document?.documentName}
               </Title>
-              <Tag color={tagColor[convertScopeName(document?.scope)]}>
+              <Tag
+                color={tagColor[convertScopeName(document?.scope)]}
+                style={{ fontSize: 14 }}
+              >
                 {convertScopeName(document?.scope)}
               </Tag>
+              <Tag
+                color={document?.isExpire ? "red" : "green"}
+                style={{ fontSize: 14 }}
+              >
+                {!document?.isExpire ? "Còn hiệu lực" : "Hết hiệu lực"}
+              </Tag>
+
               <Divider
                 variant="solid"
                 style={{
@@ -834,29 +905,141 @@ const ViewDetailArchivedDocument = () => {
                     </span>
                   </div>
                 )}
-              {document?.sender && (
-                <div
-                  style={{
-                    fontSize: "14px",
-                    marginBottom: "8px",
-                    display: "flex",
-                    flexWrap: "wrap",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <span style={{ color: "#5f6368" }}>Người gửi:</span>
-                  <span
-                    style={{
-                      fontWeight: 500,
-                      textAlign: "right",
-                      maxWidth: "70%",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {document?.sender}
-                  </span>
-                </div>
-              )}
+              {Array.isArray(document?.senderArray) &&
+                (document.senderArray.length === 1 ? (
+                  <>
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        marginBottom: "8px",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span style={{ color: "#5f6368" }}>Người gửi:</span>
+                      <span
+                        style={{
+                          fontWeight: 500,
+                          textAlign: "right",
+                          maxWidth: "70%",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {document?.senderArray[0]}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  document?.senderArray?.length > 1 && (
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        marginBottom: "8px",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span style={{ color: "#5f6368" }}>Người gửi:</span>
+                      <span
+                        style={{
+                          fontWeight: 500,
+                          textAlign: "right",
+                          maxWidth: "70%",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        <Popover
+                          content={senderContent}
+                          title="Thông tin người gửi"
+                          trigger="click"
+                          placement="left"
+                        >
+                          <span
+                            style={{
+                              color: "#1890ff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Xem chi tiết
+                          </span>
+                        </Popover>
+                      </span>
+                    </div>
+                  )
+                ))}
+
+              {document?.scope !== "InComing" &&
+                Array.isArray(document?.externalPartnerArray) &&
+                (document.externalPartnerArray.length === 1 ? (
+                  <>
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        marginBottom: "8px",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span style={{ color: "#5f6368" }}>
+                        Đối tác bên ngoài:
+                      </span>
+                      <span
+                        style={{
+                          fontWeight: 500,
+                          textAlign: "right",
+                          maxWidth: "70%",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {document?.externalPartnerArray[0]}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  document?.externalPartnerArray?.length > 1 && (
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        marginBottom: "8px",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span style={{ color: "#5f6368" }}>
+                        Đối tác bên ngoài:
+                      </span>
+                      <span
+                        style={{
+                          fontWeight: 500,
+                          textAlign: "right",
+                          maxWidth: "70%",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        <Popover
+                          content={externalPartnerContent}
+                          title="Thông tin người gửi"
+                          trigger="click"
+                          placement="left"
+                        >
+                          <span
+                            style={{
+                              color: "#1890ff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Xem chi tiết
+                          </span>
+                        </Popover>
+                      </span>
+                    </div>
+                  )
+                ))}
+
               {document?.dateIssued &&
                 dayjs(document.dateIssued).year() > 1900 &&
                 dayjs(document.dateIssued).year() < 3000 && (
@@ -880,6 +1063,32 @@ const ViewDetailArchivedDocument = () => {
                     >
                       {document?.dateIssued &&
                         dayjs(document?.dateIssued).format("DD-MM-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
+              {document?.validFrom &&
+                dayjs(document.validFrom).year() > 1900 &&
+                dayjs(document.validFrom).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày có hiệu lực:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.validFrom &&
+                        dayjs(document?.validFrom).format("DD-MM-YYYY HH:mm")}
                     </span>
                   </div>
                 )}
@@ -1242,7 +1451,7 @@ const ViewDetailArchivedDocument = () => {
                 width: 150,
                 render: (_, record) => (
                   <Radio.Group
-                    value={userPermissions[record.userId] || "view"}
+                    value={userPermissions[record.userId] || "View"}
                     onChange={(e) =>
                       setUserPermissions({
                         ...userPermissions,

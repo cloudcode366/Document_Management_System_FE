@@ -15,6 +15,7 @@ const USBDigitalSignatureModal = ({
   setUSBReq,
   taskId,
   documentId,
+  documentName,
 }) => {
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -283,7 +284,7 @@ const USBDigitalSignatureModal = ({
             </p>
             {signatureResult.StatusCode === 200 && (
               <p style={{ color: "green" }}>
-                ✅ Ký thành công tài liệu: {USBReq?.documentId}
+                ✅ Ký thành công tài liệu: {documentName}
               </p>
             )}
           </div>

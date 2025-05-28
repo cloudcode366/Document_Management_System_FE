@@ -161,7 +161,7 @@ const AllTasks = () => {
                         margin: "5px 0",
                       }}
                     >
-                      {convertTaskType(task.taskType)}
+                      {convertTaskType(task.taskType, scope)}
                     </p>
                     <p
                       style={{

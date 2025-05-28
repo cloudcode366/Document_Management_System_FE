@@ -8,8 +8,9 @@ import {
   Divider,
   Tag,
   App,
+  Upload,
 } from "antd";
-import { FilePdfOutlined } from "@ant-design/icons";
+import { FilePdfOutlined, UploadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -20,6 +21,7 @@ import "./confirm.info.document.scss";
 import {
   createDocumentByTemplateAPI,
   createInComingDocumentAPI,
+  createUploadAttachmentAPI,
 } from "@/services/api.service";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -108,15 +110,27 @@ const ConfirmInfoDocument = (props) => {
         const NewSignerName = currentSigners.filter(
           (s) => !defaultSigner.includes(s)
         );
+        const attachments =
+          values?.attachments?.length > 0
+            ? values?.attachments?.map((item) => ({
+                name: item.name,
+                url: item.file?.[0]?.url,
+              }))
+            : null;
 
         const updatedCanChange = {
           ...resDocument?.canChange,
           ...values,
           NewSignerName: NewSignerName,
+          attachments: attachments,
+          validFrom: dayjs(values.validFrom).format("DD-MM-YYYY HH:mm"),
         };
 
         resDocument.canChange = updatedCanChange;
-
+        console.log(
+          `>>> Check data when confirm document Incoming: `,
+          resDocument
+        );
         const res = await createInComingDocumentAPI(resDocument);
         if (res && res.data && res.data.statusCode === 200) {
           const data = res.data.content;
@@ -166,7 +180,7 @@ const ConfirmInfoDocument = (props) => {
         }
       }
     } catch (err) {
-      console.warn("Form chưa hợp lệ:", err);
+      console.warn("Warning:", err);
     } finally {
       setIsLoading(false);
     }
@@ -308,12 +322,29 @@ const ConfirmInfoDocument = (props) => {
                   </Form.Item>
                   <Form.Item
                     label="Ngày ban hành"
-                    name="validFrom"
+                    name="dateIssued"
                     rules={[
                       {
                         required: true,
                         message: "Vui lòng chọn ngày ban hành!",
                       },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const DateReceived = getFieldValue("DateReceived");
+
+                          if (!value) return Promise.resolve();
+
+                          if (
+                            DateReceived &&
+                            value.isAfter(DateReceived, "minute")
+                          ) {
+                            return Promise.reject(
+                              new Error("Ngày ban hành phải trước ngày nhận!")
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      }),
                     ]}
                   >
                     <DatePicker
@@ -324,6 +355,64 @@ const ConfirmInfoDocument = (props) => {
                       disabledDate={(current) =>
                         current && current > dayjs().endOf("day")
                       } // Không cho chọn ngày trong tương lai
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Ngày có hiệu lực"
+                    name="validFrom"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn ngày có hiệu lực!",
+                      },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const issuedDate = getFieldValue("dateIssued");
+                          const deadline = getFieldValue("Deadline");
+                          const validTo = getFieldValue("validTo");
+
+                          if (!value) return Promise.resolve();
+
+                          if (
+                            issuedDate &&
+                            value.isBefore(issuedDate, "minute")
+                          ) {
+                            return Promise.reject(
+                              new Error(
+                                "Ngày có hiệu lực phải cùng ngày hoặc sau ngày ban hành!"
+                              )
+                            );
+                          }
+
+                          if (deadline && value.isAfter(deadline, "minute")) {
+                            return Promise.reject(
+                              new Error(
+                                "Ngày có hiệu lực phải trước hạn xử lý!"
+                              )
+                            );
+                          }
+
+                          if (validTo && value.isAfter(validTo, "minute")) {
+                            return Promise.reject(
+                              new Error(
+                                "Ngày có hiệu lực phải trước ngày hết hiệu lực!"
+                              )
+                            );
+                          }
+
+                          return Promise.resolve();
+                        },
+                      }),
+                    ]}
+                  >
+                    <DatePicker
+                      format="DD-MM-YYYY HH:mm"
+                      showTime={{ format: "HH:mm" }}
+                      style={{ width: "100%" }}
+                      placeholder="Vui lòng chọn ngày có hiệu lực"
+                      // disabledDate={(current) =>
+                      //   current && current > dayjs().endOf("day")
+                      // } // Không cho chọn ngày trong tương lai
                     />
                   </Form.Item>
                 </>
@@ -544,6 +633,126 @@ const ConfirmInfoDocument = (props) => {
                   >
                     <TextArea rows={5} placeholder="Nhập nội dung tóm tắt" />
                   </Form.Item>
+                  <Form.List name="attachments">
+                    {(fields, { add, remove }) => (
+                      <>
+                        <div style={{ marginBottom: 8, fontWeight: 600 }}>
+                          Danh sách tệp đính kèm
+                        </div>
+                        {fields.map(({ key, name, ...restField }) => (
+                          <Card
+                            key={key}
+                            size="small"
+                            type="inner"
+                            style={{ marginBottom: 12 }}
+                            title={`Tệp đính kèm ${name + 1}`}
+                            extra={
+                              <Button
+                                danger
+                                type="link"
+                                icon={<CloseOutlined />}
+                                onClick={() => remove(name)}
+                              ></Button>
+                            }
+                          >
+                            <Form.Item
+                              {...restField}
+                              label="Tên tệp hiển thị"
+                              name={[name, "name"]}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Vui lòng nhập tên tệp!",
+                                },
+                              ]}
+                            >
+                              <Input placeholder="Nhập tên hiển thị của tệp" />
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              label="Tải tệp"
+                              name={[name, "file"]}
+                              valuePropName="fileList"
+                              getValueFromEvent={(e) => {
+                                if (Array.isArray(e)) return e;
+                                return e?.fileList;
+                              }}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Vui lòng tải tệp lên!",
+                                },
+                              ]}
+                            >
+                              <Upload
+                                beforeUpload={(file) => {
+                                  const allowedExtensions = [
+                                    ".doc",
+                                    ".docx",
+                                    ".pdf",
+                                    ".xlsx",
+                                    ".ppt",
+                                    ".pptx",
+                                    ".jpg",
+                                    ".jpeg",
+                                    ".png",
+                                  ];
+                                  const fileExtension = file.name
+                                    .slice(file.name.lastIndexOf("."))
+                                    .toLowerCase();
+                                  const isValid =
+                                    allowedExtensions.includes(fileExtension);
+
+                                  if (!isValid) {
+                                    message.error(
+                                      "Chỉ cho phép các định dạng: .doc, .docx, .pdf, .xlsx, .ppt, .pptx, .jpg, .jpeg, .png"
+                                    );
+                                    return Upload.LIST_IGNORE;
+                                  }
+
+                                  return true;
+                                }}
+                                customRequest={async ({
+                                  file,
+                                  onError,
+                                  onSuccess,
+                                }) => {
+                                  try {
+                                    const response =
+                                      await createUploadAttachmentAPI(file);
+                                    const uploadedUrl = response?.data?.content;
+
+                                    // Gán URL để dùng lại lúc submit
+                                    file.url = uploadedUrl;
+
+                                    onSuccess(response?.data, file); // cần dòng này để Upload hoạt động đúng
+                                  } catch (err) {
+                                    onError?.(err);
+                                    message.error("Tải tệp lên thất bại!");
+                                  }
+                                }}
+                                maxCount={1}
+                              >
+                                <Button icon={<UploadOutlined />}>
+                                  Chọn tệp
+                                </Button>
+                              </Upload>
+                            </Form.Item>
+                          </Card>
+                        ))}
+                        <Form.Item>
+                          <Button
+                            type="dashed"
+                            onClick={() => add()}
+                            block
+                            icon={<PlusOutlined />}
+                          >
+                            Thêm tệp đính kèm
+                          </Button>
+                        </Form.Item>
+                      </>
+                    )}
+                  </Form.List>
                 </>
               )}
 
