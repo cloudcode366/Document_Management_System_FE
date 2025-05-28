@@ -688,7 +688,10 @@ const ViewDetailDocument = () => {
               >
                 {document?.documentName}
               </Title>
-              <Tag color={tagColor[convertScopeName(document?.scope)]}>
+              <Tag
+                color={tagColor[convertScopeName(document?.scope)]}
+                style={{ fontSize: 14 }}
+              >
                 {convertScopeName(document?.scope)}
               </Tag>
               <Divider

@@ -32,6 +32,8 @@ const EditInitTaskModal = (props) => {
     selectedTask,
     setSelectedTask,
     setTaskCreated,
+    scope,
+    setScope,
   } = props;
   const [form] = Form.useForm();
   const [users, setUsers] = useState([]);
@@ -67,7 +69,7 @@ const EditInitTaskModal = (props) => {
           ? dayjs(selectedTask.startDate)
           : null,
         endDate: selectedTask?.endDate ? dayjs(selectedTask.endDate) : null,
-        taskType: convertTaskType(selectedTask?.taskType),
+        taskType: convertTaskType(selectedTask?.taskType, scope),
         userId: selectedTask?.user?.userId,
       });
     }

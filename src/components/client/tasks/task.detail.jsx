@@ -295,7 +295,7 @@ const TaskDetail = () => {
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>
                 <span style={{ color: "#5f6368" }}>Nhiệm vụ chính:</span>
                 <span style={{ float: "right", fontWeight: 500 }}>
-                  {convertTaskType(taskData.taskDto.taskType)}
+                  {convertTaskType(taskData.taskDto.taskType, taskData.scope)}
                 </span>
               </div>
               <div style={{ fontSize: "14px", marginBottom: "8px" }}>

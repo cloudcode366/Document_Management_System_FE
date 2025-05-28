@@ -659,6 +659,7 @@ const ViewDetailProgress = () => {
           setOpenTaskDetailModal={setOpenTaskDetailModal}
           selectedTask={selectedTask}
           setSelectedTask={setSelectedTask}
+          scope={processDetail?.workflowRequest?.scope}
         />
         <EditTaskModal
           openEditInitTaskModal={openEditInitTaskModal}
@@ -668,6 +669,7 @@ const ViewDetailProgress = () => {
           setTaskCreated={setTaskCreated}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
+          scope={processDetail?.workflowRequest?.scope}
         />
         <UserInfoModal
           openUserInfoModal={openUserInfoModal}

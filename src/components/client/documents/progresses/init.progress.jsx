@@ -797,6 +797,8 @@ const ViewInitProgress = () => {
           setOpenTaskDetailModal={setOpenTaskDetailModal}
           selectedTask={selectedTask}
           setSelectedTask={setSelectedTask}
+          scope={scope}
+          setScope={setScope}
         />
         <EditInitTaskModal
           openEditInitTaskModal={openEditInitTaskModal}
@@ -806,6 +808,8 @@ const ViewInitProgress = () => {
           setTaskCreated={setTaskCreated}
           currentStep={currentStep}
           setCurrentStep={setCurrentStep}
+          scope={scope}
+          setScope={setScope}
         />
         <UserInfoModal
           openUserInfoModal={openUserInfoModal}

@@ -10,6 +10,8 @@ const DetailTaskModal = (props) => {
     setOpenTaskDetailModal,
     selectedTask,
     setSelectedTask,
+    scope,
+    setScope,
   } = props;
   const [form] = Form.useForm();
   useEffect(() => {
@@ -19,7 +21,7 @@ const DetailTaskModal = (props) => {
         description: selectedTask?.description,
         startDate: dayjs(selectedTask?.startDate).format("DD-MM-YYYY HH:mm"),
         endDate: dayjs(selectedTask?.endDate).format("DD-MM-YYYY HH:mm"),
-        taskType: convertTaskType(selectedTask?.taskType),
+        taskType: convertTaskType(selectedTask?.taskType, scope),
         fullName: selectedTask?.user.fullName,
       });
     }

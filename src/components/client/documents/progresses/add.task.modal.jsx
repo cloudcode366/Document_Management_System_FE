@@ -324,14 +324,14 @@ const AddTaskModal = (props) => {
                   ) : scope === "InComing" ? (
                     <>
                       {currentStep?.role?.roleName === "Chief" && (
-                        <Option value="Create">
-                          Khởi tạo hoặc phân bổ văn bản
-                        </Option>
+                        <Option value="Create">Phân bổ văn bản</Option>
                       )}
                       {currentStep?.role?.roleName === "Chief" && (
                         <Option value="Browse">Duyệt văn bản</Option>
                       )}
-                      <Option value="View">Xem văn bản</Option>
+                      {currentStep?.role?.roleName !== "Chief" && (
+                        <Option value="View">Xem văn bản</Option>
+                      )}
                     </>
                   ) : (
                     <>

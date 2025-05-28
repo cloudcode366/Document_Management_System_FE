@@ -299,12 +299,29 @@ const ConfirmInfoDocumentProgress = (props) => {
                   </Form.Item>
                   <Form.Item
                     label="Ngày ban hành"
-                    name="validFrom"
+                    name="dateIssued"
                     rules={[
                       {
                         required: true,
                         message: "Vui lòng chọn ngày ban hành!",
                       },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const DateReceived = getFieldValue("DateReceived");
+
+                          if (!value) return Promise.resolve();
+
+                          if (
+                            DateReceived &&
+                            value.isAfter(DateReceived, "minute")
+                          ) {
+                            return Promise.reject(
+                              new Error("Ngày ban hành phải trước ngày nhận!")
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      }),
                     ]}
                   >
                     <DatePicker
@@ -315,6 +332,61 @@ const ConfirmInfoDocumentProgress = (props) => {
                       disabledDate={(current) =>
                         current && current > dayjs().endOf("day")
                       } // Không cho chọn ngày trong tương lai
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Ngày có hiệu lực"
+                    name="validFrom"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn ngày có hiệu lực!",
+                      },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const issuedDate = getFieldValue("dateIssued");
+                          const deadline = getFieldValue("Deadline");
+                          const validTo = getFieldValue("validTo");
+
+                          if (!value) return Promise.resolve();
+
+                          if (issuedDate && value.isBefore(issuedDate, "day")) {
+                            return Promise.reject(
+                              new Error(
+                                "Ngày có hiệu lực phải cùng ngày hoặc sau ngày nhận!"
+                              )
+                            );
+                          }
+
+                          if (deadline && value.isAfter(deadline, "day")) {
+                            return Promise.reject(
+                              new Error(
+                                "Ngày có hiệu lực phải trước hạn xử lý!"
+                              )
+                            );
+                          }
+
+                          if (validTo && value.isAfter(validTo, "day")) {
+                            return Promise.reject(
+                              new Error(
+                                "Ngày có hiệu lực phải trước ngày hết hiệu lực!"
+                              )
+                            );
+                          }
+
+                          return Promise.resolve();
+                        },
+                      }),
+                    ]}
+                  >
+                    <DatePicker
+                      format="DD-MM-YYYY HH:mm"
+                      showTime={{ format: "HH:mm" }}
+                      style={{ width: "100%" }}
+                      placeholder="Vui lòng chọn ngày có hiệu lực"
+                      // disabledDate={(current) =>
+                      //   current && current > dayjs().endOf("day")
+                      // } // Không cho chọn ngày trong tương lai
                     />
                   </Form.Item>
                 </>

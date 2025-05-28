@@ -9,6 +9,9 @@ import {
   Typography,
   Alert,
   Table,
+  Radio,
+  DatePicker,
+  Upload,
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -19,9 +22,15 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import {
   createHandleTaskActionAPI,
+  createUploadAttachmentAPI,
   updateConfirmDocumentBySubmit,
 } from "@/services/api.service";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  ExclamationCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -41,9 +50,10 @@ const ConfirmVersionModal = (props) => {
   } = props;
 
   const [form] = Form.useForm();
-  const { notification } = App.useApp();
+  const { notification, message } = App.useApp();
   const { user } = useCurrentApp();
   const [isLoading, setIsLoading] = useState(false);
+  const [effectiveOption, setEffectiveOption] = useState("fromIssueDate");
 
   useEffect(() => {
     if (openConfirmModal) {
@@ -59,6 +69,12 @@ const ConfirmVersionModal = (props) => {
 
   const reallySubmit = async () => {
     const values = await form.validateFields();
+    const effectiveDate =
+      effectiveOption === "fromIssueDate" ? null : values.validFrom;
+    const attachments = values.attachments.map((item) => ({
+      name: item.name,
+      file: item.file?.[0]?.originFileObj || null,
+    }));
     const res = await updateConfirmDocumentBySubmit(
       documentId,
       values.documentName,
@@ -68,7 +84,9 @@ const ConfirmVersionModal = (props) => {
       values.documentContent,
       values.numberOfDocument,
       resDocument.isDifferent,
-      resDocument.fileBase64
+      resDocument.fileBase64,
+      effectiveDate,
+      attachments
     );
     if (res.data.statusCode === 200) {
       const res2 = await createHandleTaskActionAPI(
@@ -309,6 +327,48 @@ const ConfirmVersionModal = (props) => {
                 </Form.Item>
 
                 <Form.Item
+                  label="Ngày có hiệu lực"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn ngày có hiệu lực!",
+                    },
+                  ]}
+                >
+                  <Radio.Group
+                    onChange={(e) => setEffectiveOption(e.target.value)}
+                    value={effectiveOption}
+                  >
+                    <Radio value="fromIssueDate">
+                      Có hiệu lực từ ngày ban hành
+                    </Radio>
+                    <Radio value="custom">Ngày khác</Radio>
+                  </Radio.Group>
+                </Form.Item>
+
+                {effectiveOption === "custom" && (
+                  <Form.Item
+                    name="validFrom"
+                    label="Chọn ngày có hiệu lực"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn ngày có hiệu lực!",
+                      },
+                    ]}
+                  >
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      placeholder="Chọn ngày"
+                      format="DD-MM-YYYY"
+                      disabledDate={(current) =>
+                        current && current < dayjs().endOf("day")
+                      }
+                    />
+                  </Form.Item>
+                )}
+
+                <Form.Item
                   label="Nội dung"
                   name="documentContent"
                   rules={[
@@ -317,6 +377,126 @@ const ConfirmVersionModal = (props) => {
                 >
                   <TextArea rows={5} placeholder="Nhập nội dung tóm tắt" />
                 </Form.Item>
+                <Form.List name="attachments">
+                  {(fields, { add, remove }) => (
+                    <>
+                      <div style={{ marginBottom: 8, fontWeight: 600 }}>
+                        Danh sách tệp đính kèm
+                      </div>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Card
+                          key={key}
+                          size="small"
+                          type="inner"
+                          style={{ marginBottom: 12 }}
+                          title={`Tệp đính kèm ${name + 1}`}
+                          extra={
+                            <Button
+                              danger
+                              type="link"
+                              icon={<CloseOutlined />}
+                              onClick={() => remove(name)}
+                            ></Button>
+                          }
+                        >
+                          <Form.Item
+                            {...restField}
+                            label="Tên tệp hiển thị"
+                            name={[name, "name"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Vui lòng nhập tên tệp!",
+                              },
+                            ]}
+                          >
+                            <Input placeholder="Nhập tên hiển thị của tệp" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            label="Tải tệp"
+                            name={[name, "file"]}
+                            valuePropName="fileList"
+                            getValueFromEvent={(e) => {
+                              if (Array.isArray(e)) return e;
+                              return e?.fileList;
+                            }}
+                            rules={[
+                              {
+                                required: true,
+                                message: "Vui lòng tải tệp lên!",
+                              },
+                            ]}
+                          >
+                            <Upload
+                              beforeUpload={(file) => {
+                                const allowedExtensions = [
+                                  ".doc",
+                                  ".docx",
+                                  ".pdf",
+                                  ".xlsx",
+                                  ".ppt",
+                                  ".pptx",
+                                  ".jpg",
+                                  ".jpeg",
+                                  ".png",
+                                ];
+                                const fileExtension = file.name
+                                  .slice(file.name.lastIndexOf("."))
+                                  .toLowerCase();
+                                const isValid =
+                                  allowedExtensions.includes(fileExtension);
+
+                                if (!isValid) {
+                                  message.error(
+                                    "Chỉ cho phép các định dạng: .doc, .docx, .pdf, .xlsx, .ppt, .pptx, .jpg, .jpeg, .png"
+                                  );
+                                  return Upload.LIST_IGNORE;
+                                }
+
+                                return true;
+                              }}
+                              customRequest={async ({
+                                file,
+                                onError,
+                                onSuccess,
+                              }) => {
+                                try {
+                                  const response =
+                                    await createUploadAttachmentAPI(file);
+                                  const uploadedUrl = response?.data?.content;
+
+                                  // Gán URL để dùng lại lúc submit
+                                  file.url = uploadedUrl;
+
+                                  onSuccess(response?.data, file); // cần dòng này để Upload hoạt động đúng
+                                } catch (err) {
+                                  onError?.(err);
+                                  message.error("Tải tệp lên thất bại!");
+                                }
+                              }}
+                              maxCount={1}
+                            >
+                              <Button icon={<UploadOutlined />}>
+                                Chọn tệp
+                              </Button>
+                            </Upload>
+                          </Form.Item>
+                        </Card>
+                      ))}
+                      <Form.Item>
+                        <Button
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          icon={<PlusOutlined />}
+                        >
+                          Thêm tệp đính kèm
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
 
                 <div style={{ marginTop: "auto" }}>
                   <Divider />

@@ -713,6 +713,19 @@ const viewDivisionDetailsAPI = (divisionId) => {
   return axios.get(urlBackend);
 };
 
+const createUploadAttachmentAPI = (file) => {
+  const URL_BACKEND = `/api/Document/create-upload-attachment`;
+  let config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
+  const bodyFormData = new FormData();
+  bodyFormData.append("attachmentDocumentRequest", file);
+  return axios.post(URL_BACKEND, bodyFormData, config);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -785,4 +798,5 @@ export {
   deleteTemplateAPI,
   createLogDownloadAPI,
   viewDivisionDetailsAPI,
+  createUploadAttachmentAPI,
 };

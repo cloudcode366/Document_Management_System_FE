@@ -542,6 +542,7 @@ const DigitalSignatureComponent = () => {
         setUSBReq={setUSBReq}
         taskId={taskId}
         documentId={documentId}
+        documentName={document?.documentName}
       />
     </div>
   );
