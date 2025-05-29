@@ -29,6 +29,7 @@ import {
   CheckCircleOutlined,
   UserOutlined,
   ClockCircleOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import "./view.detail.document.scss";
@@ -49,7 +50,7 @@ import { convertProcessingStatus, convertScopeName } from "@/services/helper";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Link } = Typography;
 
 const ActionButtonsGroup = ({ buttons }) => {
   const rows = [];
@@ -276,6 +277,38 @@ const ViewDetailDocument = () => {
       });
     }
     setIsSubmit(false);
+  };
+
+  const handleDownload = async (file) => {
+    if (typeof window === "undefined" || typeof document === "undefined")
+      return;
+
+    try {
+      const response = await fetch(file.attachmentDocumentUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Tải xuống thất bại");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = file.attachmentName || "file";
+      window.document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      message.error("Không thể tải tệp xuống");
+    }
   };
 
   // Tải văn bản
@@ -953,6 +986,32 @@ const ViewDetailDocument = () => {
                     </span>
                   </div>
                 )}
+              {document?.validFrom &&
+                dayjs(document.validFrom).year() > 1900 &&
+                dayjs(document.validFrom).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày có hiệu lực:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.validFrom &&
+                        dayjs(document?.validFrom).format("MM-DD-YYYY HH:mm")}
+                    </span>
+                  </div>
+                )}
               {document?.dateExpires &&
                 dayjs(document.dateExpires).year() > 1900 &&
                 dayjs(document.dateExpires).year() < 3000 && (
@@ -1067,7 +1126,42 @@ const ViewDetailDocument = () => {
                   ></Divider>
                 </>
               )}
-
+              {Array.isArray(document?.attachments) &&
+                document.attachments.length > 0 && (
+                  <>
+                    <Typography.Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        marginBottom: 8,
+                        display: "block",
+                      }}
+                    >
+                      Tệp đính kèm
+                    </Typography.Text>
+                    <List
+                      itemLayout="horizontal"
+                      dataSource={document.attachments}
+                      renderItem={(item, index) => (
+                        <List.Item>
+                          <Link
+                            onClick={() => handleDownload(item)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <DownloadOutlined style={{ marginRight: 8 }} />
+                            {index + 1}. {item.attachmentDocumentName}
+                          </Link>
+                        </List.Item>
+                      )}
+                    />
+                    <Divider
+                      variant="solid"
+                      style={{
+                        borderColor: "#80868b",
+                      }}
+                    ></Divider>
+                  </>
+                )}
               <Typography.Text style={{ fontSize: 16, fontWeight: 600 }}>
                 Danh sách các phiên bản
               </Typography.Text>

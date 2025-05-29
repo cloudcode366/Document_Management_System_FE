@@ -283,9 +283,7 @@ const USBDigitalSignatureModal = ({
               <strong>Kết quả ký:</strong>
             </p>
             {signatureResult.StatusCode === 200 && (
-              <p style={{ color: "green" }}>
-                ✅ Ký thành công tài liệu: {documentName}
-              </p>
+              <p style={{ color: "green" }}>✅ Văn bản đã được ký thành công</p>
             )}
           </div>
         )}
