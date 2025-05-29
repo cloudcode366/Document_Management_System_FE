@@ -30,6 +30,7 @@ import {
   EyeOutlined,
   FileTextOutlined,
   CloseOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import SignatureBox from "@/components/client/documents/initial.signature/signature.box";
@@ -41,7 +42,6 @@ import {
   viewArchivedDocumentDetailAPI,
 } from "@/services/api.service";
 import dayjs from "dayjs";
-import axios from "axios";
 import { useCurrentApp } from "@/components/context/app.context";
 import ArchivedPDFViewerWithToken from "@/components/archived.pdf.viewer";
 import "./detail.archived.document.scss";
@@ -50,13 +50,14 @@ import SignatureContainer from "../../documents/initial.signature/signature.cont
 import CreateWithdrawModal from "./create.withdraw.modal";
 import CreateReplaceModal from "./create.replace.modal";
 import { MdEmail } from "react-icons/md";
+import UserInfo from "../../documents/detail.document/user.info.modal";
 
 const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
 const SCOPE = "openid email https://mail.google.com/";
 const REDIRECT_URI = window.location.origin + "/send-email";
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Link } = Typography;
 
 const ActionButtonsGroup = ({ buttons }) => {
   const rows = [];
@@ -122,6 +123,8 @@ const ViewDetailArchivedDocument = () => {
   const buttons = [];
   const [openModalWithdraw, setOpenModalWithdraw] = useState(false);
   const [openModalReplace, setOpenModalReplace] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [openUserInfoModal, setOpenUserInfoModal] = useState(false);
 
   const loginWithGoogle = () => {
     localStorage.setItem("documentId", documentId);
@@ -249,6 +252,38 @@ const ViewDetailArchivedDocument = () => {
     }
   };
 
+  const handleDownload = async (file) => {
+    if (typeof window === "undefined" || typeof document === "undefined")
+      return;
+
+    try {
+      const response = await fetch(file.attachmentUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Tải xuống thất bại");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = window.document.createElement("a");
+      a.href = url;
+      a.download = file.attachmentName || "file";
+      window.document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      message.error("Không thể tải tệp xuống");
+    }
+  };
+
   useEffect(() => {
     if (documentId) {
       fetchInfo();
@@ -302,12 +337,20 @@ const ViewDetailArchivedDocument = () => {
         <div key={index}>
           <Space direction="vertical" size={4} style={{ width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Image
+              <img
                 src={viewer?.avatar}
                 width={32}
                 height={32}
-                style={{ borderRadius: "50%", objectFit: "cover" }}
-                fallback="/default-avatar.png"
+                style={{
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenUserInfoModal(true);
+                  setUserId(viewer?.userId);
+                }}
               />
               <div>
                 <div>
@@ -338,12 +381,20 @@ const ViewDetailArchivedDocument = () => {
         <div key={index}>
           <Space direction="vertical" size={4} style={{ width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Image
+              <img
                 src={granter?.avatar}
                 width={32}
                 height={32}
-                style={{ borderRadius: "50%", objectFit: "cover" }}
-                fallback="/default-avatar.png"
+                style={{
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenUserInfoModal(true);
+                  setUserId(granter?.userId);
+                }}
               />
               <div>
                 <div>
@@ -1088,7 +1139,7 @@ const ViewDetailArchivedDocument = () => {
                       }}
                     >
                       {document?.validFrom &&
-                        dayjs(document?.validFrom).format("DD-MM-YYYY HH:mm")}
+                        dayjs(document?.validFrom).format("MM-DD-YYYY HH:mm")}
                     </span>
                   </div>
                 )}
@@ -1264,6 +1315,42 @@ const ViewDetailArchivedDocument = () => {
                   ></Divider>
                 </>
               )}
+              {Array.isArray(document?.attachments) &&
+                document.attachments.length > 0 && (
+                  <>
+                    <Typography.Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        marginBottom: 8,
+                        display: "block",
+                      }}
+                    >
+                      Tệp đính kèm
+                    </Typography.Text>
+                    <List
+                      itemLayout="horizontal"
+                      dataSource={document.attachments}
+                      renderItem={(item, index) => (
+                        <List.Item>
+                          <Link
+                            onClick={() => handleDownload(item)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <DownloadOutlined style={{ marginRight: 8 }} />
+                            {index + 1}. {item.attachmentName}
+                          </Link>
+                        </List.Item>
+                      )}
+                    />
+                    <Divider
+                      variant="solid"
+                      style={{
+                        borderColor: "#80868b",
+                      }}
+                    ></Divider>
+                  </>
+                )}
               {(document?.revokeDocument?.documentId ||
                 document?.replacedDocument?.documentId) && (
                 <>
@@ -1497,6 +1584,12 @@ const ViewDetailArchivedDocument = () => {
         openModalReplace={openModalReplace}
         setOpenModalReplace={setOpenModalReplace}
         documentId={documentId}
+      />
+      <UserInfo
+        userId={userId}
+        setUserId={setUserId}
+        openUserInfoModal={openUserInfoModal}
+        setOpenUserInfoModal={setOpenUserInfoModal}
       />
     </div>
   );
