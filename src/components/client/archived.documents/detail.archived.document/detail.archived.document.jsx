@@ -167,9 +167,12 @@ const ViewDetailArchivedDocument = () => {
         );
         const senderArray =
           data.sender?.split(",").map((email) => email.trim()) || [];
+        let externalPartnerArray = [];
+        if (data?.scope !== "InComing") {
+          externalPartnerArray =
+            data.receivedBy?.split(",").map((email) => email.trim()) || [];
+        }
 
-        const externalPartnerArray =
-          data.externalPartner?.split(",").map((email) => email.trim()) || [];
         setDocument({
           ...data,
           finalVersion,
@@ -1034,9 +1037,7 @@ const ViewDetailArchivedDocument = () => {
                         justifyContent: "space-between",
                       }}
                     >
-                      <span style={{ color: "#5f6368" }}>
-                        Đối tác bên ngoài:
-                      </span>
+                      <span style={{ color: "#5f6368" }}>Người nhận:</span>
                       <span
                         style={{
                           fontWeight: 500,
@@ -1060,9 +1061,7 @@ const ViewDetailArchivedDocument = () => {
                         justifyContent: "space-between",
                       }}
                     >
-                      <span style={{ color: "#5f6368" }}>
-                        Đối tác bên ngoài:
-                      </span>
+                      <span style={{ color: "#5f6368" }}>Người nhận:</span>
                       <span
                         style={{
                           fontWeight: 500,

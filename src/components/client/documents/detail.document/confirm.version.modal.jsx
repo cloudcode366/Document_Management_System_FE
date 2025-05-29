@@ -284,11 +284,13 @@ const ConfirmVersionModal = (props) => {
                     },
                   ]}
                   validateStatus={
-                    resDocument?.isDifferent ? "warning" : undefined
+                    resDocument && resDocument.isDifferent
+                      ? "warning"
+                      : undefined
                   }
                   help={
-                    resDocument?.isDifferent
-                      ? `Tên AI nhận dạng: ${resDocument?.aiDocumentName}`
+                    resDocument && resDocument.isDifferent
+                      ? `Tên văn bản AI nhận dạng: ${resDocument?.aiDocumentName}`
                       : ""
                   }
                 >

@@ -266,7 +266,7 @@ const ViewDetailDocument = () => {
     if (res?.data?.statusCode === 200) {
       notification.success({
         message: "Nộp văn bản thành công!",
-        description: "Văn bản đã được duyệt thành công.",
+        description: "Văn bản đã được nộp thành công.",
       });
       setOpenSubmitConfirmModal(false);
       await fetchInfo();
