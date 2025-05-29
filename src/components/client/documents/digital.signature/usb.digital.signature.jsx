@@ -17,7 +17,7 @@ const USBDigitalSignatureModal = ({
   documentId,
   documentName,
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   const [signatureResult, setSignatureResult] = useState(null);
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ const USBDigitalSignatureModal = ({
       connection.error((err) => {
         if (mountedRef.current) {
           appendMessage(`❌ Lỗi kết nối SignalR: ${err}`);
-          message.error("Lỗi kết nối với ứng dụng ký.");
+          message.error("Lỗi kết nối với ứng dụng ký Digital Sign.");
           setLoading(false);
         }
       });
@@ -100,7 +100,8 @@ const USBDigitalSignatureModal = ({
         });
     } catch (err) {
       appendMessage(`❌ Lỗi khởi tạo SignalR: ${err.message}`);
-      message.error("Không thể khởi tạo kết nối.");
+      message.error(`Không thể khởi tạo kết nối. Vui lòng kiểm tra lại đã cắm USB
+                chưa và đã mở Digital Sign và BkavCA Token Manager chưa.`);
       setLoading(false);
       throw err;
     }
@@ -168,7 +169,7 @@ const USBDigitalSignatureModal = ({
       } else {
         const msg = parsedResult?.Message || "Không rõ lý do";
         appendMessage(`❌ Ký thất bại: ${msg}`);
-        message.error(`Ký thất bại: ${msg}`);
+        // message.error(`Ký thất bại: ${msg}`);
       }
     },
     [
@@ -233,7 +234,12 @@ const USBDigitalSignatureModal = ({
     <Modal
       title="Quá trình ký số USB"
       open={openUSBDigitalSignatureModal}
-      onCancel={() => setOpenUSBDigitalSignatureModal(false)}
+      onCancel={() => {
+        if (!loading) {
+          setOpenUSBDigitalSignatureModal(false);
+          setLoading(true);
+        }
+      }}
       footer={null}
       width={600}
       maskClosable={false}
@@ -277,14 +283,11 @@ const USBDigitalSignatureModal = ({
           )}
         </div> */}
 
-        {signatureResult && (
+        {signatureResult && signatureResult.StatusCode === 200 && (
           <div style={{ border: "1px solid #d9d9d9", padding: 16 }}>
-            <p>
-              <strong>Kết quả ký:</strong>
+            <p style={{ color: "green" }}>
+              ✅ Văn bản đã được ký thành công. Vui lòng đợi trong giây lát...
             </p>
-            {signatureResult.StatusCode === 200 && (
-              <p style={{ color: "green" }}>✅ Văn bản đã được ký thành công</p>
-            )}
           </div>
         )}
       </div>
