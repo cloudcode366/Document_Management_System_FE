@@ -43,10 +43,15 @@ import {
   viewDetailDocumentAPI,
 } from "@/services/api.service";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { pdfjs } from "react-pdf";
 import PDFViewerWithToken from "@/components/pdf.viewer";
 import CreateVersionModal from "./create.version.modal";
 import { convertProcessingStatus, convertScopeName } from "@/services/helper";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -1008,7 +1013,10 @@ const ViewDetailDocument = () => {
                       }}
                     >
                       {document?.validFrom &&
-                        dayjs(document?.validFrom).format("MM-DD-YYYY HH:mm")}
+                        dayjs
+                          .utc(document.validFrom)
+                          .tz("Asia/Ho_Chi_Minh")
+                          .format("DD-MM-YYYY HH:mm")}
                     </span>
                   </div>
                 )}

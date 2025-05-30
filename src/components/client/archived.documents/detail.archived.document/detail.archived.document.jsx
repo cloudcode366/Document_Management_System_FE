@@ -42,6 +42,8 @@ import {
   viewArchivedDocumentDetailAPI,
 } from "@/services/api.service";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { useCurrentApp } from "@/components/context/app.context";
 import ArchivedPDFViewerWithToken from "@/components/archived.pdf.viewer";
 import "./detail.archived.document.scss";
@@ -51,6 +53,9 @@ import CreateWithdrawModal from "./create.withdraw.modal";
 import CreateReplaceModal from "./create.replace.modal";
 import { MdEmail } from "react-icons/md";
 import UserInfo from "../../documents/detail.document/user.info.modal";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const CLIENT_ID =
   "574718261918-j6trtu7cd141fqc26nt436ipmicdaagf.apps.googleusercontent.com";
@@ -1138,7 +1143,10 @@ const ViewDetailArchivedDocument = () => {
                       }}
                     >
                       {document?.validFrom &&
-                        dayjs(document?.validFrom).format("MM-DD-YYYY HH:mm")}
+                        dayjs
+                          .utc(document.validFrom)
+                          .tz("Asia/Ho_Chi_Minh")
+                          .format("DD-MM-YYYY HH:mm")}
                     </span>
                   </div>
                 )}

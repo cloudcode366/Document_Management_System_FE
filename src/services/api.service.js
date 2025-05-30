@@ -653,7 +653,9 @@ const updateConfirmDocumentBySubmit = (
   documentContent,
   numberOfDocument,
   isDifferent,
-  fileBase64
+  fileBase64,
+  validFrom,
+  attachments
 ) => {
   const urlBackend = `/api/Document/update-confirm-document-by-submit`;
   return axios.post(urlBackend, {
@@ -666,6 +668,8 @@ const updateConfirmDocumentBySubmit = (
     numberOfDocument,
     isDifferent,
     fileBase64,
+    validFrom,
+    attachments,
   });
 };
 
