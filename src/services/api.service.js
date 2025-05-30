@@ -246,8 +246,8 @@ const createSubRoleAPI = (roleName) => {
   return axios.post(urlBackend, { roleName });
 };
 
-const viewAllFlowsAPI = () => {
-  const urlBackend = `/api/Flow/view-all-flow`;
+const viewAllFlowsAPI = (scope) => {
+  const urlBackend = `/api/Flow/view-all-flow?scope=${scope}`;
   return axios.get(urlBackend);
 };
 
@@ -730,6 +730,11 @@ const createUploadAttachmentAPI = (file) => {
   return axios.post(URL_BACKEND, bodyFormData, config);
 };
 
+const updateWithdrawDocumentByIdAPI = (archiveDocumentId) => {
+  const URL_BACKEND = `/api/ArchiveDocument/update-withdraw-document-by-id?archiveDocumentId=${archiveDocumentId}`;
+  return axios.post(URL_BACKEND);
+};
+
 export {
   loginAPI,
   viewProfileUserAPI,
@@ -803,4 +808,5 @@ export {
   createLogDownloadAPI,
   viewDivisionDetailsAPI,
   createUploadAttachmentAPI,
+  updateWithdrawDocumentByIdAPI,
 };
