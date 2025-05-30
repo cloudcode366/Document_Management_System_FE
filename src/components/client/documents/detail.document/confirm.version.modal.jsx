@@ -69,12 +69,15 @@ const ConfirmVersionModal = (props) => {
 
   const reallySubmit = async () => {
     const values = await form.validateFields();
-    const effectiveDate =
+    const validFrom =
       effectiveOption === "fromIssueDate" ? null : values.validFrom;
-    const attachments = values?.attachments?.map((item) => ({
-      name: item.name,
-      file: item.file?.[0]?.originFileObj || null,
-    }));
+    const attachments =
+      values?.attachments?.length > 0
+        ? values?.attachments?.map((item) => ({
+            name: item.name,
+            url: item.file?.[0]?.url,
+          }))
+        : null;
     const res = await updateConfirmDocumentBySubmit(
       documentId,
       values.documentName,
@@ -85,7 +88,7 @@ const ConfirmVersionModal = (props) => {
       values.numberOfDocument,
       resDocument.isDifferent,
       resDocument.fileBase64,
-      effectiveDate,
+      validFrom,
       attachments
     );
     if (res.data.statusCode === 200) {

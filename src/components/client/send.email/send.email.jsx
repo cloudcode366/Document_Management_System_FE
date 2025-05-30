@@ -166,7 +166,12 @@ const SendEmailPage = () => {
       const res = await createSendEmailAPI(emailData);
       if (res.data.statusCode === 200) {
         message.success("Email đã được gửi thành công!");
-        navigate("/archived-document");
+        //navigate("/archived-document");
+        navigate("/detail-archived-document", {
+          state: {
+            documentId: documentId, // truyền documentId
+          },
+        });
       } else {
         message.error("Gửi email không thành công!");
       }

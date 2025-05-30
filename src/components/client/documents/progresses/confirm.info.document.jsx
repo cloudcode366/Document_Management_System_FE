@@ -123,7 +123,7 @@ const ConfirmInfoDocument = (props) => {
           ...values,
           NewSignerName: NewSignerName,
           attachments: attachments,
-          validFrom: dayjs(values.validFrom).format("DD-MM-YYYY HH:mm"),
+          // validFrom: dayjs(values.validFrom).format("DD-MM-YYYY HH:mm"),
         };
 
         resDocument.canChange = updatedCanChange;
