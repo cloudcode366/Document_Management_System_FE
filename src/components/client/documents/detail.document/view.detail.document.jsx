@@ -305,7 +305,7 @@ const ViewDetailDocument = () => {
 
       const a = window.document.createElement("a");
       a.href = url;
-      a.download = file.attachmentName || "file";
+      a.download = file.attachmentDocumentName || "file";
       window.document.body.appendChild(a);
       a.click();
       a.remove();
