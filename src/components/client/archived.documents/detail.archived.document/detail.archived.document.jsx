@@ -38,6 +38,7 @@ import { PiHandWithdraw } from "react-icons/pi";
 import { BeatLoader } from "react-spinners";
 import {
   grantPermissionAPI,
+  updateWithdrawDocumentByIdAPI,
   viewAllUserAPI,
   viewArchivedDocumentDetailAPI,
 } from "@/services/api.service";
@@ -265,24 +266,20 @@ const ViewDetailArchivedDocument = () => {
 
   const handleConfirmWithdraw = async () => {
     setIsSubmit(true);
-    // const res = await createHandleTaskActionAPI(
-    //   document?.taskId,
-    //   user.userId,
-    //   "ApproveDocument"
-    // );
-    // if (res?.data?.statusCode === 200) {
-    //   notification.success({
-    //     message: "Thu hồi văn bản thành công!",
-    //     description: "Văn bản đã được thu hồi.",
-    //   });
-    //   setOpenModalConfirmWithdraw(false);
-    //   await fetchInfo();
-    // } else {
-    //   notification.error({
-    //     message: "Hệ thống đang bận!",
-    //     description: "Xin vui lòng thử lại sau.",
-    //   });
-    // }
+    const res = await updateWithdrawDocumentByIdAPI(documentId);
+    if (res?.data?.statusCode === 200) {
+      notification.success({
+        message: "Thu hồi văn bản thành công!",
+        description: "Văn bản đã được thu hồi.",
+      });
+      setOpenModalConfirmWithdraw(false);
+      await fetchInfo();
+    } else {
+      notification.error({
+        message: "Hệ thống đang bận!",
+        description: "Xin vui lòng thử lại sau.",
+      });
+    }
     setIsSubmit(false);
   };
 
@@ -937,6 +934,85 @@ const ViewDetailArchivedDocument = () => {
                   </span>
                 </div>
               )}
+              {document?.scope === "InComing" &&
+                document?.status === "Rejected" &&
+                document?.versions[0]?.userName && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Người từ chối:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.versions[0]?.userName}
+                    </span>
+                  </div>
+                )}
+              {document?.scope === "InComing" &&
+                document?.status === "Rejected" &&
+                dayjs(document?.versions[0]?.dateReject).year() > 1900 &&
+                dayjs(document?.versions[0]?.dateReject).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày từ chối:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.versions[0]?.dateReject &&
+                        dayjs(document?.versions[0]?.dateReject).format(
+                          "DD-MM-YYYY HH:mm"
+                        )}
+                    </span>
+                  </div>
+                )}
+              {document?.scope === "InComing" &&
+                document?.status === "Rejected" &&
+                document?.versions[0]?.reasonReject && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Lý do:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.versions[0]?.reasonReject}
+                    </span>
+                  </div>
+                )}
               {document?.createdBy && (
                 <div
                   style={{

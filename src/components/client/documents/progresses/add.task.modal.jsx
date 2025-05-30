@@ -34,6 +34,12 @@ const AddTaskModal = (props) => {
     setIsSecondTask,
     scope,
     setScope,
+    selectedUsers,
+    setSelectedUsers,
+    currentFlow,
+    setCurrentFlow,
+    userStep2,
+    setUserStep2,
   } = props;
   const [form] = Form.useForm();
   const [users, setUsers] = useState([]);
@@ -50,6 +56,12 @@ const AddTaskModal = (props) => {
       if (currentStep?.taskDtos[0]?.user?.userId) {
         form.setFieldsValue({ userId: currentStep.taskDtos[0].user.userId });
       }
+      if (currentFlow?.flowIdx > 1 && currentStep?.stepNumber === 1) {
+        form.setFieldsValue({
+          userId: userStep2[userStep2.length - 1]?.userId,
+        });
+      }
+      console.log(`>>> currentStep`, currentStep, currentStep.taskDtos.length);
     }
   }, [openModalCreate, isSecondTask]);
 
@@ -63,12 +75,31 @@ const AddTaskModal = (props) => {
           {}
         );
 
-        const data = res.data.content.map((user) => ({
-          userId: user.userId,
-          fullName: user.fullName,
-          userName: user.userName,
-        }));
-        setUsers(data);
+        if (
+          currentStep?.taskDtos[0]?.user?.userId ||
+          currentStep?.stepNumber === 1
+        ) {
+          const data = res.data.content.map((user) => ({
+            userId: user.userId,
+            fullName: user.fullName,
+            userName: user.userName,
+          }));
+          setUsers(data);
+        } else {
+          const data = res.data.content
+            .map((user) => ({
+              userId: user.userId,
+              fullName: user.fullName,
+              userName: user.userName,
+            }))
+            .filter(
+              (user) =>
+                !selectedUsers.some(
+                  (selected) => selected.userId === user.userId
+                )
+            );
+          setUsers(data);
+        }
       } else {
         const res = await viewAllUserAPI(
           1,
@@ -80,12 +111,28 @@ const AddTaskModal = (props) => {
           {}
         );
 
-        const data = res.data.content.map((user) => ({
-          userId: user.userId,
-          fullName: user.fullName,
-          userName: user.userName,
-        }));
-        setUsers(data);
+        if (currentStep?.taskDtos[0]?.user?.userId) {
+          const data = res.data.content.map((user) => ({
+            userId: user.userId,
+            fullName: user.fullName,
+            userName: user.userName,
+          }));
+          setUsers(data);
+        } else {
+          const data = res.data.content
+            .map((user) => ({
+              userId: user.userId,
+              fullName: user.fullName,
+              userName: user.userName,
+            }))
+            .filter(
+              (user) =>
+                !selectedUsers.some(
+                  (selected) => selected.userId === user.userId
+                )
+            );
+          setUsers(data);
+        }
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -168,6 +215,86 @@ const AddTaskModal = (props) => {
     setOpenModalCreate(false);
     setUsers([]);
     form.resetFields();
+  };
+
+  const renderTaskOptions = () => {
+    if (isSecondTask) {
+      return <Option value="Upload">Tải văn bản lên</Option>;
+    } else if (
+      scope === "InComing" &&
+      currentStep?.action.trim() === "Duyệt văn bản"
+    ) {
+      return <Option value="Browse">Duyệt văn bản</Option>;
+    } else if (
+      scope === "InComing" &&
+      currentStep?.action.trim() === "Phân bổ văn bản"
+    ) {
+      return <Option value="Create">Phân bổ văn bản</Option>;
+    } else if (
+      scope === "InComing" &&
+      currentStep?.action.trim() === "Xem văn bản"
+    ) {
+      return <Option value="View">Xem văn bản</Option>;
+    } else if (
+      scope === "InComing" &&
+      currentStep?.action.trim() === "Chuyển tiếp văn bản"
+    ) {
+      return <Option value="Submit">Nộp văn bản</Option>;
+    } else if (
+      (scope === "OutGoing" || scope === "School") &&
+      currentStep?.action.trim() === "Duyệt văn bản" &&
+      (currentStep?.role?.roleName === "Chief" ||
+        currentStep?.role?.roleName === "Leader") &&
+      currentStep.taskDtos.length === 0
+    ) {
+      return (
+        <>
+          <Option value="Browse">Duyệt văn bản</Option>
+          <Option value="Sign" disabled>
+            Ký điện tử
+          </Option>
+        </>
+      );
+    } else if (
+      (scope === "OutGoing" || scope === "School") &&
+      currentStep?.action.trim() === "Duyệt văn bản" &&
+      (currentStep?.role?.roleName === "Chief" ||
+        currentStep?.role?.roleName === "Leader") &&
+      currentStep.taskDtos.length === 1
+    ) {
+      return (
+        <>
+          <Option value="Browse" disabled>
+            Duyệt văn bản
+          </Option>
+          <Option value="Sign">Ký điện tử</Option>
+        </>
+      );
+    } else if (
+      (scope === "OutGoing" || scope === "School" || scope === "Division") &&
+      currentStep?.action.trim() === "Duyệt văn bản" &&
+      (currentStep?.role?.roleName.trim() === "Specialist" ||
+        currentStep?.role?.roleName.trim() === "Division Head" ||
+        currentStep?.role?.roleName.trim() === "Clerical Assistant")
+    ) {
+      return <Option value="Browse">Duyệt văn bản</Option>;
+    } else if (
+      (scope === "OutGoing" || scope === "School") &&
+      currentStep?.action.trim() === "Khởi tạo hoặc chuyển tiếp văn bản"
+    ) {
+      return <Option value="Submit">Nộp văn bản</Option>;
+    } else if (
+      scope === "Division" &&
+      currentStep?.action.trim() === "Duyệt văn bản" &&
+      (currentStep?.role?.roleName === "Chief" ||
+        currentStep?.role?.roleName === "Leader")
+    ) {
+      return (
+        <>
+          <Option value="Browse">Duyệt văn bản</Option>
+        </>
+      );
+    }
   };
 
   return (
@@ -319,30 +446,7 @@ const AddTaskModal = (props) => {
                   allowClear
                   disabled={isSecondTask}
                 >
-                  {isSecondTask ? (
-                    <Option value="Upload">Tải văn bản lên</Option>
-                  ) : scope === "InComing" ? (
-                    <>
-                      {currentStep?.role?.roleName === "Chief" && (
-                        <Option value="Create">Phân bổ văn bản</Option>
-                      )}
-                      {currentStep?.role?.roleName === "Chief" && (
-                        <Option value="Browse">Duyệt văn bản</Option>
-                      )}
-                      {currentStep?.role?.roleName !== "Chief" && (
-                        <Option value="View">Xem văn bản</Option>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <Option value="Browse">Duyệt văn bản</Option>
-                      <Option value="Submit">Nộp văn bản</Option>
-                      {(currentStep?.role?.roleName === "Chief" ||
-                        currentStep?.role?.roleName === "Leader") && (
-                        <Option value="Sign">Ký điện tử</Option>
-                      )}
-                    </>
-                  )}
+                  {renderTaskOptions()}
                 </Select>
               </Form.Item>
             </Col>
@@ -361,7 +465,10 @@ const AddTaskModal = (props) => {
                   filterOption={(input, option) =>
                     option.children.toLowerCase().includes(input.toLowerCase())
                   }
-                  disabled={currentStep?.taskDtos[0]?.user?.userId}
+                  disabled={
+                    currentStep?.taskDtos[0]?.user?.userId ||
+                    (currentFlow?.flowIdx > 1 && currentStep?.stepNumber === 1)
+                  }
                 >
                   {users.map((user) => (
                     <Select.Option key={user.userId} value={user.userId}>

@@ -31,6 +31,8 @@ const CreateWithdrawModal = (props) => {
   const [loading, setLoading] = useState(false);
   const { user } = useCurrentApp();
   const [listDocumentTemplates, setListDocumentTemplates] = useState([]);
+  const [showDocumentTemplateSelect, setShowDocumentTemplateSelect] =
+    useState(false);
 
   const handleSelectedScope = async (e) => {
     const scope = "OutGoing";
@@ -45,8 +47,18 @@ const CreateWithdrawModal = (props) => {
     const res = await viewWorkflowByScopeAPI(scope);
     if (res && res.data && res.data.statusCode === 200) {
       const data = res.data.content;
-      setListWorkflows(data);
-      setShowWorkflowSelect(true);
+      const filterWorkflows = data.filter(
+        (workflow) => user?.mainRole?.roleName === workflow.firstRole
+      );
+      if (filterWorkflows.length > 0) {
+        setListWorkflows(filterWorkflows);
+        setShowWorkflowSelect(true);
+      } else {
+        notification.warning({
+          message: "Không có luồng xử lý nào phù hợp với vai trò của bạn!",
+          description: "Vui lòng chọn phạm vi ban hành khác!",
+        });
+      }
     } else {
       notification.error({
         message: "Lấy dữ liệu luồng xử lý không thành công!",
@@ -180,11 +192,28 @@ const CreateWithdrawModal = (props) => {
     const docType = listDocumentTypes.find((dt) => dt.documentTypeId === value);
     setSelectedDocumentType(docType);
     if (selectedScope !== "InComing") {
+      setSelectedTemplate(null);
       const res = await viewAllTemplatesAPI(
         `documentName=${docType.documentTypeName}&page=1&pageSize=10000`
       );
       if (res?.data?.statusCode === 200) {
-        setListDocumentTemplates(res?.data?.content);
+        const data = res?.data?.content;
+        if (data.length > 0) {
+          setListDocumentTemplates(data);
+          setShowDocumentTemplateSelect(true);
+        } else {
+          setSelectedTemplate(null);
+          setShowDocumentTemplateSelect(false);
+          notification.warning({
+            message: "Chưa có mẫu văn bản nào ứng với loại văn bản này!",
+            description: "Vui lòng chọn loại văn bản khác!",
+          });
+        }
+      } else {
+        notification.error({
+          message: "Lấy dữ liệu loại văn bản không thành công!",
+          description: "Vui lòng thử lại sau!",
+        });
       }
     }
   };
@@ -253,7 +282,7 @@ const CreateWithdrawModal = (props) => {
             onClick={() => {
               handleConfirmRest(selectedTemplate);
             }}
-            disabled={!selectedDocumentType?.documentTypeId}
+            disabled={!selectedTemplate}
             loading={loading}
           >
             Tiếp tục
@@ -315,7 +344,7 @@ const CreateWithdrawModal = (props) => {
           </div>
         )}
 
-        {selectedDocumentType?.documentTypeId && (
+        {showDocumentTemplateSelect && (
           <div style={{ marginTop: 16 }}>
             <div
               style={{

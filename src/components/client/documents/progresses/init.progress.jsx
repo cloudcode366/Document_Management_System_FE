@@ -82,6 +82,10 @@ const ViewInitProgress = () => {
   const [scope, setScope] = useState(null);
   const [openUserInfoModal, setOpenUserInfoModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [userStep2, setUserStep2] = useState([]);
+  const [currentFlow, setCurrentFlow] = useState(null);
+  const [hasTaskUpload, setHasTaskUpload] = useState(false);
 
   const fetchProgress = async () => {
     setLoading(true);
@@ -92,6 +96,7 @@ const ViewInitProgress = () => {
       setTaskId(data?.workflowRequest?.flows[0]?.steps[0]?.taskDtos[0]?.taskId);
       if (
         data?.workflowRequest?.flows[0]?.steps[0]?.taskDtos.length === 1 &&
+        data?.workflowRequest?.flows[0]?.steps[1]?.taskDtos.length === 0 &&
         data?.workflowRequest?.scope !== "InComing"
       ) {
         setIsSecondTask(true);
@@ -99,6 +104,55 @@ const ViewInitProgress = () => {
         setIsSecondTask(false);
       }
       setScope(data?.workflowRequest?.scope);
+      const userTaskStepFlowList = [];
+
+      data?.workflowRequest?.flows?.forEach((flow, flowIndex) => {
+        flow.steps.forEach((step) => {
+          step.taskDtos?.forEach((task) => {
+            const user = task.user;
+            if (!user) return;
+            if (task.taskType === "Upload") {
+              setHasTaskUpload(true);
+            }
+
+            userTaskStepFlowList.push({
+              userId: user.userId,
+              userName: user.userName,
+
+              stepId: step.stepId,
+              stepNumber: step.stepNumber,
+
+              flowId: flow.flowId,
+              flowName: flow.flowName,
+              flowIndex: flowIndex + 1,
+              roleStart: flow.roleStart?.roleName || null,
+              roleEnd: flow.roleEnd?.roleName || null,
+            });
+          });
+        });
+      });
+      setSelectedUsers(userTaskStepFlowList);
+
+      const userStep2List = [];
+
+      data?.workflowRequest?.flows?.forEach((flow) => {
+        const step2 = flow.steps.find((step) => step.stepNumber === 2);
+        if (step2 && Array.isArray(step2.taskDtos)) {
+          step2.taskDtos.forEach((task) => {
+            const user = task.user;
+            const exists = userStep2List.some((u) => u.userId === user.userId);
+            if (user && !exists) {
+              userStep2List.push({
+                userId: user.userId,
+                fullName: user.fullName,
+                email: user.email,
+              });
+            }
+          });
+        }
+      });
+
+      setUserStep2(userStep2List);
     } else {
       notification.error({
         message: "Tải dữ liệu thất bại",
@@ -254,9 +308,16 @@ const ViewInitProgress = () => {
                         type="primary"
                         icon={<PlusCircleOutlined />}
                         onClick={() => {
-                          handleOpenModalCreate(step);
+                          handleOpenModalCreate(step, flow, idx);
                         }}
                         style={{ top: -20, backgroundColor: "#FC8330" }}
+                        disabled={shouldDisableCreateTaskButton(
+                          processDetail?.workflowRequest?.flows,
+                          step,
+                          flow,
+                          i,
+                          idx
+                        )}
                       >
                         Tạo nhiệm vụ
                       </Button>
@@ -341,6 +402,81 @@ const ViewInitProgress = () => {
     ));
   };
 
+  const shouldDisableCreateTaskButton = (flows, step, flow, i, idx) => {
+    const scope = processDetail?.workflowRequest?.scope;
+    const roleName = step?.role?.roleName?.trim();
+    const action = step?.action?.trim();
+
+    // Điều kiện: scope InComing và đã có 1 task
+    if (scope === "InComing" && step.taskDtos.length === 1) return true;
+    else if (
+      (i === 0 &&
+        idx > 0 &&
+        flows[idx - 1]?.steps[1]?.taskDtos?.length === 0) ||
+      (i === 1 && idx > 0 && flow?.steps[0]?.taskDtos?.length === 0)
+    )
+      return true;
+    else if (hasTaskUpload && scope !== "InComing" && i === 0 && idx === 0)
+      return true;
+    // Điều kiện: OutGoing - Chief/Leader - đã có 2 task - action là "Duyệt văn bản"
+    else if (
+      (scope === "OutGoing" || scope === "School") &&
+      (roleName === "Chief" || roleName === "Leader") &&
+      action === "Duyệt văn bản"
+    ) {
+      const hasUploadTask = step?.taskDtos?.some(
+        (task) => task.taskType === "Upload"
+      );
+      const expectedLength = hasUploadTask ? 3 : 2;
+
+      if (step?.taskDtos?.length === expectedLength) {
+        return true;
+      }
+    } else if (
+      scope === "Division" &&
+      (roleName === "Chief" || roleName === "Leader") &&
+      action === "Duyệt văn bản"
+    ) {
+      const hasUploadTask = step?.taskDtos?.some(
+        (task) => task.taskType === "Upload"
+      );
+      const expectedLength = hasUploadTask ? 2 : 1;
+
+      if (step?.taskDtos?.length === expectedLength) {
+        return true;
+      }
+    }
+
+    // Điều kiện: OutGoing - Specialist/Division Head/Clerical Assistant - 1 task - Duyệt văn bản
+    else if (
+      (scope === "OutGoing" || scope === "School" || scope === "Division") &&
+      ["Specialist", "Division Head", "Clerical Assistant"].includes(
+        roleName
+      ) &&
+      action === "Duyệt văn bản"
+    ) {
+      const hasUploadTask = step?.taskDtos?.some(
+        (task) => task.taskType === "Upload"
+      );
+      const expectedLength = hasUploadTask ? 2 : 1;
+
+      if (step?.taskDtos?.length === expectedLength) {
+        return true;
+      }
+    }
+
+    // Điều kiện: OutGoing - không phải luồng đầu tiên - action là "Khởi tạo hoặc chuyển tiếp văn bản"
+    else if (
+      (scope === "OutGoing" || scope === "School" || scope === "Division") &&
+      idx > 0 &&
+      action === "Khởi tạo hoặc chuyển tiếp văn bản" &&
+      step?.taskDtos?.length === 1
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   const renderTaskCard = (task, step, index) => (
     <Card
       key={index}
@@ -386,7 +522,7 @@ const ViewInitProgress = () => {
 
                     if (res?.data?.statusCode === 200) {
                       message.success("Xoá nhiệm vụ thành công");
-                      setTaskCreated(true);
+                      window.location.reload();
                     } else {
                       let errorMessage = res?.data?.content;
                       if (
@@ -657,7 +793,8 @@ const ViewInitProgress = () => {
     setIsSubmit(false);
   };
 
-  const handleOpenModalCreate = (step) => {
+  const handleOpenModalCreate = (step, flow, idx) => {
+    setCurrentFlow({ ...flow, flowIdx: idx + 1 });
     setCurrentStep(step);
     setOpenModalCreate(true);
   };
@@ -791,6 +928,12 @@ const ViewInitProgress = () => {
           setIsSecondTask={setIsSecondTask}
           scope={scope}
           setScope={setScope}
+          selectedUsers={selectedUsers}
+          setSelectedUsers={setSelectedUsers}
+          currentFlow={currentFlow}
+          setCurrentFlow={setCurrentFlow}
+          userStep2={userStep2}
+          setUserStep2={setUserStep2}
         />
         <DetailTaskModal
           openTaskDetailModal={openTaskDetailModal}

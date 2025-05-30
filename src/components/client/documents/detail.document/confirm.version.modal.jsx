@@ -84,7 +84,7 @@ const ConfirmVersionModal = (props) => {
       documentId,
       values.documentName,
       values.documentTypeName,
-      resDocument.aiDocumentName,
+      resDocument.aiDocumentName || "null",
       resDocument.aiDocumentType,
       values.documentContent,
       values.numberOfDocument,

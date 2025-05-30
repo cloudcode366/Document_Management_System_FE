@@ -99,7 +99,7 @@ const CreateWorkflow = ({
 
   const fetchFlows = async () => {
     setLoading(true);
-    const res = await viewAllFlowsAPI();
+    const res = await viewAllFlowsAPI(scope);
     if (res?.data?.statusCode === 200) {
       const newFlowsData = res.data.content;
       setFlows(newFlowsData);
@@ -110,7 +110,6 @@ const CreateWorkflow = ({
   useEffect(() => {
     fetchDocumentTypes();
     fetchRoles();
-    fetchFlows();
   }, [openModalCreate]);
 
   const handleScopeChange = async (selectedScope) => {
@@ -141,6 +140,7 @@ const CreateWorkflow = ({
       );
       setWorkflowRoles(roles);
       setCurrentStep(2);
+      fetchFlows(scope);
     }
   };
 

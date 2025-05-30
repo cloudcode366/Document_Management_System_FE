@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Descriptions, Spin, Image } from "antd";
 import { viewProfileUserAPI } from "@/services/api.service";
+import { convertRoleName } from "@/services/helper";
 
 const UserInfo = (props) => {
   const { userId, setUserId, openUserInfoModal, setOpenUserInfoModal } = props;
@@ -13,7 +14,9 @@ const UserInfo = (props) => {
       const res = await viewProfileUserAPI(userId);
       if (res.data.statusCode === 200) {
         const data = res.data.content;
-        setUser(data);
+        const mainRole = data?.roles?.find((r) => r.createdDate === null);
+        const subRole = data?.roles?.find((r) => r.createdDate !== null);
+        setUser({ ...data, mainRole, subRole });
       }
       setLoading(false);
     };
@@ -63,6 +66,12 @@ const UserInfo = (props) => {
                 {user?.userName}
               </Descriptions.Item>
               <Descriptions.Item
+                label="Vai trò"
+                labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
+              >
+                {convertRoleName(user?.mainRole?.roleName)}
+              </Descriptions.Item>
+              <Descriptions.Item
                 label="Email"
                 labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
               >
@@ -75,22 +84,16 @@ const UserInfo = (props) => {
                 {user?.phoneNumber}
               </Descriptions.Item>
               <Descriptions.Item
-                label="Chức vụ"
-                labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
-              >
-                {user?.position}
-              </Descriptions.Item>
-              <Descriptions.Item
                 label="Phòng ban"
                 labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
               >
                 {user?.divisionDto?.divisionName}
               </Descriptions.Item>
               <Descriptions.Item
-                label="Địa chỉ "
+                label="Chức vụ"
                 labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
               >
-                {user?.address}
+                {user?.position}
               </Descriptions.Item>
             </Descriptions>
           </div>

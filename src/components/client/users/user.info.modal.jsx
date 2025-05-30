@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Avatar, Descriptions, Spin, Image } from "antd";
-import { viewDivisionDetailsAPI } from "@/services/api.service";
+import {
+  viewDivisionDetailsAPI,
+  viewProfileUserAPI,
+} from "@/services/api.service";
 import "./user.info.modal.css";
+import { convertRoleName } from "@/services/helper";
 
 const UserInfoModal = ({
   openUserInfoModal,
@@ -9,28 +13,26 @@ const UserInfoModal = ({
   currentUser,
   setCurrentUser,
 }) => {
-  const [divisionName, setDivisionName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchDivision = async () => {
-      if (!currentUser?.divisionId) return;
       setLoading(true);
-      try {
-        const response = await viewDivisionDetailsAPI(currentUser.divisionId);
-        setDivisionName(response.data?.content?.divisionName);
-      } catch (error) {
-        console.error("Lỗi lấy thông tin phòng ban:", error);
-        setDivisionName("Không xác định");
-      } finally {
-        setLoading(false);
+      const res = await viewProfileUserAPI(currentUser.userId);
+      if (res.data.statusCode === 200) {
+        const data = res.data.content;
+        const mainRole = data?.roles?.find((r) => r.createdDate === null);
+        const subRole = data?.roles?.find((r) => r.createdDate !== null);
+        setUser({ ...data, mainRole, subRole });
       }
+      setLoading(false);
     };
 
     if (openUserInfoModal) {
       fetchDivision();
     }
-  }, [openUserInfoModal, currentUser?.divisionId]);
+  }, [openUserInfoModal]);
 
   return (
     <Modal
@@ -39,7 +41,6 @@ const UserInfoModal = ({
       onCancel={() => {
         setOpenUserInfoModal(false);
         setCurrentUser(null);
-        setDivisionName("");
         setLoading(false);
       }}
       width={750}
@@ -57,10 +58,10 @@ const UserInfoModal = ({
                 objectFit: "cover",
                 borderRadius: "30px",
               }}
-              src={currentUser?.avatar}
-              alt={currentUser?.fullName}
+              src={user?.avatar}
+              alt={user?.fullName}
             />
-            <div className="user-fullname">{currentUser?.fullName}</div>
+            <div className="user-fullname">{user?.fullName}</div>
           </div>
 
           {/* Info column */}
@@ -70,37 +71,37 @@ const UserInfoModal = ({
                 label="Tên đăng nhập"
                 labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
               >
-                {currentUser?.userName}
+                {user?.userName}
+              </Descriptions.Item>
+              <Descriptions.Item
+                label="Vai trò"
+                labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
+              >
+                {convertRoleName(user?.mainRole?.roleName)}
               </Descriptions.Item>
               <Descriptions.Item
                 label="Email"
                 labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
               >
-                {currentUser?.email}
+                {user?.email}
               </Descriptions.Item>
               <Descriptions.Item
                 label="Số điện thoại"
                 labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
               >
-                {currentUser?.phoneNumber}
-              </Descriptions.Item>
-              <Descriptions.Item
-                label="Chức vụ"
-                labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
-              >
-                {currentUser?.position}
+                {user?.phoneNumber}
               </Descriptions.Item>
               <Descriptions.Item
                 label="Phòng ban"
                 labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
               >
-                {divisionName}
+                {user?.divisionDto?.divisionName}
               </Descriptions.Item>
               <Descriptions.Item
-                label="Địa chỉ "
+                label="Chức vụ"
                 labelStyle={{ fontWeight: "bold", color: "#1d1d1f" }}
               >
-                {currentUser?.address}
+                {user?.position}
               </Descriptions.Item>
             </Descriptions>
           </div>

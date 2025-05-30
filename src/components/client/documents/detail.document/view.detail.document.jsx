@@ -251,7 +251,8 @@ const ViewDetailDocument = () => {
         message: "Hoàn thành",
         description: "Xác nhận đã xem văn bản thành công.",
       });
-      navigate(`/archived-document`);
+      setOpenViewConfirmModal(false);
+      await fetchInfo();
     } else {
       notification.error({
         message: "Hệ thống đang bận!",
@@ -542,6 +543,7 @@ const ViewDetailDocument = () => {
 
   // Khởi tạo nhiệm vụ
   if (
+    document?.scope === "InComing" &&
     document?.taskType === "Create" &&
     document?.taskStatus === "InProgress"
   ) {
@@ -578,7 +580,8 @@ const ViewDetailDocument = () => {
           e.currentTarget.style.transform = "scale(1)";
         }}
         onClick={() => {
-          navigate(`/init-progress/${documentId}/${document?.taskId}`);
+          if (document?.scope === "InComing")
+            navigate(`/init-progress/${documentId}/${document?.taskId}`);
         }}
       >
         Phân bổ văn bản
@@ -835,6 +838,85 @@ const ViewDetailDocument = () => {
                   </span>
                 </div>
               )}
+              {document?.scope === "InComing" &&
+                document?.status === "Rejected" &&
+                document?.versions[0]?.userName && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Người từ chối:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.versions[0]?.userName}
+                    </span>
+                  </div>
+                )}
+              {document?.scope === "InComing" &&
+                document?.status === "Rejected" &&
+                dayjs(document?.versions[0]?.dateReject).year() > 1900 &&
+                dayjs(document?.versions[0]?.dateReject).year() < 3000 && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Ngày từ chối:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.versions[0]?.dateReject &&
+                        dayjs(document?.versions[0]?.dateReject).format(
+                          "DD-MM-YYYY HH:mm"
+                        )}
+                    </span>
+                  </div>
+                )}
+              {document?.scope === "InComing" &&
+                document?.status === "Rejected" &&
+                document?.versions[0]?.reasonReject && (
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ color: "#5f6368" }}>Lý do:</span>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        textAlign: "right",
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {document?.versions[0]?.reasonReject}
+                    </span>
+                  </div>
+                )}
               {document?.workflowName && (
                 <div
                   style={{
