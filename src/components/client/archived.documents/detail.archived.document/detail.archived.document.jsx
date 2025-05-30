@@ -130,6 +130,9 @@ const ViewDetailArchivedDocument = () => {
   const [openModalReplace, setOpenModalReplace] = useState(false);
   const [userId, setUserId] = useState(null);
   const [openUserInfoModal, setOpenUserInfoModal] = useState(false);
+  const [openModalConfirmWithdraw, setOpenModalConfirmWithdraw] =
+    useState(false);
+  const [isSubmit, setIsSubmit] = useState(false);
 
   const loginWithGoogle = () => {
     localStorage.setItem("documentId", documentId);
@@ -258,6 +261,29 @@ const ViewDetailArchivedDocument = () => {
       console.error("Lỗi khi chia sẻ:", error);
       message.error("Đã xảy ra lỗi khi chia sẻ: " + error.message);
     }
+  };
+
+  const handleConfirmWithdraw = async () => {
+    setIsSubmit(true);
+    // const res = await createHandleTaskActionAPI(
+    //   document?.taskId,
+    //   user.userId,
+    //   "ApproveDocument"
+    // );
+    // if (res?.data?.statusCode === 200) {
+    //   notification.success({
+    //     message: "Thu hồi văn bản thành công!",
+    //     description: "Văn bản đã được thu hồi.",
+    //   });
+    //   setOpenModalConfirmWithdraw(false);
+    //   await fetchInfo();
+    // } else {
+    //   notification.error({
+    //     message: "Hệ thống đang bận!",
+    //     description: "Xin vui lòng thử lại sau.",
+    //   });
+    // }
+    setIsSubmit(false);
   };
 
   const handleDownload = async (file) => {
@@ -555,7 +581,7 @@ const ViewDetailArchivedDocument = () => {
     );
   }
 
-  // Thu hồi văn bản
+  // Thu hồi văn bản OutGoing
   if (
     document?.scope === "OutGoing" &&
     (user?.mainRole?.roleName === "Chief" ||
@@ -596,6 +622,52 @@ const ViewDetailArchivedDocument = () => {
         }}
         onClick={() => {
           setOpenModalWithdraw(true);
+        }}
+      >
+        Thu hồi văn bản
+      </Button>
+    );
+  }
+
+  // Thu hồi văn bản InComing, Division ,School
+  if (
+    document?.scope !== "OutGoing" &&
+    document?.granters?.some((granter) => granter.userId === user?.userId) &&
+    document?.status === "Archived"
+  ) {
+    buttons.push(
+      <Button
+        icon={<PiHandWithdraw style={{ color: "#ff4d4f" }} />}
+        block
+        size="middle"
+        style={{
+          height: 40,
+          fontSize: 16,
+          background: "#fff1f0",
+          border: "1px solid #ffa39e",
+          transition: "all 0.3s ease",
+          fontWeight: 600,
+          padding: "0 12px",
+          minWidth: 150,
+          maxWidth: "100%",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "#ffccc7";
+          e.currentTarget.style.border = "1px solid #ff7875";
+          e.currentTarget.style.color = "#f5222d";
+          e.currentTarget.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "#fff1f0";
+          e.currentTarget.style.border = "1px solid #ffa39e";
+          e.currentTarget.style.color = "#ff4d4f";
+          e.currentTarget.style.transform = "scale(1)";
+        }}
+        onClick={() => {
+          setOpenModalConfirmWithdraw(true);
         }}
       >
         Thu hồi văn bản
@@ -1456,6 +1528,20 @@ const ViewDetailArchivedDocument = () => {
           </Card>
         </div>
       </div>
+
+      <Modal
+        title="Xác nhận thu hồi văn bản"
+        open={openModalConfirmWithdraw}
+        onOk={handleConfirmWithdraw}
+        onCancel={() => setOpenModalConfirmWithdraw(false)}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        centered
+        maskClosable={false}
+        confirmLoading={isSubmit}
+      >
+        <p>Bạn có chắc chắn muốn thu hồi vĩnh viễn văn bản này không?</p>
+      </Modal>
 
       {/* Modal cấp quyền xem */}
       <Modal

@@ -63,6 +63,8 @@ const ConfirmVersionModal = (props) => {
         documentTypeName: resDocument.documentTypeName,
         documentContent: resDocument.documentContent,
         numberOfDocument: resDocument.numberOfDocument,
+        validTo: dayjs(resDocument.validTo),
+        deadline: dayjs(resDocument.deadline),
       });
     }
   }, [openConfirmModal, form, resDocument]);
@@ -297,7 +299,7 @@ const ConfirmVersionModal = (props) => {
                       : ""
                   }
                 >
-                  <Input placeholder="Nhập tên văn bản" readOnly />
+                  <Input placeholder="Nhập tên văn bản" disabled />
                 </Form.Item>
 
                 <Form.Item
@@ -315,7 +317,7 @@ const ConfirmVersionModal = (props) => {
                       : ""
                   }
                 >
-                  <Input placeholder="Loại văn bản" readOnly />
+                  <Input placeholder="Loại văn bản" disabled />
                 </Form.Item>
 
                 <Form.Item
@@ -328,7 +330,45 @@ const ConfirmVersionModal = (props) => {
                     },
                   ]}
                 >
-                  <Input placeholder="Nhập số hiệu văn bản" readOnly />
+                  <Input placeholder="Nhập số hiệu văn bản" disabled />
+                </Form.Item>
+
+                <Form.Item
+                  label="Hạn xử lý"
+                  name="deadline"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn Hạn xử lý xử lý!",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn hạn xử lý"
+                    disabled
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Ngày hết hiệu lực"
+                  name="validTo"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng chọn ngày hết hiệu lực!",
+                    },
+                  ]}
+                >
+                  <DatePicker
+                    format="DD-MM-YYYY HH:mm"
+                    showTime={{ format: "HH:mm" }}
+                    style={{ width: "100%" }}
+                    placeholder="Vui lòng chọn ngày hết hiệu lực"
+                    disabled
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -360,6 +400,31 @@ const ConfirmVersionModal = (props) => {
                         required: true,
                         message: "Vui lòng chọn ngày có hiệu lực!",
                       },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const deadline = getFieldValue("deadline");
+                          const validTo = getFieldValue("validTo");
+
+                          if (!value) return Promise.resolve();
+                          if (deadline && value.isAfter(deadline, "minute")) {
+                            return Promise.reject(
+                              new Error(
+                                "Ngày có hiệu lực phải trước hạn xử lý!"
+                              )
+                            );
+                          }
+
+                          if (validTo && value.isAfter(validTo, "minute")) {
+                            return Promise.reject(
+                              new Error(
+                                "Ngày có hiệu lực phải trước ngày hết hiệu lực!"
+                              )
+                            );
+                          }
+
+                          return Promise.resolve();
+                        },
+                      }),
                     ]}
                   >
                     <DatePicker
