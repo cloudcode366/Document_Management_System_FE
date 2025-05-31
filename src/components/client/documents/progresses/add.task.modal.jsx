@@ -86,18 +86,17 @@ const AddTaskModal = (props) => {
           }));
           setUsers(data);
         } else {
-          const data = res.data.content
-            .map((user) => ({
-              userId: user.userId,
-              fullName: user.fullName,
-              userName: user.userName,
-            }))
-            .filter(
-              (user) =>
-                !selectedUsers.some(
-                  (selected) => selected.userId === user.userId
-                )
-            );
+          const data = res.data.content.map((user) => ({
+            userId: user.userId,
+            fullName: user.fullName,
+            userName: user.userName,
+          }));
+          // .filter(
+          //   (user) =>
+          //     !selectedUsers.some(
+          //       (selected) => selected.userId === user.userId
+          //     )
+          // );
           setUsers(data);
         }
       } else {
