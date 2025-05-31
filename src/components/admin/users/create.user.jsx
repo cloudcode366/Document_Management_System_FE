@@ -50,9 +50,13 @@ const CreateUser = (props) => {
       setOpenModalCreate(false);
       refreshTable();
     } else {
+      let errorMsg = res?.data?.content;
+      if (errorMsg === "Email already exists") {
+        errorMsg = "Email này đã tồn tại!";
+      }
       notification.error({
         message: "Đã có lỗi xảy ra",
-        description: res.message,
+        description: errorMsg,
       });
     }
     setIsSubmit(false);

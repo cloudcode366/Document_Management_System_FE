@@ -96,8 +96,8 @@ const LoginESignModal = (props) => {
         );
         if (res?.data?.statusCode === 200) {
           notification.success({
-            message: "Chuyển giao văn bản thành công!",
-            description: "Văn bản đã được chuyển giao thành công.",
+            message: "Nhiệm vụ ký văn bản thành công!",
+            description: "Văn bản đã được ký thành công.",
           });
           navigate(`/detail-document/${documentId}`);
         } else {

@@ -127,9 +127,10 @@ const ViewDetailDocument = () => {
     const res = await viewDetailDocumentAPI(documentId);
     if (res?.data?.statusCode === 200) {
       const data = res.data.content;
-      const finalVersion = data.versions.find(
-        (version) => version.isFinal === true
-      );
+      const finalVersion =
+        data?.versions?.find((version) => version?.isFinal === true) ??
+        data?.versions?.find((version) => version?.number === "0");
+
       const rejectedVersions = data.versions.filter(
         (version) => version.isFinal === false
       );
@@ -453,6 +454,7 @@ const ViewDetailDocument = () => {
 
   // Từ chối
   if (
+    document?.scope !== "InComing" &&
     document?.taskType === "Browse" &&
     document?.taskStatus === "InProgress"
   ) {
