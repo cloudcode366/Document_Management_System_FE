@@ -118,9 +118,14 @@ const CreateDocumentProgress = (props) => {
     );
     if (workflow) {
       setSelectedWorkflow(workflow);
-      const filteredDocumentTypes = workflow?.documentTypes?.filter(
-        (doc) => doc.haveTemplate === true
-      );
+      let filteredDocumentTypes = [];
+      if (selectedScope !== "InComing") {
+        filteredDocumentTypes = workflow?.documentTypes?.filter(
+          (doc) => doc.haveTemplate === true
+        );
+      } else {
+        filteredDocumentTypes = workflow?.documentTypes;
+      }
       setListDocumentTypes(filteredDocumentTypes || []);
       const res = await viewWorkflowDetailsWithFlowAndStepAPI(
         workflow.workflowId
