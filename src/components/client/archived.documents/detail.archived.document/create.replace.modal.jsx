@@ -80,7 +80,10 @@ const CreateReplaceModal = (props) => {
     );
     if (workflow) {
       setSelectedWorkflow(workflow);
-      setListDocumentTypes(workflow.documentTypes || []);
+      const filteredDocumentTypes = workflow?.documentTypes?.filter(
+        (doc) => doc.haveTemplate === true
+      );
+      setListDocumentTypes(filteredDocumentTypes || []);
       const res = await viewWorkflowDetailsWithFlowAndStepAPI(
         workflow.workflowId
       );
@@ -91,7 +94,14 @@ const CreateReplaceModal = (props) => {
           user?.subRole?.roleName === data.flows[0].roleStart
         ) {
           setWorkflowDetail(res.data.content);
-          setShowDocumentTypeSelect(true);
+          if (filteredDocumentTypes.length > 0) {
+            setShowDocumentTypeSelect(true);
+          } else {
+            setShowDocumentTypeSelect(false);
+            message.error(
+              "Các loại văn bản của luồng này chưa có mẫu văn bản tương ứng. Xin vui lòng liên hệ phòng văn thư để tạo mẫu văn bản cần thiết!"
+            );
+          }
         } else {
           setShowDocumentTypeSelect(false);
           message.error("Bạn không có quyền khởi tạo văn bản cho luồng này!");

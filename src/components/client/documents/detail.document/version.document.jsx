@@ -34,7 +34,7 @@ const ViewVersionDocument = () => {
             <div className="content-wrapper-vdd hide-scrollbar-vdd">
               <PDFViewerWithToken
                 documentId={documentId}
-                url={document?.finalVersion?.url}
+                url={version?.url}
                 token={localStorage.getItem(`access_token`)}
                 documentName={document?.documentName}
               />
